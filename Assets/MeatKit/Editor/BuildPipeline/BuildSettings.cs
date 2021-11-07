@@ -150,7 +150,9 @@ namespace MeatKit
             obj["description"] = Description;
             if (!string.IsNullOrEmpty(WebsiteURL))
                 obj["website_url"] = WebsiteURL;
-            obj["dependencies"] = new JArray(GetRequiredDependencies().Concat(AdditionalDependencies));
+            
+            // ReSharper disable once CoVariantArrayConversion
+            obj["dependencies"] = new JArray(GetRequiredDependencies().Concat(AdditionalDependencies).ToArray());
 
             File.WriteAllText(location, JsonConvert.SerializeObject(obj));
 #endif
