@@ -1,0 +1,136 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Gravel
+  m_Shader: {fileID: 4800000, guid: 2b91f6aff1a953b4687dfa34aeb0fce7, type: 3}
+  m_ShaderKeywords: EFFECT_BUMP _TRIPLANARMODE_WORLD
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _PrimaryBumpMap:
+        m_Texture: {fileID: 2800000, guid: ba462f7cd2d8b614eb631052f9e9f2e5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrimaryMainTex:
+        m_Texture: {fileID: 2800000, guid: c07f0b16a167aae4a8db9f86f6428658, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrimaryMaterialMap:
+        m_Texture: {fileID: 2800000, guid: 4301b466c1b6d4241a4493cb92ce23d6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _QuaternaryBumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _QuaternaryMainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _QuaternaryMaterialMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondaryBumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondaryMainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondaryMaterialMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TertiaryBumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TertiaryMainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TertiaryMaterialMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AdvancedOptions: 0
+    - _Cutoff: 0.5
+    - _DstBlend: 0
+    - _EnableInstancing: 0
+    - _ForwardRenderingOptions: 0
+    - _GlossyReflections: 1
+    - _HasBumpMap: 1
+    - _Lightmapping: 1
+    - _MainRoughnessSource: 0
+    - _Mode: 0
+    - _PrimaryBumpScale: 1
+    - _PrimaryColorVertexTint: 0
+    - _PrimaryMetallic: 1
+    - _PrimaryOcclusion: 1
+    - _PrimaryPhysicalProperties: 0
+    - _PrimaryRoughness: 1
+    - _PrimarySpecularTint: 0
+    - _PrimarySpecularity: 1
+    - _PrimaryTextures: 0
+    - _QuaternaryBumpScale: 1
+    - _QuaternaryColorVertexTint: 0
+    - _QuaternaryMetallic: 0
+    - _QuaternaryOcclusion: 1
+    - _QuaternaryPhysicalProperties: 0
+    - _QuaternaryRoughness: 1
+    - _QuaternarySpecularTint: 0
+    - _QuaternarySpecularity: 0.5
+    - _QuaternaryTextures: 0
+    - _RenderQueue: 0
+    - _Rim: 0
+    - _RimBias: 0
+    - _RimPower: 4
+    - _RimWeight: 1
+    - _SecondaryBumpScale: 1
+    - _SecondaryColorVertexTint: 0
+    - _SecondaryMetallic: 1
+    - _SecondaryOcclusion: 1
+    - _SecondaryPhysicalProperties: 0
+    - _SecondaryRoughness: 1
+    - _SecondarySpecularTint: 0
+    - _SecondarySpecularity: 1
+    - _SecondaryTextures: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TertiaryBumpScale: 1
+    - _TertiaryColorVertexTint: 0
+    - _TertiaryMetallic: 1
+    - _TertiaryOcclusion: 1
+    - _TertiaryPhysicalProperties: 0
+    - _TertiaryRoughness: 1
+    - _TertiarySpecularTint: 0
+    - _TertiarySpecularity: 1
+    - _TertiaryTextures: 0
+    - _TriplanarBlendSharpness: 2
+    - _TriplanarMode: 1
+    - _TriplanarProperties: 0
+    - _ZWrite: 1
+    m_Colors:
+    - _PrimaryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PrimaryMainTexVelocity: {r: 0, g: 0, b: 0, a: 0}
+    - _QuaternaryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _QuaternaryMainTexVelocity: {r: 0, g: 0, b: 0, a: 0}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SecondaryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SecondaryMainTexVelocity: {r: 0, g: 0, b: 0, a: 0}
+    - _TertiaryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TertiaryMainTexVelocity: {r: 0, g: 0, b: 0, a: 0}
