@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if H3VR_IMPORTED
 using FistVR;
+#endif
 using UnityEditor;
 using UnityEngine;
 
