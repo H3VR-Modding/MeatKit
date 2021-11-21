@@ -130,42 +130,36 @@ public class EnumPicker : PropertyDrawer
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        var valuesRaw = Enum.GetValues(fieldInfo.FieldType);
+        Array valuesRaw = null;
+        Type enumType = fieldInfo.FieldType;
+        if (enumType.IsArray) enumType = enumType.GetElementType(); //this turns the enum array into just the enum to prevent issues with arrays of enums
+        
+        valuesRaw = Enum.GetValues(enumType);
         if (valuesRaw.Length <= 0)
             return;
-
         var valuesStr = new List<string>();
         for (var i = 0; i < valuesRaw.Length; ++i)
         {
-            var raw = valuesRaw.GetValue(i);
+            object raw = valuesRaw.GetValue(i);
             var str = raw.ToString();
-
             valuesStr.Add(str);
         }
-
-        var enumName = fieldInfo.FieldType.Name;
-        var currentName = Enum.GetName(fieldInfo.FieldType, property.intValue);
-
+        string enumName = enumType.Name;
+        string currentName = Enum.GetName(enumType, property.intValue);
         EditorGUI.PrefixLabel(position, label);
-
         GUI.SetNextControlName(property.propertyPath);
-
         var fieldRect = new Rect(position.x + EditorGUIUtility.labelWidth, position.y,
             position.width - EditorGUIUtility.labelWidth, position.height);
-
         if (GUI.Button(fieldRect, currentName, EditorStyles.popup))
         {
             _window = EditorWindow.GetWindow<EnumPickerWindow>();
-
             Action<string> callback = str =>
             {
-                var index = (int) Convert.ChangeType(Enum.Parse(fieldInfo.FieldType, str), fieldInfo.FieldType);
-
+                var index = (int) Convert.ChangeType(Enum.Parse(enumType, str), enumType);
                 property.serializedObject.Update();
                 property.intValue = index;
                 property.serializedObject.ApplyModifiedProperties();
             };
-
             _window.ShowCustom(enumName, valuesStr, fieldRect, callback);
             _window.Focus();
         }
