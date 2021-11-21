@@ -11,6 +11,7 @@ namespace MeatKit
     {
         public const string MeatKitDir = "Assets/MeatKit/";
         private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "MeatKit/Managed/");
+        private static string _lastImportedAsselbly;
 
         private static bool ShowErrorIfH3VRNotImported()
         {
@@ -37,7 +38,21 @@ namespace MeatKit
             var assemblyLocation =
                 EditorUtility.OpenFilePanel("Select assembly", null, "dll");
             if (string.IsNullOrEmpty(assemblyLocation)) return;
+            _lastImportedAsselbly = assemblyLocation;
             ImportSingleAssembly(assemblyLocation, ManagedDirectory);
+            Debug.Log("Finished importing " + assemblyLocation);
+        }
+
+        [MenuItem("MeatKit/Scripts/Re-Import Last", priority = 0)]
+        public static void ReimportLast()
+        {
+            if (string.IsNullOrEmpty(_lastImportedAsselbly))
+            {
+                Debug.Log("Nothing to re-import.");
+                return;
+            }
+            ImportSingleAssembly(_lastImportedAsselbly, ManagedDirectory);
+            Debug.Log("Re-imported " + _lastImportedAsselbly);
         }
 
         [MenuItem("MeatKit/Scripts/Export", priority = 0)]

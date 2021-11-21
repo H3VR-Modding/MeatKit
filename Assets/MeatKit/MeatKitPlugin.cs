@@ -2,6 +2,9 @@
 using System.IO;
 using System.Reflection;
 using BepInEx;
+using FistVR;
+using Sodalite.Api;
+using UnityEngine;
 
 /*
  * SUPER LARGE WARNING ABOUT THIS CLASS
