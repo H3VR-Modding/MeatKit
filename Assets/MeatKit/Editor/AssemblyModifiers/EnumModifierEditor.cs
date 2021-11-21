@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEditor;
 
 namespace MeatKit
@@ -11,7 +12,8 @@ namespace MeatKit
             "FistVR.FireArmRoundType",
             "FistVR.FireArmRoundClass",
             "FistVR.FireArmMagazineType",
-            "FistVR.ItemSpawnerObjectDefinition.ItemSpawnerCategory"
+            "FistVR.ItemSpawnerObjectDefinition.ItemSpawnerCategory",
+            "FistVR.SosigEnemyID"
         };
 
         private SerializedProperty _addedValues;
@@ -26,7 +28,7 @@ namespace MeatKit
             _addedValues = serializedObject.FindProperty("AddedValues");
             _enumModifier = (EnumModifier) target;
             _selectedType = Array.IndexOf(CommonTypes, _enumModifier.EnumName);
-            _isCustomType = _selectedType == -1;
+            _isCustomType = _selectedType == -1 || string.IsNullOrEmpty(_enumModifier.EnumName);
         }
 
         // Called to draw the inspector GUI
@@ -49,6 +51,12 @@ namespace MeatKit
             // Draw the values field and then save the object
             EditorGUILayout.PropertyField(_addedValues, true);
             serializedObject.ApplyModifiedProperties();
+            
+            // Suggest to the user that all added enums should be negative
+            if (_enumModifier.AddedValues.Any(x => x.Value >= 0))
+                EditorGUILayout.HelpBox(
+                    "Your added enum values should be negative to avoid conflicts with vanilla items.",
+                    MessageType.Warning);
         }
     }
 }

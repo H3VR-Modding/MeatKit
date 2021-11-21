@@ -11,10 +11,10 @@ namespace MeatKit
             FieldAttributes.Static | FieldAttributes.Literal | FieldAttributes.Public | FieldAttributes.HasDefault;
 
         [Tooltip("Specify the FULL NAME of the enum you want to change. e.g. Sub.Namespace.Type")]
-        public string EnumName;
+        public string EnumName = "FistVR.FireArmRoundType";
 
         [Tooltip("The new values you want to add to this enum")]
-        public EnumValue[] AddedValues;
+        public EnumValue[] AddedValues = new EnumValue[0];
 
         public override void ApplyModification(AssemblyDefinition assembly)
         {
