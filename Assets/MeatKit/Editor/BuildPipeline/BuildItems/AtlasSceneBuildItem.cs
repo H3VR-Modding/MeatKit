@@ -82,24 +82,8 @@ namespace MeatKit
         public override void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
         {
 #if H3VR_IMPORTED
-            // Check if the plugin already has Atlas added as a dependency
-            var hasAtlas = plugin.CustomAttributes
-                .Where(a => a.AttributeType.Name == "BepInDependency")
-                .Any(attribute => (string) attribute.ConstructorArguments[0].Value == AtlasConstants.Guid);
-
-            // If it doesn't we need to add it.
-            if (!hasAtlas)
-            {
-                MethodBase constructor =
-                    typeof(BepInDependency).GetConstructor(new[] {typeof(string), typeof(string)});
-                var attribute = new CustomAttribute(plugin.Module.ImportReference(constructor));
-                plugin.CustomAttributes.Add(attribute);
-
-                var str = plugin.Module.TypeSystem.String;
-                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, AtlasConstants.Guid));
-                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, AtlasConstants.Version));
-            }
-
+            EnsurePluginDependsOn(plugin, AtlasConstants.Guid, AtlasConstants.Version);
+            
             /*
              * We need to add this line: AtlasPlugin.RegisterScene(Path.Combine(BasePath, "scene name"))
              * Which translates to this IL:

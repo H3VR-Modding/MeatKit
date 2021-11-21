@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using BepInEx;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor;
@@ -22,6 +25,27 @@ namespace MeatKit
 
         public virtual void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
         {
+        }
+
+        protected void EnsurePluginDependsOn(TypeDefinition plugin, string pluginGuid, string pluginVersion)
+        {
+            // Check if the plugin already has this dependency
+            var alreadyDependsOn = plugin.CustomAttributes
+                .Where(a => a.AttributeType.Name == "BepInDependency")
+                .Any(attribute => (string) attribute.ConstructorArguments[0].Value == pluginGuid);
+
+            // If it doesn't we need to add it.
+            if (!alreadyDependsOn)
+            {
+                MethodBase constructor =
+                    typeof(BepInDependency).GetConstructor(new[] {typeof(string), typeof(string)});
+                var attribute = new CustomAttribute(plugin.Module.ImportReference(constructor));
+                plugin.CustomAttributes.Add(attribute);
+
+                var str = plugin.Module.TypeSystem.String;
+                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginGuid));
+                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginVersion));
+            }
         }
     }
 }

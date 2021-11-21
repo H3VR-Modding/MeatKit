@@ -7,6 +7,7 @@ using System.Reflection;
 using Atlas;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Sodalite;
 using Sodalite.Api;
 
 namespace MeatKit
@@ -34,6 +35,8 @@ namespace MeatKit
         public override void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
         {
 #if H3VR_IMPORTED
+            EnsurePluginDependsOn(plugin, SodaliteConstants.Guid, SodaliteConstants.Version);
+            
             // Get some references
             const BindingFlags publicStatic = BindingFlags.Public | BindingFlags.Static;
             FieldReference basePath = plugin.Fields.First(f => f.Name == "BasePath");
