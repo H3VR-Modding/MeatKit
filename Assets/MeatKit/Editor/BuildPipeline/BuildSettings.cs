@@ -71,7 +71,7 @@ namespace MeatKit
             if (!Icon)
                 messages["Icon"] = BuildMessage.Error("Missing icon.");
             else if (Icon.width != 256 || Icon.height != 256)
-                messages["Icon"] = BuildMessage.Error("Icon must be 256x256.");
+                messages["Icon"] = BuildMessage.Info("Icon will be resized to 256x256.");
 
             if (!ReadMe)
                 messages["ReadMe"] = BuildMessage.Error("Missing readme.");
@@ -150,7 +150,7 @@ namespace MeatKit
             obj["description"] = Description;
             if (!string.IsNullOrEmpty(WebsiteURL))
                 obj["website_url"] = WebsiteURL;
-            
+
             // ReSharper disable once CoVariantArrayConversion
             obj["dependencies"] = new JArray(GetRequiredDependencies().Concat(AdditionalDependencies).ToArray());
 

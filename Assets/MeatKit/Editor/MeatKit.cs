@@ -154,7 +154,13 @@ namespace MeatKit
 
             // Now we can write the Thunderstore stuff to the folder
             settings.WriteThunderstoreManifest(BundleOutputPath + "manifest.json");
-            File.Copy(AssetDatabase.GetAssetPath(settings.Icon), BundleOutputPath + "icon.png");
+
+            // Write the icon image, scaling it if required.
+            Texture2D icon = settings.Icon;
+            if (settings.Icon.width != 256 || settings.Icon.height != 256) icon = icon.ScaleTexture(256, 256);
+            File.WriteAllBytes(BundleOutputPath + "icon.png", icon.EncodeToPNG());
+            
+            // Copy the readme
             File.Copy(AssetDatabase.GetAssetPath(settings.ReadMe), BundleOutputPath + "README.md");
         }
 
