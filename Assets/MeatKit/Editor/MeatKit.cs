@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AssetsTools.NET;
@@ -91,7 +91,7 @@ namespace MeatKit
                 {"Assembly-CSharp-firstpass.dll", "H3VRCode-CSharp-firstpass.dll"}
             };
 
-            ProcessBundle(assetBundlePath, assetBundlePath + "-imported", replaceMap, AssetBundleCompressionType.LZ4);
+            ProcessBundle(assetBundlePath, assetBundlePath + "-imported", replaceMap, AssetBundleCompressionType.NONE);
         }
 
         [MenuItem("MeatKit/Build/Configure", priority = 2)]

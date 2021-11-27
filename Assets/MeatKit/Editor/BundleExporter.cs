@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
@@ -13,27 +14,29 @@ namespace MeatKit
         {
             try
             {
-                // Progress bar just in case these files are massive
-                EditorUtility.DisplayProgressBar("Exporting bundle", "Loading file...", 0);
-
-                // Load the bundle, then the assets in the bundle
+                // Step 1: Load the asset bundle.
+                EditorUtility.DisplayProgressBar("Processing bundle", "Loading asset bundle...", 0f);
                 var am = new AssetsManager();
                 var bundle = am.LoadBundleFile(source);
                 var assets = am.LoadAssetsFileFromBundle(bundle, 0);
 
                 // Step 2: For each MonoScript asset, alter it's assembly name
-                EditorUtility.DisplayProgressBar("Exporting bundle", "Scanning and making changes...", 25);
+                EditorUtility.DisplayProgressBar("Processing bundle", "Modifying assets...", 0.33f);
                 var modifications = new List<AssetsReplacer>();
-                foreach (var assetInfo in assets.table.GetAssetsOfType(115))
+                foreach (AssetFileInfoEx assetInfo in assets.table.assetFileInfo)
                 {
+                    // We only want MonoScripts (type 115)
+                    if (assetInfo.curFileType != 115) continue;
+
                     // Get the field for this asset
                     var field = am.GetTypeInstance(assets, assetInfo).GetBaseField();
                     var assemblyNameValue = field["m_AssemblyName"].GetValue();
 
-                    // Modify it's assembly name
+                    // Check if we want to replace this name
                     var asmName = assemblyNameValue.AsString();
                     if (replaceMap.ContainsKey(asmName))
                     {
+                        // Modify it's assembly name
                         assemblyNameValue.Set(replaceMap[asmName]);
 
                         // Write the modifications to the list
@@ -43,44 +46,41 @@ namespace MeatKit
                     }
                 }
 
-                // Write asset changes to memory
-                // TODO: I don't like that this uses a byte array here
-                EditorUtility.DisplayProgressBar("Exporting bundle", "Saving changes...", 50);
-                byte[] newAssetData;
-                using (var stream = new MemoryStream())
-                using (var writer = new AssetsFileWriter(stream))
-                {
-                    assets.file.Write(writer, 0, modifications, 0);
-                    newAssetData = stream.ToArray();
-                }
-
-
-                // Write the whole assets data to the bundle file
+                // Step 3: Write the modified assets back into an uncompressed bundle
+                EditorUtility.DisplayProgressBar("Processing bundle", "Saving changes...", 0.66f);
                 using (var fileStream = new FileStream(destination + ".uncompressed", FileMode.Create))
                 {
-                    var bunRepl = new BundleReplacerFromMemory(assets.name, null, true, newAssetData, -1);
+                    var bunRepl = new BundleReplacerFromAssets(assets.name, assets.name, assets.file, modifications);
                     var bunWriter = new AssetsFileWriter(fileStream);
                     bundle.file.Write(bunWriter, new List<BundleReplacer> {bunRepl});
                 }
 
-                EditorUtility.DisplayProgressBar("Exporting bundle", "Compressing bundle...", 75);
+                // Unload the existing bundle
                 am.UnloadAll();
-                var compressedBundle = am.LoadBundleFile(destination + ".uncompressed");
-                using (var stream = File.OpenWrite(destination))
-                using (var writer = new AssetsFileWriter(stream))
+
+                // Step 4: Re-compress the bundle if requested
+                EditorUtility.DisplayProgressBar("Processing bundle", "Recompressing bundle...", 1f);
+                if (recompressAs != AssetBundleCompressionType.NONE)
                 {
-                    compressedBundle.file.Pack(compressedBundle.file.reader, writer, recompressAs);
+                    var compressedBundle = am.LoadBundleFile(destination + ".uncompressed");
+                    using (var fs = File.OpenWrite(destination))
+                    using (var writer = new AssetsFileWriter(fs))
+                    {
+                        compressedBundle.file.Pack(compressedBundle.file.reader, writer, recompressAs);
+                    }
+
+                    File.Delete(destination + ".uncompressed");
                 }
+                else File.Move(destination + ".uncompressed", destination);
 
+                // More cleanup
                 am.UnloadAll();
-
-                EditorUtility.DisplayProgressBar("Exporting bundle", "Cleaning up", 100);
-                File.Delete(destination + ".uncompressed");
+                
             }
             finally
             {
-                // Clear the progress bar when we're done
                 EditorUtility.ClearProgressBar();
+                GC.Collect();
             }
         }
     }

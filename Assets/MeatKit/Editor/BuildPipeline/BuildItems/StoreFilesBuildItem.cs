@@ -13,7 +13,7 @@ namespace MeatKit
 
         public override IEnumerable<string> RequiredDependencies
         {
-            get { return new[] {"nrgill28-Sodalite-1.1.0"}; }
+            get { return new string[0]; }
         }
 
         public override Dictionary<string, BuildMessage> Validate()

@@ -20,7 +20,7 @@ namespace MeatKit
 
         public override IEnumerable<string> RequiredDependencies
         {
-            get { return new string[0]; }
+            get { return new[] {"nrgill28-Sodalite-1.2.0"}; }
         }
 
         public override AssetBundleBuild? ConfigureBuild()

@@ -1,5 +1,3 @@
-#if UNITY_EDITOR
-
 using System.IO;
 using UnityEngine;
 using UnityEditor;
@@ -86,4 +84,3 @@ public class IconCamera : MonoBehaviour
         AssetDatabase.Refresh();
     }
 }
-#endif
