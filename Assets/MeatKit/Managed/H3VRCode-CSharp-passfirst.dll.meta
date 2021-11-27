@@ -1,11 +1,32 @@
 fileFormatVersion: 2
 guid: 7832d585943e5b183a30017a1bb83953
-timeCreated: 1636265409
-licenseType: Pro
+timeCreated: 1638030763
+licenseType: Free
 PluginImporter:
   serializedVersion: 2
   iconMap: {}
-  executionOrder: {}
+  executionOrder:
+    FMODUnity.RuntimeManager: 300
+    FMODUnity.Settings: -7
+    FMODUnity.StudioBankLoader: -6
+    FMODUnity.StudioEventEmitter: -5
+    FMODUnity.StudioListener: 200
+    RootMotion.CameraController: 2000
+    RootMotion.FinalIK.AimIK: 700
+    RootMotion.FinalIK.ArmIK: 800
+    RootMotion.FinalIK.BipedIK: 1600
+    RootMotion.FinalIK.CCDIK: 900
+    RootMotion.FinalIK.FABRIK: 1000
+    RootMotion.FinalIK.FABRIKRoot: 1100
+    RootMotion.FinalIK.FingerRig: 1900
+    RootMotion.FinalIK.FullBodyBipedIK: 1800
+    RootMotion.FinalIK.IKExecutionOrder: 600
+    RootMotion.FinalIK.LegIK: 1200
+    RootMotion.FinalIK.LimbIK: 1300
+    RootMotion.FinalIK.LookAtIK: 1400
+    RootMotion.FinalIK.TrigonometricIK: 1500
+    RootMotion.FinalIK.TwistRelaxer: 2100
+    RootMotion.FinalIK.VRIK: 1700
   isPreloaded: 0
   isOverridable: 0
   platformData:

@@ -3,16 +3,59 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Matchbox
+  - Burning
+  - MaskedTarget
+  - QuickbeltSlot
+  - Harmless
+  - FVRFireArmChamber
+  - FVRFireArmReloadTriggerWell
+  - FVRFireArmReloadTriggerMag
+  - FVRFireArmMagazineReloadTrigger
+  - Pickup
+  - GunPortationTarget
+  - FVRFireArmAttachmentMount
+  - IFFTeam1
+  - IFFTeam2
+  - IFFTeam3
+  - IFFTeam4
+  - FxTemporaire
+  - FVRFireArmRound
+  - NoTeleport
+  - OptionsPanelButton
+  - ESlabSlot
+  - ESlabDisc
+  - HorseshoePost
+  - wwHatReturn
+  - KeyDetectTrigger
+  - FVRFireArmClipReloadTriggerWell
+  - FVRFireArmClipReloadTriggerClip
+  - Agent
+  - PlayerHand
+  - explosion
+  - IgnitorSystem
+  - LighterFluid
+  - projectile
+  - noOcclude
+  - flintlock_shot
+  - flintlock_paper
+  - flintlock_wadding
+  - flintlock_powdergrain
+  - flintlock_ramrod
+  - flintlock_flint
+  - GronchTarget
+  - FillMe
+  - RawGrab
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  -
+  - 
   - Water
   - UI
-  -
-  -
+  - 
+  - 
   - NoCol
   - HandTrigger
   - Interactable
@@ -31,8 +74,8 @@ TagManager:
   - PlayerAndRBTrigger
   - Smoke
   - AIEntity
-  -
-  -
+  - 
+  - 
   - ExternalCamOnly
   - Distant
   - Burning
