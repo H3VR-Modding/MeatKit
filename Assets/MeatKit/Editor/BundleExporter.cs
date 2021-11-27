@@ -68,14 +68,12 @@ namespace MeatKit
                     {
                         compressedBundle.file.Pack(compressedBundle.file.reader, writer, recompressAs);
                     }
-
+                    
+                    am.UnloadAll();
                     File.Delete(destination + ".uncompressed");
                 }
                 else File.Move(destination + ".uncompressed", destination);
 
-                // More cleanup
-                am.UnloadAll();
-                
             }
             finally
             {
