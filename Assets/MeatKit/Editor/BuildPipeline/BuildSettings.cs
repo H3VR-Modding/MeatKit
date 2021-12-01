@@ -148,8 +148,7 @@ namespace MeatKit
             obj["author"] = Author;
             obj["version_number"] = Version;
             obj["description"] = Description;
-            if (!string.IsNullOrEmpty(WebsiteURL))
-                obj["website_url"] = WebsiteURL;
+            obj["website_url"] = string.IsNullOrEmpty(WebsiteURL) ? "" : WebsiteURL;
 
             // ReSharper disable once CoVariantArrayConversion
             obj["dependencies"] = new JArray(GetRequiredDependencies().Concat(AdditionalDependencies).ToArray());
