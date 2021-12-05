@@ -9,7 +9,7 @@ namespace MeatKit
 {
     public static partial class MeatKit
     {
-        private static void ProcessBundle(string source, string destination, IDictionary<string, string> replaceMap,
+        public static void ProcessBundle(string source, string destination, IDictionary<string, string> replaceMap,
             AssetBundleCompressionType recompressAs)
         {
             try
