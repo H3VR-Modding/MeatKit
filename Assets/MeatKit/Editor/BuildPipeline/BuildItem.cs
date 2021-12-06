@@ -18,9 +18,9 @@ namespace MeatKit
             return new Dictionary<string, BuildMessage>();
         }
 
-        public virtual AssetBundleBuild? ConfigureBuild()
+        public virtual List<AssetBundleBuild?> ConfigureBuild()
         {
-            return null;
+            return new List<AssetBundleBuild?>();
         }
 
         public virtual void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)

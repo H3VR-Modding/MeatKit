@@ -1,29 +1,11 @@
 fileFormatVersion: 2
 guid: 61df6207064b6df9f1154d3f48a90696
-timeCreated: 1638031543
+timeCreated: 1638750206
 licenseType: Free
 PluginImporter:
   serializedVersion: 2
   iconMap: {}
-  executionOrder:
-    AnvilManager: -10
-    FistVR.AM: -3
-    FistVR.FVRMovementManager: -2
-    FistVR.FVRSceneSettings: -11
-    FistVR.FVRViveHand: -1
-    FistVR.GM: -9
-    FistVR.OptionsScreen_Controls: 400
-    ProbeCullManager: -8
-    ScreenShakeVR: 500
-    SoundController: 100
-    VRTrailManager: -4
-    Valve.VR.InteractionSystem.Player: -15
-    Valve.VR.InteractionSystem.Teleport: -100
-    Valve.VR.SteamVR_Behaviour: -50
-    Valve.VR.SteamVR_Behaviour_Pose: -13
-    Valve.VR.SteamVR_Behaviour_Skeleton: -12
-    Valve.VR.SteamVR_Camera: -20
-    Valve.VR.SteamVR_Render: -40
+  executionOrder: {}
   isPreloaded: 0
   isOverridable: 0
   platformData:

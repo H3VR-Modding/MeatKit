@@ -125,7 +125,7 @@ namespace MeatKit
 
             // Then get their asset bundle configurations
             var bundles = settings.BuildItems
-                .Select(x => x.ConfigureBuild())
+                .SelectMany(x => x.ConfigureBuild())
                 .Where(x => x != null)
                 .Select(x => x.Value).ToArray();
 

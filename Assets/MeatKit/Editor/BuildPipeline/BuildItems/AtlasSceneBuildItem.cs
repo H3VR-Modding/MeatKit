@@ -57,7 +57,8 @@ namespace MeatKit
             return messages;
         }
 
-        public override AssetBundleBuild? ConfigureBuild()
+
+        public override List<AssetBundleBuild?> ConfigureBuild()
         {
 #if H3VR_IMPORTED
             // We need to export the thumbnail and scene metadata
@@ -72,12 +73,17 @@ namespace MeatKit
             File.WriteAllText(sceneFileName + ".json", JsonConvert.SerializeObject(obj));
 #endif
             // Return the configuration to build the scene bundle file
-            return new AssetBundleBuild
+            List<AssetBundleBuild?> bundles = new List<AssetBundleBuild?>();
+
+            bundles.Add(new AssetBundleBuild
             {
                 assetBundleName = SceneFile.name,
-                assetNames = new[] {AssetDatabase.GetAssetPath(SceneFile)}
-            };
+                assetNames = new[] { AssetDatabase.GetAssetPath(SceneFile) }
+            });
+
+            return bundles;
         }
+
 
         public override void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
         {
