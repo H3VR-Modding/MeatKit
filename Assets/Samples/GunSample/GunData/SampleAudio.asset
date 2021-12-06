@@ -1,0 +1,249 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 598449717, guid: 61df6207064b6df9f1154d3f48a90696, type: 3}
+  m_Name: SampleAudio
+  m_EditorClassIdentifier: 
+  Loudness_Primary: 100
+  Loudness_Suppressed: 65
+  Loudness_OperationMult: 1
+  FTP:
+    Kick_Shot: 0
+    Rumble_Shot_Intensity: 100
+    Rumble_Shot_Duration: 0.03
+    Rumble_Handling_Intensity: 50
+    Rumble_Handling_Duration: 0.022
+  Shots_Main:
+    Clips:
+    - {fileID: 8300000, guid: 3a7624ef821fa764f8f0709917a49032, type: 3}
+    - {fileID: 8300000, guid: 597977294ec329d4ca5d4d7a92c947c8, type: 3}
+    - {fileID: 8300000, guid: 8a7c2dea3a6ac5641b124e169969c41a, type: 3}
+    - {fileID: 8300000, guid: d5fd7e879c8cbe542bbd54ba0e3f9f98, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  Shots_Suppressed:
+    Clips:
+    - {fileID: 8300000, guid: 3a7624ef821fa764f8f0709917a49032, type: 3}
+    - {fileID: 8300000, guid: 597977294ec329d4ca5d4d7a92c947c8, type: 3}
+    - {fileID: 8300000, guid: 8a7c2dea3a6ac5641b124e169969c41a, type: 3}
+    - {fileID: 8300000, guid: d5fd7e879c8cbe542bbd54ba0e3f9f98, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  Shots_LowPressure:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  TailPitchMod_Main: {x: 1, y: 1.03}
+  TailPitchMod_Suppressed: {x: 1, y: 1.03}
+  TailPitchMod_LowPressure: {x: 1, y: 1.03}
+  TailConcurrentLimit: 2
+  UsesTail_Main: 1
+  UsesTail_Suppressed: 1
+  UsesLowPressureSet: 0
+  BoltRelease:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BoltSlideBack:
+    Clips:
+    - {fileID: 8300000, guid: 95348fa6bfe85c94581ff5e96b608dc3, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BoltSlideBackHeld:
+    Clips:
+    - {fileID: 8300000, guid: 95348fa6bfe85c94581ff5e96b608dc3, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BoltSlideBackLocked:
+    Clips:
+    - {fileID: 8300000, guid: eb89d83045b00c8468ed3f278c797b05, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BoltSlideForward:
+    Clips:
+    - {fileID: 8300000, guid: d4e745f24a5f85e42b6e2c1110d39a4b, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BoltSlideForwardHeld:
+    Clips:
+    - {fileID: 8300000, guid: 1b40dcef8fcf84342a706ee4e7df34fe, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BreachOpen:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BreachClose:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltBulletSet:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  CatchOnSear:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  ChamberManual:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  FireSelector:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HammerHit:
+    Clips:
+    - {fileID: 8300000, guid: d6bff2300442d4f4b94bbc40e793aa75, type: 3}
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleBack:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleBackEmpty:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleForward:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleForwardEmpty:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleUp:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleDown:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  HandleGrab:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  MagazineIn:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  MagazineOut:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  MagazineInsertRound:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  MagazineEjectRound:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  Prefire:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  Safety:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  TriggerReset:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  TopCoverRelease:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  TopCoverUp:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  TopCoverDown:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  StockOpen:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  StockClosed:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BipodOpen:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BipodClosed:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltGrab:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltRelease:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltSeat:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltSettle:
+    Clips: []
+    VolumeRange: {x: 1, y: 1}
+    PitchRange: {x: 1, y: 1}
+    ClipLengthRange: {x: 1, y: 1}
+  BeltSettlingLimit: 0

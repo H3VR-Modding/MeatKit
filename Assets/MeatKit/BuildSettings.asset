@@ -18,7 +18,8 @@ MonoBehaviour:
   ReadMe: {fileID: 102900000, guid: 0ef972042aeb3144a87158168db7cdbc, type: 3}
   WebsiteURL: https://github.com/H3VR-Modding/AtlasSampleProject
   Description: The sample scenes for Atlas!
-  AdditionalDependencies: []
+  AdditionalDependencies:
+  - devyndamonster-OtherLoader-1.1.5
   BuildItems:
-  - {fileID: 11400000, guid: 1d720bb5de0286042ae34e79dd940e2c, type: 2}
+  - {fileID: 11400000, guid: 788fe00c2bc3e17468fdacb95990a388, type: 2}
   BundleCompressionType: 2

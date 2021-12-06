@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -964389625, guid: 61df6207064b6df9f1154d3f48a90696, type: 3}
+  m_Name: SampleRecoil
+  m_EditorClassIdentifier: 
+  VerticalRotPerShot: 28
+  HorizontalRotPerShot: 1
+  MaxVerticalRot: 45
+  MaxHorizontalRot: 30
+  VerticalRotRecovery: 25
+  HorizontalRotRecovery: 20
+  ZLinearPerShot: 0.005
+  ZLinearMax: 0.025
+  ZLinearRecovery: 8
+  XYLinearPerShot: 0.05
+  XYLinearMax: 0.005
+  XYLinearRecovery: 8
+  IsConstantRecoil: 0
+  VerticalRotPerShot_Bipodded: 2
+  HorizontalRotPerShot_Bipodded: 0.4
+  MaxVerticalRot_Bipodded: 8
+  MaxHorizontalRot_Bipodded: 3
+  RecoveryStabilizationFactors_Foregrip: {x: 1, y: 1, z: 0.8, w: 0.8}
+  RecoveryStabilizationFactors_Twohand: {x: 0.5, y: 0.8, z: 0.3, w: 0.75}
+  RecoveryStabilizationFactors_None: {x: 0.25, y: 0.5, z: 0.25, w: 0.25}
+  MassDriftIntensity: 0.1
+  MassDriftFactors: {x: 0.25, y: 0.6, z: 1, w: 0.1}
+  MaxMassDriftMagnitude: 5
+  MaxMassMaxRotation: 5
+  MassDriftRecoveryFactor: 5

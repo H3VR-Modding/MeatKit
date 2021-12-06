@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 423536732, guid: 61df6207064b6df9f1154d3f48a90696, type: 3}
+  m_Name: SampleID
+  m_EditorClassIdentifier: 
+  IsDisplayedInMainEntry: 1
+  DisplayName: Homemade Pistol
+  Sprite: {fileID: 0}
+  SubHeading: Made in a garage
+  Description: 
+  Infographic: {fileID: 0}
+  Category: 0
+  SubCategory: 1
+  ItemID: HomemadePistol
+  MainObject: {fileID: 11400000, guid: cf6cf254b8523ce479443dff55c8bcca, type: 2}
+  SecondObject: {fileID: 0}
+  Secondaries: []
+  Secondaries_ByStringID: []
+  ModTags: []
+  TutorialBlocks: []
+  UsesLargeSpawnPad: 0
+  UsesHugeSpawnPad: 0
+  UnlockCost: 0
+  IsUnlockedByDefault: 1
+  IsReward: 0

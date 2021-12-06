@@ -98,4 +98,4 @@ Assets/StreamingAssets/*
 /[Aa]ssets/BakeryLightmaps.meta
 
 #No game assets for gun sample
-Assets/OtherLoader/SampleGunAssets/Audio/*
+/[Aa]ssets/Samples/GunSample/GunAssets/Audio/*

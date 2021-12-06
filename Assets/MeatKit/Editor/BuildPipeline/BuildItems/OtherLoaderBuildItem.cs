@@ -55,7 +55,7 @@ namespace MeatKit
 
             bundles.Add(new AssetBundleBuild
             {
-                assetBundleName = BundleName,
+                assetBundleName = BundleName.ToLower(),
                 assetNames = dataNames.ToArray()
             });
 
@@ -64,9 +64,11 @@ namespace MeatKit
             //The second asset bundle contains the prefabs themselves, and everything they reference
             bundles.Add(new AssetBundleBuild
             {
-                assetBundleName = "late_" + BundleName,
-                assetNames = Prefabs.Select(o => AssetDatabase.GetAssetPath(PrefabUtility.GetPrefabParent(o))).ToArray()
+                assetBundleName = "late_" + BundleName.ToLower(),
+                assetNames = Prefabs.Select(o => AssetDatabase.GetAssetPath(o)).ToArray()
             });
+
+            
 
             return bundles;
         }
