@@ -18,9 +18,9 @@ namespace MeatKit
             return new Dictionary<string, BuildMessage>();
         }
 
-        public virtual List<AssetBundleBuild?> ConfigureBuild()
+        public virtual List<AssetBundleBuild> ConfigureBuild()
         {
-            return new List<AssetBundleBuild?>();
+            return new List<AssetBundleBuild>();
         }
 
         public virtual void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
@@ -46,6 +46,11 @@ namespace MeatKit
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginGuid));
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginVersion));
             }
+        }
+
+        public virtual void PostProcessBuild()
+        {
+
         }
     }
 }

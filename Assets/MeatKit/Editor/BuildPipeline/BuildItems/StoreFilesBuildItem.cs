@@ -26,9 +26,9 @@ namespace MeatKit
             return messages;
         }
 
-        public override List<AssetBundleBuild?> ConfigureBuild()
+        public override List<AssetBundleBuild> ConfigureBuild()
         {
-            List<AssetBundleBuild?> bundles = new List<AssetBundleBuild?>();
+            List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
 
             bundles.Add(new AssetBundleBuild
             {

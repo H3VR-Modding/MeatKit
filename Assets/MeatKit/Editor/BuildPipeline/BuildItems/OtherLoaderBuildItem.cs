@@ -16,7 +16,7 @@ using Valve.Newtonsoft.Json.Linq;
 
 namespace MeatKit
 {
-    [CreateAssetMenu(menuName = "MeatKit/Build Items/OtherLoader Mod", fileName = "New Mod")]
+    [CreateAssetMenu(menuName = "MeatKit/Build Items/OtherLoader Item", fileName = "New Item")]
     public class OtherLoaderBuildItem : BuildItem
     {
         [Tooltip("The name of this bundle pair")]
@@ -44,9 +44,9 @@ namespace MeatKit
             return messages;
         }
 
-        public override List<AssetBundleBuild?> ConfigureBuild()
+        public override List<AssetBundleBuild> ConfigureBuild()
         {
-            List<AssetBundleBuild?> bundles = new List<AssetBundleBuild?>();
+            List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
 
             // The first asset bundle contains just item data
             List<string> dataNames = new List<string>();
@@ -60,7 +60,6 @@ namespace MeatKit
             });
 
 
-
             //The second asset bundle contains the prefabs themselves, and everything they reference
             bundles.Add(new AssetBundleBuild
             {
@@ -68,7 +67,6 @@ namespace MeatKit
                 assetNames = Prefabs.Select(o => AssetDatabase.GetAssetPath(o)).ToArray()
             });
 
-            
 
             return bundles;
         }

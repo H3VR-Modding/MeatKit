@@ -58,7 +58,7 @@ namespace MeatKit
         }
 
 
-        public override List<AssetBundleBuild?> ConfigureBuild()
+        public override List<AssetBundleBuild> ConfigureBuild()
         {
 #if H3VR_IMPORTED
             // We need to export the thumbnail and scene metadata
@@ -73,7 +73,7 @@ namespace MeatKit
             File.WriteAllText(sceneFileName + ".json", JsonConvert.SerializeObject(obj));
 #endif
             // Return the configuration to build the scene bundle file
-            List<AssetBundleBuild?> bundles = new List<AssetBundleBuild?>();
+            List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
 
             bundles.Add(new AssetBundleBuild
             {

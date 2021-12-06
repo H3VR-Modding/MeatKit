@@ -124,10 +124,7 @@ namespace MeatKit
             ExportEditorAssembly(BundleOutputPath);
 
             // Then get their asset bundle configurations
-            var bundles = settings.BuildItems
-                .SelectMany(x => x.ConfigureBuild())
-                .Where(x => x != null)
-                .Select(x => x.Value).ToArray();
+            var bundles = settings.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
 
             BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
                 BuildTarget.StandaloneWindows64);
@@ -162,6 +159,12 @@ namespace MeatKit
             
             // Copy the readme
             File.Copy(AssetDatabase.GetAssetPath(settings.ReadMe), BundleOutputPath + "README.md");
+
+            //Now that all files are in place, you can perform post processing on them
+            foreach(BuildItem buildItem in settings.BuildItems)
+            {
+                buildItem.PostProcessBuild();
+            }
         }
 
         [MenuItem("MeatKit/Clear Cache", priority = 3)]
