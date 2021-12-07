@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Valve.VR.InteractionSystem;
 
 namespace MeatKit
 {
@@ -23,6 +25,10 @@ namespace MeatKit
             var asm = AssemblyDefinition.ReadAssembly(EditorAssemblyPath + AssemblyName + ".dll");
             var plugin = asm.MainModule.GetType("MeatKitPlugin");
             plugin.Name = settings.PackageName + "Plugin";
+
+            // This is some quantum bullshit.
+            // If you don't enumerate the constructor arguments for attributes their values aren't updated correctly. 
+            GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments).ForEach(x => { });
 
             // Get the BepInPlugin attribute and replace the values in it with our own
             var str = asm.MainModule.TypeSystem.String;
@@ -68,6 +74,15 @@ namespace MeatKit
 
             // Save it
             asm.Write(exportPath);
+        }
+
+        private static IEnumerable<CustomAttribute> GetAllCustomAttributes(AssemblyDefinition asm)
+        {
+            foreach (var type in asm.MainModule.Types)
+            {
+                foreach (var attrib in type.CustomAttributes) yield return attrib;
+                foreach (CustomAttribute attrib in type.Methods.SelectMany(method => method.CustomAttributes)) yield return attrib;
+            }
         }
     }
 }

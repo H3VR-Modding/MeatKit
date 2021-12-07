@@ -23,3 +23,5 @@ MonoBehaviour:
   BuildItems:
   - {fileID: 11400000, guid: bad59fd2aa5633540af2bd7736c1132b, type: 2}
   BundleCompressionType: 2
+  BuildAction: 1
+  OutputProfile: C:/Users/nrgil/AppData/Roaming/r2modmanPlus-local/H3VR/profiles/Default

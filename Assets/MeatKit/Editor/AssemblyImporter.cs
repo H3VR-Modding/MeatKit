@@ -63,8 +63,7 @@ namespace MeatKit
         private static readonly string[] ExtraAssemblies =
         {
             "DinoFracture.dll",
-            "ES2.dll",
-            "Valve.Newtonsoft.Json.dll"
+            "ES2.dll"
         };
 
 
