@@ -167,9 +167,24 @@ namespace MeatKit
             // Now we can write the Thunderstore stuff to the folder
             settings.WriteThunderstoreManifest(BundleOutputPath + "manifest.json");
 
-            // Write the icon image, scaling it if required.
+            // Check if the icon is already 256x256
             Texture2D icon = settings.Icon;
-            if (settings.Icon.width != 256 || settings.Icon.height != 256) icon = icon.ScaleTexture(256, 256);
+            if (settings.Icon.width != 256 || settings.Icon.height != 256)
+            {
+                // If not, make sure the texture is readable and not compressed
+                var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(settings.Icon));
+                if (!importSettings.isReadable || importSettings.textureCompression != TextureImporterCompression.Uncompressed)
+                {
+                    importSettings.isReadable = true;
+                    importSettings.textureCompression = TextureImporterCompression.Uncompressed;
+                    importSettings.SaveAndReimport();
+                }
+                
+                // Then resize it for the build
+                icon = icon.ScaleTexture(256, 256);
+            }
+            
+            // Write the texture to file
             File.WriteAllBytes(BundleOutputPath + "icon.png", icon.EncodeToPNG());
 
             // Copy the readme
