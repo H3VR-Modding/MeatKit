@@ -31,6 +31,8 @@ namespace MeatKit
         [Tooltip("Drag your FVRObjects here")]
         public List<FVRObject> FVRObjects;
 
+        [Tooltip("When true, contents of item will be broken into two bundles: the data and the assets. This improves load times")]
+        public bool OnDemand = true;
 
         public override IEnumerable<string> RequiredDependencies
         {
@@ -48,24 +50,40 @@ namespace MeatKit
         {
             List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
 
-            // The first asset bundle contains just item data
             List<string> dataNames = new List<string>();
             dataNames.AddRange(SpawnerIDs.Select(o => AssetDatabase.GetAssetPath(o)));
             dataNames.AddRange(FVRObjects.Select(o => AssetDatabase.GetAssetPath(o)));
 
-            bundles.Add(new AssetBundleBuild
-            {
-                assetBundleName = BundleName.ToLower(),
-                assetNames = dataNames.ToArray()
-            });
+            List<string> prefabNames = new List<string>();
+            prefabNames.AddRange(Prefabs.Select(o => AssetDatabase.GetAssetPath(o)));
 
 
-            //The second asset bundle contains the prefabs themselves, and everything they reference
-            bundles.Add(new AssetBundleBuild
+            //If the build item is on demand, we split it into two bundles
+            if (OnDemand)
             {
-                assetBundleName = "late_" + BundleName.ToLower(),
-                assetNames = Prefabs.Select(o => AssetDatabase.GetAssetPath(o)).ToArray()
-            });
+                bundles.Add(new AssetBundleBuild
+                {
+                    assetBundleName = BundleName.ToLower(),
+                    assetNames = dataNames.ToArray()
+                });
+
+                
+                bundles.Add(new AssetBundleBuild
+                {
+                    assetBundleName = "late_" + BundleName.ToLower(),
+                    assetNames = prefabNames.ToArray()
+                });
+            }
+
+            //If the build item is not on demand, it is all in once bundle
+            else
+            {
+                bundles.Add(new AssetBundleBuild
+                {
+                    assetBundleName = BundleName.ToLower(),
+                    assetNames = dataNames.Concat(prefabNames).ToArray()
+                });
+            }
 
 
             return bundles;

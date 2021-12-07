@@ -136,7 +136,7 @@ Material:
     - _Metallic: 0
     - _MinSamples: 4
     - _Mode: 0
-    - _Occlusion: 1
+    - _Occlusion: 0.85
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ParallaxT: 0

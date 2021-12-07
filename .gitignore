@@ -82,6 +82,8 @@ Assets/StreamingAssets/*
 !/[Aa]ssets/MeatKit/Managed/BepInEx.dll
 !/[Aa]ssets/MeatKit/Managed/Sodalite.dll
 !/[Aa]ssets/MeatKit/Managed/Atlas.dll
+!/[Aa]ssets/MeatKit/Managed/OtherLoader.dll
+!/[Aa]ssets/MeatKit/Managed/Stratum.dll
 /[Aa]ssets/MeatKit/Managed.meta
 /[Aa]ssets/MeatKit/Cache.asset
 /[Aa]ssets/MeatKit/Cache.asset.meta

@@ -21,5 +21,5 @@ MonoBehaviour:
   AdditionalDependencies:
   - devyndamonster-OtherLoader-1.1.5
   BuildItems:
-  - {fileID: 11400000, guid: 788fe00c2bc3e17468fdacb95990a388, type: 2}
+  - {fileID: 11400000, guid: bad59fd2aa5633540af2bd7736c1132b, type: 2}
   BundleCompressionType: 2

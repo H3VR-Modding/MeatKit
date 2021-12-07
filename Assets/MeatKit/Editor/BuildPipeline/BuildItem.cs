@@ -48,7 +48,7 @@ namespace MeatKit
             }
         }
 
-        public virtual void PostProcessBuild()
+        public virtual void PostProcessBuild(string outputPath)
         {
 
         }

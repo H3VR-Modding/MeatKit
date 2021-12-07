@@ -18,3 +18,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e4ba21904d0b883439c73560be13d7c4, type: 2}
   FVRObjects:
   - {fileID: 11400000, guid: cf6cf254b8523ce479443dff55c8bcca, type: 2}
+  OnDemand: 1

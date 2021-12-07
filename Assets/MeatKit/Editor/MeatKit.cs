@@ -163,7 +163,7 @@ namespace MeatKit
             //Now that all files are in place, you can perform post processing on them
             foreach(BuildItem buildItem in settings.BuildItems)
             {
-                buildItem.PostProcessBuild();
+                buildItem.PostProcessBuild(BundleOutputPath);
             }
         }
 
