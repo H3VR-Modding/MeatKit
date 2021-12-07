@@ -32,7 +32,7 @@ namespace MeatKit
                     _settings.OutputProfile = EditorUtility.OpenFolderPanel("Select your r2mm profile folder", @"%APPDATA%\Roaming\r2modmanPlus-local\H3VR\profiles", "");
                     
                 // Draw any errors that come from the BuildAction property, as those won't get displayed otherwise.
-                DrawMessageIfExists(serializedObject.FindProperty("OutputProfile"));
+                DrawMessageIfExists("OutputProfile");
             }
 
             if (GUILayout.Button("Build!", GUILayout.Height(50)))
