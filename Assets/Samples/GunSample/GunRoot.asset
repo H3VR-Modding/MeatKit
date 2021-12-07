@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Name: GunRoot
   m_EditorClassIdentifier: 
   BuildItemsFirst:
+  - {fileID: 11400000, guid: 788fe00c2bc3e17468fdacb95990a388, type: 2}
+  BuildItemsAny:
   - {fileID: 0}
-  BuildItemsAny: []
   BuildItemsLast: []
   SelfLoading: 1
