@@ -179,11 +179,11 @@ namespace MeatKit
                     importSettings.textureCompression = TextureImporterCompression.Uncompressed;
                     importSettings.SaveAndReimport();
                 }
-                
+
                 // Then resize it for the build
                 icon = icon.ScaleTexture(256, 256);
             }
-            
+
             // Write the texture to file
             File.WriteAllBytes(BundleOutputPath + "icon.png", icon.EncodeToPNG());
 
@@ -197,7 +197,8 @@ namespace MeatKit
                 if (Directory.Exists(pluginFolder)) Directory.Delete(pluginFolder, true);
                 Directory.CreateDirectory(pluginFolder);
                 Extensions.CopyFilesRecursively(BundleOutputPath, pluginFolder);
-            } else if (settings.BuildAction == BuildAction.CreateThunderstorePackage)
+            }
+            else if (settings.BuildAction == BuildAction.CreateThunderstorePackage)
             {
                 using (var zip = new ZipFile())
                 {
@@ -211,7 +212,7 @@ namespace MeatKit
             MeatKitCache.LastBuildTime = DateTime.Now;
         }
 
-        [MenuItem("MeatKit/Clear Cache", priority = 3)]
+
         public static void ClearCache()
         {
             AssetDatabase.SaveAssets();

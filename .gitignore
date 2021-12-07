@@ -83,6 +83,8 @@ AssetBundles/
 !/[Aa]ssets/MeatKit/Managed/Atlas.dll
 !/[Aa]ssets/MeatKit/Managed/Valve.Newtonsoft.Json.dll
 !/[Aa]ssets/MeatKit/Managed/DotNetZip.dll
+!/[Aa]ssets/MeatKit/Managed/0Harmony.dll
+!/[Aa]ssets/MeatKit/Managed/MonoMod.Utils.dll
 /[Aa]ssets/MeatKit/Managed.meta
 /[Aa]ssets/MeatKit/Cache.asset
 /[Aa]ssets/MeatKit/Cache.asset.meta

@@ -24,13 +24,13 @@ namespace MeatKit
         protected virtual void DrawProperty(SerializedProperty property)
         {
             EditorGUILayout.PropertyField(property, true);
-            DrawMessageIfExists(property);
+            DrawMessageIfExists(property.name);
         }
 
-        protected void DrawMessageIfExists(SerializedProperty property)
+        protected void DrawMessageIfExists(string propertyName)
         {
             BuildMessage message;
-            if (ValidationMessages.TryGetValue(property.name, out message))
+            if (ValidationMessages.TryGetValue(propertyName, out message))
                 EditorGUILayout.HelpBox(message.Message, message.Type);
         }
     }

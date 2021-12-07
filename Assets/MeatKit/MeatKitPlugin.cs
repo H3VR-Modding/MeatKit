@@ -26,7 +26,9 @@ using UnityEngine;
 public class MeatKitPlugin : BaseUnityPlugin
 {
     // DO NOT CHANGE OR REMOVE THIS FIELD.
+#pragma warning disable 414
     private static readonly string BasePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+#pragma warning restore 414
 
     private void Awake()
     {
