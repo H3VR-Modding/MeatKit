@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AssetsTools.NET;
+using Ionic.Zip;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace MeatKit
 {
@@ -11,7 +15,6 @@ namespace MeatKit
     {
         public const string MeatKitDir = "Assets/MeatKit/";
         private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "MeatKit/Managed/");
-        private static string _lastImportedAsselbly;
 
         private static bool ShowErrorIfH3VRNotImported()
         {
@@ -26,8 +29,15 @@ namespace MeatKit
         [MenuItem("MeatKit/Scripts/Import Game", priority = 0)]
         public static void ImportAssemblies()
         {
-            var gameManagedLocation =
-                EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
+            // If the path has never been set, or no longer exists, prompt the user to find it again
+            var gameManagedLocation = MeatKitCache.GameManagedLocation;
+            if (string.IsNullOrEmpty(gameManagedLocation) || !Directory.Exists(gameManagedLocation))
+            {
+                gameManagedLocation = EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
+                MeatKitCache.GameManagedLocation = gameManagedLocation;
+            }
+
+            // If it's _still_ empty, the user must have cancelled.
             if (string.IsNullOrEmpty(gameManagedLocation)) return;
             ImportAssemblies(gameManagedLocation, ManagedDirectory);
         }
@@ -38,7 +48,7 @@ namespace MeatKit
             var assemblyLocation =
                 EditorUtility.OpenFilePanel("Select assembly", null, "dll");
             if (string.IsNullOrEmpty(assemblyLocation)) return;
-            _lastImportedAsselbly = assemblyLocation;
+            MeatKitCache.LastImportedAssembly = assemblyLocation;
             ImportSingleAssembly(assemblyLocation, ManagedDirectory);
             Debug.Log("Finished importing " + assemblyLocation);
         }
@@ -46,13 +56,14 @@ namespace MeatKit
         [MenuItem("MeatKit/Scripts/Re-Import Last", priority = 0)]
         public static void ReimportLast()
         {
-            if (string.IsNullOrEmpty(_lastImportedAsselbly))
+            if (string.IsNullOrEmpty(MeatKitCache.LastImportedAssembly))
             {
                 Debug.Log("Nothing to re-import.");
                 return;
             }
-            ImportSingleAssembly(_lastImportedAsselbly, ManagedDirectory);
-            Debug.Log("Re-imported " + _lastImportedAsselbly);
+
+            ImportSingleAssembly(MeatKitCache.LastImportedAssembly, ManagedDirectory);
+            Debug.Log("Re-imported " + MeatKitCache.LastImportedAssembly);
         }
 
         [MenuItem("MeatKit/Scripts/Export", priority = 0)]
@@ -94,24 +105,25 @@ namespace MeatKit
             ProcessBundle(assetBundlePath, assetBundlePath + "-imported", replaceMap, AssetBundleCompressionType.NONE);
         }
 
-        [MenuItem("MeatKit/Build/Configure", priority = 2)]
+        [MenuItem("MeatKit/Build Window", priority = 2)]
         public static void ConfigureBuild()
         {
             Selection.activeObject = BuildSettings.Instance;
         }
 
-        [MenuItem("MeatKit/Build/Clean", priority = 2)]
         public static void CleanBuild()
         {
             if (Directory.Exists(BundleOutputPath)) Directory.Delete(BundleOutputPath, true);
             Directory.CreateDirectory(BundleOutputPath);
         }
 
-        [MenuItem("MeatKit/Build/Build", priority = 2)]
         public static void DoBuild()
         {
             // Make sure the scripts are imported.
             if (ShowErrorIfH3VRNotImported()) return;
+
+            // Start a stopwatch to time the build
+            Stopwatch sw = Stopwatch.StartNew();
 
             // If there's anything invalid in the settings don't continue
             var settings = BuildSettings.Instance;
@@ -159,9 +171,29 @@ namespace MeatKit
             Texture2D icon = settings.Icon;
             if (settings.Icon.width != 256 || settings.Icon.height != 256) icon = icon.ScaleTexture(256, 256);
             File.WriteAllBytes(BundleOutputPath + "icon.png", icon.EncodeToPNG());
-            
+
             // Copy the readme
             File.Copy(AssetDatabase.GetAssetPath(settings.ReadMe), BundleOutputPath + "README.md");
+
+            string packageName = settings.Author + "-" + settings.PackageName;
+            if (settings.BuildAction == BuildAction.CopyToProfile)
+            {
+                string pluginFolder = Path.Combine(settings.OutputProfile, "BepInEx/plugins/" + packageName);
+                if (Directory.Exists(pluginFolder)) Directory.Delete(pluginFolder, true);
+                Directory.CreateDirectory(pluginFolder);
+                Extensions.CopyFilesRecursively(BundleOutputPath, pluginFolder);
+            } else if (settings.BuildAction == BuildAction.CreateThunderstorePackage)
+            {
+                using (var zip = new ZipFile())
+                {
+                    zip.AddDirectory(BundleOutputPath, "");
+                    zip.Save(Path.Combine(BundleOutputPath, packageName + ".zip"));
+                }
+            }
+
+            // End the stopwatch and save the time
+            MeatKitCache.LastBuildDuration = sw.Elapsed;
+            MeatKitCache.LastBuildTime = DateTime.Now;
         }
 
         [MenuItem("MeatKit/Clear Cache", priority = 3)]

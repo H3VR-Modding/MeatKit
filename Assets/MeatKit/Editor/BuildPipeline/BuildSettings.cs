@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using AssetsTools.NET;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.WSA;
 using Object = UnityEngine.Object;
 #if H3VR_IMPORTED
 using Valve.Newtonsoft.Json;
@@ -33,6 +34,12 @@ namespace MeatKit
 
         public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;
 
+        // Post build action
+        public BuildAction BuildAction = BuildAction.JustBuildFiles;
+
+        [HideInInspector]
+        public string OutputProfile = "";
+        
         public static BuildSettings Instance
         {
             get
@@ -85,6 +92,25 @@ namespace MeatKit
                 case AssetBundleCompressionType.LZMA:
                     messages["BundleCompressionType"] = BuildMessage.Info(
                         "LZMA can take longer to compress than LZ4, however it will result in smaller file sizes usually.");
+                    break;
+            }
+
+            switch (BuildAction)
+            {
+                case BuildAction.JustBuildFiles:
+                    messages["BuildAction"] = BuildMessage.Info("This will just create the files for a Thunderstore package in your AssetBundles folder.");
+                    break;
+                case BuildAction.CopyToProfile:
+                    messages["BuildAction"] = BuildMessage.Info("This will copy the built files into the plugins folder of the selected profile.");
+                    if (string.IsNullOrEmpty(OutputProfile))
+                        messages["OutputProfile"] = BuildMessage.Error("Please set the output profile.");
+                    else if (!Directory.Exists(OutputProfile))
+                        messages["OutputProfile"] = BuildMessage.Error("Selected profile no longer exists.");
+                    else if (!File.Exists(Path.Combine(OutputProfile, "mods.yml")))
+                        messages["OutputProfile"] = BuildMessage.Error("Selected folder is not a r2mm profile. Please select the folder which contains the plugins folder.");
+                    break;
+                case BuildAction.CreateThunderstorePackage:
+                    messages["BuildAction"] = BuildMessage.Info("This will zip up the built files as a final build for importing into r2mm / uploading to Thunderstore.");
                     break;
             }
 
@@ -156,5 +182,12 @@ namespace MeatKit
             File.WriteAllText(location, JsonConvert.SerializeObject(obj));
 #endif
         }
+    }
+
+    public enum BuildAction
+    {
+        JustBuildFiles,
+        CopyToProfile,
+        CreateThunderstorePackage
     }
 }
