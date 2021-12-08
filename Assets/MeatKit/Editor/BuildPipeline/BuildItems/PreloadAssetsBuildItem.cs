@@ -15,7 +15,6 @@ namespace MeatKit
     [CreateAssetMenu(menuName = "MeatKit/Build Items/Preload Assets", fileName = "New build item")]
     public class PreloadAssetsBuildItem : BuildItem
     {
-        private const string BundleName = "preload";
         public Object[] Items;
 
         public override IEnumerable<string> RequiredDependencies
@@ -27,7 +26,7 @@ namespace MeatKit
         {
             return new AssetBundleBuild
             {
-                assetBundleName = BundleName,
+                assetBundleName = BuildSettings.Instance.PackageName.ToLower() + "_preload",
                 assetNames = Items.Select(AssetDatabase.GetAssetPath).ToArray()
             };
         }
@@ -45,7 +44,7 @@ namespace MeatKit
 
             // Emit our opcodes
             il.Emit(OpCodes.Ldsfld, basePath);
-            il.Emit(OpCodes.Ldstr, BundleName);
+            il.Emit(OpCodes.Ldstr, BuildSettings.Instance.PackageName.ToLower() + "_preload");
             il.Emit(OpCodes.Call, plugin.Module.ImportReference(pathCombine));
             il.Emit(OpCodes.Call, plugin.Module.ImportReference(sodalitePreloadAllAssets));
 #endif
