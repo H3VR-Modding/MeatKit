@@ -43,22 +43,55 @@ namespace MeatKit
 
             List<OtherLoaderBuildItem> allBuildItems = BuildItemsFirst.Concat(BuildItemsAny).Concat(BuildItemsLast).ToList();
 
-            //Go through all the child build items and validate them
-            foreach (OtherLoaderBuildItem buildItem in allBuildItems)
+            foreach (OtherLoaderBuildItem buildItem in BuildItemsFirst)
             {
                 if (buildItem == null)
                 {
-                    messages["BuildItemsFirst"] = BuildMessage.Error("Child build items cannot be null!");
+                    messages["BuildItemsFirst"] = BuildMessage.Error("Child build item cannot be null!");
                     continue;
                 }
-                
-                if(allBuildItems.Count(o => o != null && buildItem != null && o.BundleName == buildItem.BundleName) > 1)
+
+                if (allBuildItems.Count(o => o != null && buildItem != null && o.BundleName == buildItem.BundleName) > 1)
                 {
                     messages["BuildItemsFirst"] = BuildMessage.Error("Child build items must have unique bundle names!");
                 }
 
                 var itemMessages = buildItem.Validate();
-                itemMessages.ToList().ForEach(o => { messages[o.Key] = o.Value; });
+                itemMessages.ToList().ForEach(o => { messages["BuildItemsFirst"] = o.Value; });
+            }
+
+            foreach (OtherLoaderBuildItem buildItem in BuildItemsAny)
+            {
+                if (buildItem == null)
+                {
+                    messages["BuildItemsAny"] = BuildMessage.Error("Child build item cannot be null!");
+                    continue;
+                }
+
+                if (allBuildItems.Count(o => o != null && buildItem != null && o.BundleName == buildItem.BundleName) > 1)
+                {
+                    messages["BuildItemsAny"] = BuildMessage.Error("Child build items must have unique bundle names!");
+                }
+
+                var itemMessages = buildItem.Validate();
+                itemMessages.ToList().ForEach(o => { messages["BuildItemsAny"] = o.Value; });
+            }
+
+            foreach (OtherLoaderBuildItem buildItem in BuildItemsLast)
+            {
+                if (buildItem == null)
+                {
+                    messages["BuildItemsLast"] = BuildMessage.Error("Child build item cannot be null!");
+                    continue;
+                }
+
+                if (allBuildItems.Count(o => o != null && buildItem != null && o.BundleName == buildItem.BundleName) > 1)
+                {
+                    messages["BuildItemsLast"] = BuildMessage.Error("Child build items must have unique bundle names!");
+                }
+
+                var itemMessages = buildItem.Validate();
+                itemMessages.ToList().ForEach(o => { messages["BuildItemsLast"] = o.Value; });
             }
 
 

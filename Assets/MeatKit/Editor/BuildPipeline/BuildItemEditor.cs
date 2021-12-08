@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 namespace MeatKit
 {
@@ -14,11 +15,13 @@ namespace MeatKit
             serializedObject.ApplyModifiedProperties();
             ValidationMessages = ((IValidatable) target).Validate();
 
+
             // Draw the property fields and their message boxes, if any.
             var property = serializedObject.GetIterator();
             if (!property.NextVisible(true)) return;
             do DrawProperty(property);
             while (property.NextVisible(false));
+
         }
 
         protected virtual void DrawProperty(SerializedProperty property)

@@ -11,17 +11,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afed54a239594b8abd631a8047a54987, type: 3}
   m_Name: BuildSettings
   m_EditorClassIdentifier: 
-  PackageName: AtlasSampleScene
+  PackageName: SampleMod
   Author: nrgill28
   Version: 1.0.0
   Icon: {fileID: 2800000, guid: b8bd76ac1d7a9b142bd9e822c1310cbb, type: 3}
   ReadMe: {fileID: 102900000, guid: 0ef972042aeb3144a87158168db7cdbc, type: 3}
   WebsiteURL: https://github.com/H3VR-Modding/AtlasSampleProject
-  Description: The sample scenes for Atlas!
+  Description: This is a sample mod!
   AdditionalDependencies:
   - devyndamonster-OtherLoader-1.1.5
   BuildItems:
   - {fileID: 11400000, guid: bad59fd2aa5633540af2bd7736c1132b, type: 2}
   BundleCompressionType: 2
   BuildAction: 1
-  OutputProfile: C:/Users/nrgil/AppData/Roaming/r2modmanPlus-local/H3VR/profiles/Default
+  OutputProfile: C:/Users/Owner/AppData/Roaming/r2modmanPlus-local/H3VR/profiles/OtherloaderTest
