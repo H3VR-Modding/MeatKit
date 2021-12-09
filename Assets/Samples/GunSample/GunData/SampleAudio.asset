@@ -31,10 +31,10 @@ MonoBehaviour:
     ClipLengthRange: {x: 1, y: 1}
   Shots_Suppressed:
     Clips:
-    - {fileID: 8300000, guid: 3a7624ef821fa764f8f0709917a49032, type: 3}
-    - {fileID: 8300000, guid: 597977294ec329d4ca5d4d7a92c947c8, type: 3}
-    - {fileID: 8300000, guid: 8a7c2dea3a6ac5641b124e169969c41a, type: 3}
-    - {fileID: 8300000, guid: d5fd7e879c8cbe542bbd54ba0e3f9f98, type: 3}
+    - {fileID: 8300000, guid: 77d8e9aad16ad1e4d9ca17c39e37aee1, type: 3}
+    - {fileID: 8300000, guid: f626a16220f58db4f9f1e3c3eff1f2b4, type: 3}
+    - {fileID: 8300000, guid: 1c9c87f0921308e4caf7eca5e76f4b24, type: 3}
+    - {fileID: 8300000, guid: b8a4dff855d9aa14187511e5156d6e66, type: 3}
     VolumeRange: {x: 1, y: 1}
     PitchRange: {x: 1, y: 1}
     ClipLengthRange: {x: 1, y: 1}

@@ -26,7 +26,7 @@ namespace MeatKit
         public List<GameObject> Prefabs;
 
         [Tooltip("Drag your SpawnerIDs here")]
-        public List<ItemSpawnerID> SpawnerIDs;
+        public List<OtherLoader.ItemSpawnerEntry> SpawnerEntries;
 
         [Tooltip("Drag your FVRObjects here")]
         public List<FVRObject> FVRObjects;
@@ -51,7 +51,7 @@ namespace MeatKit
             List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
 
             List<string> dataNames = new List<string>();
-            dataNames.AddRange(SpawnerIDs.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(SpawnerEntries.Select(o => AssetDatabase.GetAssetPath(o)));
             dataNames.AddRange(FVRObjects.Select(o => AssetDatabase.GetAssetPath(o)));
 
             List<string> prefabNames = new List<string>();

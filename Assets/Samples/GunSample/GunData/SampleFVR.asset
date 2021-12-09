@@ -44,7 +44,7 @@ MonoBehaviour:
   MagazineType: 0
   ClipType: 0
   UsesRoundTypeFlag: 0
-  RoundType: 0
+  RoundType: 18
   CompatibleMagazines: []
   CompatibleClips: []
   CompatibleSpeedLoaders: []

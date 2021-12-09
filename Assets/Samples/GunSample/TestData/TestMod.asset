@@ -9,10 +9,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e5616f1b065a2547979cffb91ec634d, type: 3}
-  m_Name: GunRoot
+  m_Name: TestMod
   m_EditorClassIdentifier: 
   BuildItemsFirst: []
-  BuildItemsAny:
-  - {fileID: 11400000, guid: 788fe00c2bc3e17468fdacb95990a388, type: 2}
+  BuildItemsAny: []
   BuildItemsLast: []
   SelfLoading: 1

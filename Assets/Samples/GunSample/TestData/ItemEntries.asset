@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cebdb825cd62db44b01b7a821125b9f, type: 3}
+  m_Name: ItemEntries
+  m_EditorClassIdentifier: 
+  BundleName: Items
+  Prefabs: []
+  SpawnerEntries:
+  - {fileID: 11400000, guid: bb4b88558c8da3a4a814bd2ca3078f94, type: 2}
+  - {fileID: 11400000, guid: b823e6b2dab93e24aa67bf19ee3d8758, type: 2}
+  - {fileID: 11400000, guid: 89391cde072dd5b46a5cab42f60a93ba, type: 2}
+  - {fileID: 11400000, guid: c133124870d3f214c83d44bfd9195973, type: 2}
+  - {fileID: 11400000, guid: 21350581b5d5f9e4ca0ac99dcb5812b9, type: 2}
+  - {fileID: 11400000, guid: b4b93da730e0cac4f9fe60b7f584f3a4, type: 2}
+  FVRObjects: []
+  OnDemand: 1

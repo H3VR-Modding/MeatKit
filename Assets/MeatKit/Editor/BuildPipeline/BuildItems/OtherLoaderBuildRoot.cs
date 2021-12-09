@@ -21,13 +21,13 @@ namespace MeatKit
     public class OtherLoaderBuildRoot : BuildItem
     {
         [Tooltip("Build items that should load first, in the order they appear")]
-        public List<OtherLoaderBuildItem> BuildItemsFirst;
+        public List<OtherLoaderBuildItem> BuildItemsFirst = new List<OtherLoaderBuildItem>();
 
         [Tooltip("Build items that should in parralel, after the first items load")]
-        public List<OtherLoaderBuildItem> BuildItemsAny;
+        public List<OtherLoaderBuildItem> BuildItemsAny = new List<OtherLoaderBuildItem>();
 
         [Tooltip("Build items that should load last, in the order they appear")]
-        public List<OtherLoaderBuildItem> BuildItemsLast;
+        public List<OtherLoaderBuildItem> BuildItemsLast = new List<OtherLoaderBuildItem>();
 
         [Tooltip("When true, additional code will be generated that allows the mod to automatically load itself into otherloader")]
         public bool SelfLoading = true;

@@ -9,13 +9,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cebdb825cd62db44b01b7a821125b9f, type: 3}
-  m_Name: GunBuildItem
+  m_Name: CategoryItem
   m_EditorClassIdentifier: 
-  BundleName: HomemadePistol
-  Prefabs:
-  - {fileID: 1306369903001632, guid: f91cac0cb7da69e47b5a7d012f52f801, type: 2}
+  BundleName: Categories
+  Prefabs: []
   SpawnerEntries:
-  - {fileID: 11400000, guid: 2a86583d5a169fe4688976fb861bb2d4, type: 2}
-  FVRObjects:
-  - {fileID: 11400000, guid: cf6cf254b8523ce479443dff55c8bcca, type: 2}
+  - {fileID: 11400000, guid: 78a164068de551040a6906b0a9b8be4f, type: 2}
+  - {fileID: 11400000, guid: 53e90bc88c0d08a42b5d32571e59c717, type: 2}
+  FVRObjects: []
   OnDemand: 1
