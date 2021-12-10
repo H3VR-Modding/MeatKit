@@ -108,8 +108,6 @@ namespace MeatKit
 
             BuildItemsLast.ForEach(o => { bundles.AddRange(o.ConfigureBuild()); });
 
-            Debug.Log("Items: " + BuildItemsFirst[0].BundleName);
-
             return bundles;
         }
 

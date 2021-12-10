@@ -16,5 +16,7 @@ MonoBehaviour:
   SpawnerEntries:
   - {fileID: 11400000, guid: 78a164068de551040a6906b0a9b8be4f, type: 2}
   - {fileID: 11400000, guid: 53e90bc88c0d08a42b5d32571e59c717, type: 2}
+  - {fileID: 11400000, guid: c8d1aa9360d887c46bc6a57c32ba16ff, type: 2}
+  - {fileID: 11400000, guid: b9d094c2ad9e3ee45b249042ac13afa8, type: 2}
   FVRObjects: []
   OnDemand: 1
