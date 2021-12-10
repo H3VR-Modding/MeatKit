@@ -5,42 +5,15 @@ using UnityEngine;
 
 namespace MeatKit
 {
-    [CustomEditor(typeof(BuildSettings))]
+    [CustomEditor(typeof(BuildProfile))]
     public class BuildSettingsEditor : BuildItemEditor
     {
         private bool _folded;
-        private BuildSettings _settings;
+        private BuildProfile _profile;
 
         private void OnEnable()
         {
-            _settings = (BuildSettings) target;
-        }
-
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-            
-            // Draw the build action stuff
-            if (_settings.BuildAction == BuildAction.CopyToProfile)
-            {
-                // Tell the user which profile it will be output to
-                string profileName = Path.GetFileName(_settings.OutputProfile);
-                GUILayout.Label("Selected profile: " + (string.IsNullOrEmpty(profileName) ? "None" : profileName));
-                    
-                // Give a button to change the output folder
-                if (GUILayout.Button("Select profile folder"))
-                    _settings.OutputProfile = EditorUtility.OpenFolderPanel("Select your r2mm profile folder", @"%APPDATA%\Roaming\r2modmanPlus-local\H3VR\profiles", "");
-                    
-                // Draw any errors that come from the BuildAction property, as those won't get displayed otherwise.
-                DrawMessageIfExists("OutputProfile");
-            }
-
-            if (GUILayout.Button("Build!", GUILayout.Height(50)))
-                MeatKit.DoBuild();
-            
-            if (MeatKitCache.LastBuildTime != default(DateTime))
-                GUILayout.Label("Last build: " + MeatKitCache.LastBuildTime + " (" + MeatKitCache.LastBuildDuration.GetReadableTimespan() + ")");
-            else GUILayout.Label("Last build: Never");
+            _profile = (BuildProfile) target;
         }
 
         protected override void DrawProperty(SerializedProperty property)
@@ -50,7 +23,7 @@ namespace MeatKit
                 _folded = EditorGUILayout.Foldout(_folded, "Dependencies");
                 if (_folded)
                 {
-                    var requiredDeps = _settings.GetRequiredDependencies();
+                    var requiredDeps = _profile.GetRequiredDependencies();
 
                     EditorGUI.indentLevel++;
 
@@ -80,9 +53,22 @@ namespace MeatKit
             }
             else if (property.name == "BuildAction")
             {
-                // Flexible space so what comes after is at the bottom
-                GUILayout.FlexibleSpace();
                 base.DrawProperty(property);
+
+                // Draw the build action stuff
+                if (_profile.BuildAction == BuildAction.CopyToProfile)
+                {
+                    // Tell the user which profile it will be output to
+                    string profileName = Path.GetFileName(_profile.OutputProfile);
+                    GUILayout.Label("Selected profile: " + (string.IsNullOrEmpty(profileName) ? "None" : profileName));
+
+                    // Give a button to change the output folder
+                    if (GUILayout.Button("Select profile folder"))
+                        _profile.OutputProfile = EditorUtility.OpenFolderPanel("Select your r2mm profile folder", @"%APPDATA%\Roaming\r2modmanPlus-local\H3VR\profiles", "");
+
+                    // Draw any errors that come from the BuildAction property, as those won't get displayed otherwise.
+                    DrawMessageIfExists("OutputProfile");
+                }
             }
             else base.DrawProperty(property);
         }

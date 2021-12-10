@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using AssetsTools.NET;
-using Ionic.Zip;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -13,7 +9,6 @@ namespace MeatKit
 {
     public static partial class MeatKit
     {
-        public const string MeatKitDir = "Assets/MeatKit/";
         private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "MeatKit/Managed/");
 
         private static bool ShowErrorIfH3VRNotImported()
@@ -71,7 +66,7 @@ namespace MeatKit
         {
             // Make sure the scripts are imported and there are no errors before exporting
             if (ShowErrorIfH3VRNotImported()) return;
-            if (!BuildSettings.Instance.EnsureValidForEditor()) return;
+            if (!BuildWindow.SelectedProfile.EnsureValidForEditor()) return;
             ExportEditorAssembly(BundleOutputPath);
         }
 
@@ -80,7 +75,7 @@ namespace MeatKit
         public static void ExportBundle()
         {
             var assetBundlePath = EditorUtility.OpenFilePanel("Select asset bundle", Application.dataPath, "");
-            var settings = BuildSettings.Instance;
+            var settings = BuildWindow.SelectedProfile;
             var replaceMap = new Dictionary<string, string>
             {
                 {"Assembly-CSharp.dll", settings.PackageName + ".dll"},
@@ -104,114 +99,6 @@ namespace MeatKit
 
             ProcessBundle(assetBundlePath, assetBundlePath + "-imported", replaceMap, AssetBundleCompressionType.NONE);
         }
-
-        [MenuItem("MeatKit/Build Window", priority = 2)]
-        public static void ConfigureBuild()
-        {
-            Selection.activeObject = BuildSettings.Instance;
-        }
-
-        public static void CleanBuild()
-        {
-            if (Directory.Exists(BundleOutputPath)) Directory.Delete(BundleOutputPath, true);
-            Directory.CreateDirectory(BundleOutputPath);
-        }
-
-        public static void DoBuild()
-        {
-            // Make sure the scripts are imported.
-            if (ShowErrorIfH3VRNotImported()) return;
-
-            // Start a stopwatch to time the build
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // If there's anything invalid in the settings don't continue
-            var settings = BuildSettings.Instance;
-            if (!settings.EnsureValidForEditor()) return;
-
-            // Clean the output folder
-            CleanBuild();
-
-            // And export the assembly to the folder
-            ExportEditorAssembly(BundleOutputPath);
-
-            // Then get their asset bundle configurations
-            var bundles = settings.BuildItems
-                .Select(x => x.ConfigureBuild())
-                .Where(x => x != null)
-                .Select(x => x.Value).ToArray();
-
-            BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
-                BuildTarget.StandaloneWindows64);
-
-            // Cleanup the unused files created with building the bundles
-            foreach (var file in Directory.GetFiles(BundleOutputPath, "*.manifest"))
-                File.Delete(file);
-            File.Delete(Path.Combine(BundleOutputPath, "AssetBundles"));
-
-            // With the bundles done building we can process them
-            var replaceMap = new Dictionary<string, string>
-            {
-                {"Assembly-CSharp.dll", settings.PackageName + ".dll"},
-                {"Assembly-CSharp-firstpass.dll", settings.PackageName + "-firstpass.dll"},
-                {"H3VRCode-CSharp.dll", "Assembly-CSharp.dll"},
-                {"H3VRCode-CSharp-firstpass.dll", "Assembly-CSharp-firstpass.dll"}
-            };
-
-            foreach (var bundle in bundles)
-            {
-                var path = Path.Combine(BundleOutputPath, bundle.assetBundleName);
-                ProcessBundle(path, path, replaceMap, settings.BundleCompressionType);
-            }
-
-            // Now we can write the Thunderstore stuff to the folder
-            settings.WriteThunderstoreManifest(BundleOutputPath + "manifest.json");
-
-            // Check if the icon is already 256x256
-            Texture2D icon = settings.Icon;
-            if (settings.Icon.width != 256 || settings.Icon.height != 256)
-            {
-                // If not, make sure the texture is readable and not compressed
-                var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(settings.Icon));
-                if (!importSettings.isReadable || importSettings.textureCompression != TextureImporterCompression.Uncompressed)
-                {
-                    importSettings.isReadable = true;
-                    importSettings.textureCompression = TextureImporterCompression.Uncompressed;
-                    importSettings.SaveAndReimport();
-                }
-
-                // Then resize it for the build
-                icon = icon.ScaleTexture(256, 256);
-            }
-
-            // Write the texture to file
-            File.WriteAllBytes(BundleOutputPath + "icon.png", icon.EncodeToPNG());
-
-            // Copy the readme
-            File.Copy(AssetDatabase.GetAssetPath(settings.ReadMe), BundleOutputPath + "README.md");
-
-            string packageName = settings.Author + "-" + settings.PackageName;
-            if (settings.BuildAction == BuildAction.CopyToProfile)
-            {
-                string pluginFolder = Path.Combine(settings.OutputProfile, "BepInEx/plugins/" + packageName);
-                if (Directory.Exists(pluginFolder)) Directory.Delete(pluginFolder, true);
-                Directory.CreateDirectory(pluginFolder);
-                Extensions.CopyFilesRecursively(BundleOutputPath, pluginFolder);
-            }
-            else if (settings.BuildAction == BuildAction.CreateThunderstorePackage)
-            {
-                using (var zip = new ZipFile())
-                {
-                    zip.AddDirectory(BundleOutputPath, "");
-                    zip.Save(Path.Combine(BundleOutputPath, packageName + ".zip"));
-                }
-            }
-
-            // End the stopwatch and save the time
-            MeatKitCache.LastBuildDuration = sw.Elapsed;
-            MeatKitCache.LastBuildTime = DateTime.Now;
-        }
-
 
         public static void ClearCache()
         {

@@ -16,7 +16,7 @@ namespace MeatKit
             if (!File.Exists(EditorAssemblyPath + AssemblyName + ".dll")) return;
 
             // Delete the old file
-            var settings = BuildSettings.Instance;
+            var settings = BuildWindow.SelectedProfile;
             var exportPath = folder + settings.PackageName + ".dll";
             if (File.Exists(exportPath)) File.Delete(exportPath);
 

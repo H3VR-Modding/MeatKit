@@ -26,7 +26,7 @@ namespace MeatKit
         {
             return new AssetBundleBuild
             {
-                assetBundleName = BuildSettings.Instance.PackageName.ToLower() + "_preload",
+                assetBundleName = BuildWindow.SelectedProfile.PackageName.ToLower() + "_preload",
                 assetNames = Items.Select(AssetDatabase.GetAssetPath).ToArray()
             };
         }
@@ -44,7 +44,7 @@ namespace MeatKit
 
             // Emit our opcodes
             il.Emit(OpCodes.Ldsfld, basePath);
-            il.Emit(OpCodes.Ldstr, BuildSettings.Instance.PackageName.ToLower() + "_preload");
+            il.Emit(OpCodes.Ldstr, BuildWindow.SelectedProfile.PackageName.ToLower() + "_preload");
             il.Emit(OpCodes.Call, plugin.Module.ImportReference(pathCombine));
             il.Emit(OpCodes.Call, plugin.Module.ImportReference(sodalitePreloadAllAssets));
 #endif
