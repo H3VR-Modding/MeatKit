@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Valve.VR.InteractionSystem;
 
 namespace MeatKit
 {
@@ -28,7 +27,9 @@ namespace MeatKit
 
             // This is some quantum bullshit.
             // If you don't enumerate the constructor arguments for attributes their values aren't updated correctly. 
-            GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments).ForEach(x => { });
+            foreach (var x in GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments))
+            {
+            }
 
             // Get the BepInPlugin attribute and replace the values in it with our own
             var str = asm.MainModule.TypeSystem.String;
@@ -68,8 +69,8 @@ namespace MeatKit
 
             // Remove the same types we didn't want to import
             foreach (var type in StripAssemblyTypes
-                .Select(x => asm.MainModule.GetType(x))
-                .Where(x => x != null))
+                         .Select(x => asm.MainModule.GetType(x))
+                         .Where(x => x != null))
                 asm.MainModule.Types.Remove(type);
 
             // Save it

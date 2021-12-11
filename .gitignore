@@ -99,3 +99,6 @@ AssetBundles/
 /[Aa]ssets/Editor/x64.meta
 /[Aa]ssets/BakeryLightmaps/
 /[Aa]ssets/BakeryLightmaps.meta
+
+# Cache
+/meatkit.json
