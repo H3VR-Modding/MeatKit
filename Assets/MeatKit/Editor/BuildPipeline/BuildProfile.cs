@@ -19,6 +19,7 @@ namespace MeatKit
     [CreateAssetMenu(menuName = "MeatKit/Build Profile")]
     public class BuildProfile : ScriptableObject, IValidatable
     {
+        [Header("Thunderstore Metadata")]
         public string PackageName = "";
         public string Author = "";
         public string Version = "";
@@ -27,6 +28,8 @@ namespace MeatKit
         public string WebsiteURL = "";
         public string Description = "";
         public string[] AdditionalDependencies = new string[0];
+        
+        [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
 
         public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;

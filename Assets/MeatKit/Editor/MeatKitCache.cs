@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 namespace MeatKit
@@ -21,6 +22,9 @@ namespace MeatKit
 
         [SerializeField]
         private string _lastImportedAssembly;
+
+        [SerializeField]
+        private string _lastSelectedProfileGuid;
         
         private static string CacheFilePath
         {
@@ -85,6 +89,22 @@ namespace MeatKit
             set
             {
                 Instance._lastImportedAssembly = value;
+                WriteCache();
+            }
+        }
+
+        public static BuildProfile LastSelectedProfile
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Instance._lastSelectedProfileGuid)) return null;
+                var path = AssetDatabase.GUIDToAssetPath(Instance._lastSelectedProfileGuid);
+                return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<BuildProfile>(path);
+            }
+            set
+            {
+                if (value == null) Instance._lastSelectedProfileGuid = "";
+                Instance._lastSelectedProfileGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(value));
                 WriteCache();
             }
         }
