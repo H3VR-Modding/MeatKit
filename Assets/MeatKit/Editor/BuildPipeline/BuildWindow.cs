@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,9 +6,18 @@ namespace MeatKit
 {
     public class BuildWindow : EditorWindow
     {
-        public static BuildProfile SelectedProfile;
+        private static BuildProfile _selectedProfileInternal;
 
-        private static bool _init;
+        public static BuildProfile SelectedProfile
+        {
+            get
+            {
+                if (!_selectedProfileInternal)
+                    _selectedProfileInternal = MeatKitCache.LastSelectedProfile;
+                return _selectedProfileInternal;
+            }
+            private set { _selectedProfileInternal = value; }
+        }
 
         [MenuItem("MeatKit/Build Window")]
         public static void Open()
@@ -18,12 +27,6 @@ namespace MeatKit
 
         private void OnGUI()
         {
-            if (!_init)
-            {
-                SelectedProfile = MeatKitCache.LastSelectedProfile;
-                _init = true;
-            }
-            
             EditorGUILayout.LabelField("Selected Build Profile", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
@@ -45,6 +48,7 @@ namespace MeatKit
 
             if (GUILayout.Button("Build!", GUILayout.Height(50)))
                 MeatKit.DoBuild();
+
 
             if (MeatKitCache.LastBuildTime != default(DateTime))
                 GUILayout.Label("Last build: " + MeatKitCache.LastBuildTime + " (" + MeatKitCache.LastBuildDuration.GetReadableTimespan() + ")");
