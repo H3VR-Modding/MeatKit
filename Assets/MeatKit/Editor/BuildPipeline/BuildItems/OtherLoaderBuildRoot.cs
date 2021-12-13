@@ -29,6 +29,9 @@ namespace MeatKit
         [Tooltip("Build items that should load last, in the order they appear")]
         public List<OtherLoaderBuildItem> BuildItemsLast = new List<OtherLoaderBuildItem>();
 
+        [Tooltip("Guids of otherloader mods that must be loaded before these assets will load. Only applies to SelfLoading mods")]
+        public List<string> LoadDependancies = new List<string>();
+
         [Tooltip("When true, additional code will be generated that allows the mod to automatically load itself into otherloader")]
         public bool SelfLoading = true;
 
@@ -132,8 +135,10 @@ namespace MeatKit
                 var otherloaderRegisterLoad = typeof(OtherLoader.OtherLoader).GetMethod("RegisterDirectLoad", publicStatic);
 
 
-                // Now load the path, and pass the 3 arrays of bundle names
+                // Now load the path, guid, dependancies, and pass the 3 arrays of bundle names
                 il.Emit(OpCodes.Ldsfld, basePath);
+                il.Emit(OpCodes.Ldstr, BuildSettings.Instance.Author + "." + BuildSettings.Instance.PackageName);
+                il.Emit(OpCodes.Ldstr, string.Join(",", LoadDependancies.ToArray()));
                 il.Emit(OpCodes.Ldstr, string.Join(",", loadFirst));
                 il.Emit(OpCodes.Ldstr, string.Join(",", loadAny));
                 il.Emit(OpCodes.Ldstr, string.Join(",", loadLast));

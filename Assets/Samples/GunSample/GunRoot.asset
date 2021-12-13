@@ -15,4 +15,6 @@ MonoBehaviour:
   BuildItemsAny:
   - {fileID: 11400000, guid: 788fe00c2bc3e17468fdacb95990a388, type: 2}
   BuildItemsLast: []
+  LoadDependancies:
+  - devyndamonster.HomemadeAmmo
   SelfLoading: 1

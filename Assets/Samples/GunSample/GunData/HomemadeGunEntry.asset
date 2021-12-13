@@ -18,8 +18,8 @@ MonoBehaviour:
   Page: 1
   SubCategory: 1
   EntryIcon: {fileID: 0}
-  DisplayName: 
-  IsDisplayedInMainEntry: 0
+  DisplayName: Made in a garage!
+  IsDisplayedInMainEntry: 1
   TutorialBlockIDs: []
   UsesLargeSpawnPad: 0
   UsesHugeSpawnPad: 0
