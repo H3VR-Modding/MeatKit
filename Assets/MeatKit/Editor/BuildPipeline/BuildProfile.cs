@@ -16,12 +16,10 @@ using Valve.Newtonsoft.Json.Linq;
 
 namespace MeatKit
 {
-    public class BuildSettings : ScriptableObject, IValidatable
+    [CreateAssetMenu(menuName = "MeatKit/Build Profile")]
+    public class BuildProfile : ScriptableObject, IValidatable
     {
-        private const string FileName = "BuildSettings.asset";
-
-        private static BuildSettings _instance;
-
+        [Header("Thunderstore Metadata")]
         public string PackageName = "";
         public string Author = "";
         public string Version = "";
@@ -30,6 +28,8 @@ namespace MeatKit
         public string WebsiteURL = "";
         public string Description = "";
         public string[] AdditionalDependencies = new string[0];
+        
+        [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
 
         public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;
@@ -39,23 +39,6 @@ namespace MeatKit
 
         [HideInInspector]
         public string OutputProfile = "";
-        
-        public static BuildSettings Instance
-        {
-            get
-            {
-                if (_instance) return _instance;
-
-                // Check if we already have some build settings somewhere
-                var search = Extensions.GetAllInstances<BuildSettings>();
-                if (search.Length > 0) return search[0];
-
-                // If we don't, go and make it.
-                _instance = CreateInstance<BuildSettings>();
-                AssetDatabase.CreateAsset(_instance, MeatKit.MeatKitDir + FileName);
-                return _instance;
-            }
-        }
 
         public Dictionary<string, BuildMessage> Validate()
         {

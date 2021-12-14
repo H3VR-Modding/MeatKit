@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using AssetsTools.NET;
-using Ionic.Zip;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -13,7 +9,6 @@ namespace MeatKit
 {
     public static partial class MeatKit
     {
-        public const string MeatKitDir = "Assets/MeatKit/";
         private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "MeatKit/Managed/");
 
         private static bool ShowErrorIfH3VRNotImported()
@@ -71,7 +66,7 @@ namespace MeatKit
         {
             // Make sure the scripts are imported and there are no errors before exporting
             if (ShowErrorIfH3VRNotImported()) return;
-            if (!BuildSettings.Instance.EnsureValidForEditor()) return;
+            if (!BuildWindow.SelectedProfile.EnsureValidForEditor()) return;
             ExportEditorAssembly(BundleOutputPath);
         }
 
@@ -80,7 +75,7 @@ namespace MeatKit
         public static void ExportBundle()
         {
             var assetBundlePath = EditorUtility.OpenFilePanel("Select asset bundle", Application.dataPath, "");
-            var settings = BuildSettings.Instance;
+            var settings = BuildWindow.SelectedProfile;
             var replaceMap = new Dictionary<string, string>
             {
                 {"Assembly-CSharp.dll", settings.PackageName + ".dll"},

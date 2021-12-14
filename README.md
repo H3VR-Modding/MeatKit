@@ -33,3 +33,6 @@ clicking and selecting `Send To > Compressed (zipped) folder`. Finally in R2MM's
 settings select `import local mod` and select that new zip file to import your mod.
 (Note that after this first initial import, you may instead just copy and overwrite
 the files in your profile folder if you know how.)
+
+## Contributing
+If you'd like to help develop MeatKit give me a shout on Discord `@nrgill28#9007`. I'd appreciate having a chance to talk about any changes you plan on making before you make a PR.

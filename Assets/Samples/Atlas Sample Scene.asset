@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afed54a239594b8abd631a8047a54987, type: 3}
-  m_Name: BuildSettings
+  m_Name: Atlas Sample Scene
   m_EditorClassIdentifier: 
   PackageName: SampleMod
   Author: nrgill28

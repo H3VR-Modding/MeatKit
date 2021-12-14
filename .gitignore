@@ -103,5 +103,8 @@ Assets/StreamingAssets/*
 /[Aa]ssets/BakeryLightmaps/
 /[Aa]ssets/BakeryLightmaps.meta
 
+# Cache
+/meatkit.json
+
 #No game assets for gun sample
 /[Aa]ssets/Samples/GunSample/GunAssets/Audio/*
