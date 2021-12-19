@@ -33,10 +33,7 @@ namespace MeatKit
             ExportEditorAssembly(BundleOutputPath);
 
             // Then get their asset bundle configurations
-            var bundles = profile.BuildItems
-                .Select(x => x.ConfigureBuild())
-                .Where(x => x != null)
-                .Select(x => x.Value).ToArray();
+            var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
 
             BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
                 BuildTarget.StandaloneWindows64);

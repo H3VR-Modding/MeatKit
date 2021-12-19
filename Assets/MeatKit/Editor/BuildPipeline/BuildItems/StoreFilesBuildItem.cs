@@ -26,13 +26,17 @@ namespace MeatKit
             return messages;
         }
 
-        public override AssetBundleBuild? ConfigureBuild()
+        public override List<AssetBundleBuild> ConfigureBuild()
         {
-            return new AssetBundleBuild
+            List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
+
+            bundles.Add(new AssetBundleBuild
             {
                 assetBundleName = BundleName,
                 assetNames = Items.Select(AssetDatabase.GetAssetPath).ToArray()
-            };
+            });
+
+            return bundles;
         }
     }
 }

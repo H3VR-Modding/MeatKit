@@ -31,7 +31,7 @@ public class CTF_Flag :
 
 #if H3VR_IMPORTED
     private CTF_Sosig _heldBy;
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
         _resetPosition = transform.position;
