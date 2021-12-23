@@ -9,17 +9,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -799493291, guid: 9186a10622fb4a49c518d3676f8c9609, type: 3}
-  m_Name: New Spawner Entry
+  m_Name: PistolEntry
   m_EditorClassIdentifier: 
-  MainObjectID: 
-  SpawnWithIDs: []
-  SecondaryObjectIDs: []
-  EntryPath: MainMenu/
-  Page: 0
-  SubCategory: 0
+  MainObjectID: HomemadePistol
+  SpawnWithIDs:
+  - 9x19mmCartridgeFMJ
+  SecondaryObjectIDs:
+  - 9x19mmCartridgeFMJ
+  EntryPath: Firearms/AutomaticPistol/HomemadePistol
+  Page: 1
+  SubCategory: 1
   EntryIcon: {fileID: 0}
-  DisplayName: 
-  IsDisplayedInMainEntry: 0
+  DisplayName: Homemade Pistol
+  IsDisplayedInMainEntry: 1
   TutorialBlockIDs: []
   UsesLargeSpawnPad: 0
   IsReward: 0
