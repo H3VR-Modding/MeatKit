@@ -76,6 +76,9 @@ crashlytics-build.properties
 # Built asset bundles
 AssetBundles/
 
+# Imported Bundles
+ImportedBundles/
+
 # MeatKit stuffs
 /[Aa]ssets/MeatKit/Managed/*
 !/[Aa]ssets/MeatKit/Managed/BepInEx.dll
