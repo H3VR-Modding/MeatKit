@@ -41,7 +41,7 @@ namespace MeatKit
 
             EditorGUILayout.Space();
 
-            BuildSettingsEditor editor = Editor.CreateEditor(SelectedProfile, typeof(BuildSettingsEditor)) as BuildSettingsEditor;
+            BuildSettingsEditor editor = (BuildSettingsEditor) Editor.CreateEditor(SelectedProfile, typeof(BuildSettingsEditor));
             editor.OnInspectorGUI();
 
             GUILayout.FlexibleSpace();

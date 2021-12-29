@@ -11,7 +11,6 @@ namespace MeatKit
         public override void OnInspectorGUI()
         {
             // Apply any changes and validate them
-            serializedObject.ApplyModifiedProperties();
             ValidationMessages = ((IValidatable) target).Validate();
 
             // Draw the property fields and their message boxes, if any.
@@ -19,6 +18,7 @@ namespace MeatKit
             if (!property.NextVisible(true)) return;
             do DrawProperty(property);
             while (property.NextVisible(false));
+            serializedObject.ApplyModifiedProperties();
         }
 
         protected virtual void DrawProperty(SerializedProperty property)
