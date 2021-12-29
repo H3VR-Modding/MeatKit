@@ -38,7 +38,7 @@ namespace MeatKit
 
         public override IEnumerable<string> RequiredDependencies
         {
-            get { return new[] { "devyndamonster-OtherLoader-1.1.5" }; }
+            get { return new[] { "devyndamonster-OtherLoader-1.2.0" }; }
         }
 
         public override Dictionary<string, BuildMessage> Validate()

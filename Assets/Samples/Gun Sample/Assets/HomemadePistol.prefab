@@ -550,6 +550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4014564332614728}
   - component: {fileID: 114423409111184262}
+  - component: {fileID: 135210702984007790}
   m_Layer: 0
   m_Name: _Chamber
   m_TagString: FVRFireArmChamber
@@ -1176,7 +1177,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1810805756820586}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.038, z: 0.21755}
+  m_LocalPosition: {x: -0.00083, y: 0.038, z: 0.2021}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4001727057194356}
@@ -2234,7 +2235,7 @@ MonoBehaviour:
   m_hasSafetyCatch: 0
   m_currentBoltRot: 0
   Spring: {fileID: 4909230480611050}
-  SpringScales: {x: 1, y: 0.5}
+  SpringScales: {x: 0.5, y: 1}
   SlidingPieces: []
   m_isChargingHandleHeld: 0
   m_chargingHandleLerp: 0
@@ -2305,7 +2306,7 @@ MonoBehaviour:
   RoundType: 18
   OverrideAudioSet: {fileID: 0}
   IsManuallyExtractable: 0
-  IsManuallyChamberable: 0
+  IsManuallyChamberable: 1
   ChamberVelocityMultiplier: 1
   m_round: {fileID: 0}
   IsAccessible: 1
@@ -2757,6 +2758,18 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.025
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!135 &135210702984007790
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1776191499781498}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.01
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &135225933328584758
 SphereCollider:
