@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54a1d00d4b41c9f4499068404207acdf, type: 3}
+  m_Name: TestBuiltItem
+  m_EditorClassIdentifier: 
+  BundleName: TestBundle
+  Prefabs:
+  - {fileID: 1539643285283680, guid: 7f70c03841ef1e5458efeac4ec6bc460, type: 2}
+  SpawnerEntries:
+  - {fileID: 11400000, guid: ef424e2fea8370a49b4038777fdf36aa, type: 2}
+  FVRObjects:
+  - {fileID: 11400000, guid: 01de6b2020666ef4bb06c48757e68429, type: 2}
+  AccuracyCharts:
+  - {fileID: 11400000, guid: 0b59574567cb1504fa3461cf8064d12b, type: 2}
+  RoundData:
+  - {fileID: 11400000, guid: 51eb105df32ac324c980e33c5a19940e, type: 2}
+  HandlingGrabSets:
+  - {fileID: 11400000, guid: b4b5ff2d9699fe44091f1a3433c07f40, type: 2}
+  HandlingReleaseSets:
+  - {fileID: 11400000, guid: 05d0992b4df811f498e578444e2c9a86, type: 2}
+  HandlingReleaseSlotSets:
+  - {fileID: 11400000, guid: 1e4d09a2fc0d6c84f9f4fc5b22c9b653, type: 2}
+  AudioBulletImpactSets:
+  - {fileID: 11400000, guid: b210dca7819ff364b8396e246407059a, type: 2}
+  AudioImpactSets:
+  - {fileID: 11400000, guid: e2548da4874eac6489475c9aabaa43fc, type: 2}
+  OnDemand: 1

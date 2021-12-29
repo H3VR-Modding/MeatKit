@@ -56,7 +56,10 @@ namespace MeatKit
 
             // Bakery supporting types
             "ftUniqueIDRegistry",
-            "BakeryLightmapGroupPlain"
+            "BakeryLightmapGroupPlain",
+
+            //Editor Tool Scripts
+            "IconCamera"
         };
 
         // Array of the extra assemblies that need to come with the main Unity assemblies

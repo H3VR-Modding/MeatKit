@@ -32,6 +32,20 @@ namespace MeatKit
 #if H3VR_IMPORTED
         [Tooltip("Drag your FVRObjects here")]
         public List<FVRObject> FVRObjects;
+
+        public List<FVRFireArmMechanicalAccuracyChart> AccuracyCharts;
+
+        public List<FVRFireArmRoundDisplayData> RoundData;
+
+        public List<HandlingGrabSet> HandlingGrabSets;
+
+        public List<HandlingReleaseSet> HandlingReleaseSets;
+
+        public List<HandlingReleaseIntoSlotSet> HandlingReleaseSlotSets;
+
+        public List<AudioBulletImpactSet> AudioBulletImpactSets;
+
+        public List<AudioImpactSet> AudioImpactSets;
 #endif
 
         [Tooltip("When true, contents of item will be broken into two bundles: the data and the assets. This improves load times")]
@@ -58,6 +72,13 @@ namespace MeatKit
             List<string> dataNames = new List<string>();
             dataNames.AddRange(SpawnerEntries.Select(o => AssetDatabase.GetAssetPath(o)));
             dataNames.AddRange(FVRObjects.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(AccuracyCharts.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(RoundData.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(HandlingGrabSets.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(HandlingReleaseSets.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(HandlingReleaseSlotSets.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(AudioBulletImpactSets.Select(o => AssetDatabase.GetAssetPath(o)));
+            dataNames.AddRange(AudioImpactSets.Select(o => AssetDatabase.GetAssetPath(o)));
 
             List<string> prefabNames = new List<string>();
             prefabNames.AddRange(Prefabs.Select(o => AssetDatabase.GetAssetPath(o)));
