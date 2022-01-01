@@ -3,10 +3,12 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_ClipDistance("Clip Distance", Float) = 10
-		_NormalPower("Normal Power", Float) = 2
-		_NormalMultiplier("Normal Multiplier", Float) = 100
-		_NormalCutoff("Normal Cutoff", Range(0, 1)) = 0.5
+		_MinBrightness("Min Brightness", Float) = 0
+		_MaxBrightness("Max Brightness", Float) = 1
+		_ColorBands("Color Bands", Float) = 1000
+		_DarkColor("Dark Color", Color) = (0, 0, 0, 1)
+		_BrightColor("Bright Color", Color) = (1, 1, 1, 1)
+		_LightToNormalFactor("Light To Normal Factor", Range(0, 1)) = 1
 	}
 	SubShader
 	{
@@ -33,9 +35,10 @@
 				float4 vertex : SV_POSITION;
 			};
 			
-			float when_lt(float x, float y) {
-				return max(sign(y - x), 0.0);
+			float remap(float value, float from1, float to1, float from2, float to2) {
+				return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
 			}
+
 
 			v2f vert (appdata v)
 			{
@@ -46,31 +49,33 @@
 			}
 			
 			sampler2D _MainTex, _CameraDepthNormalsTexture;
-			float _ClipDistance, _NormalPower, _NormalMultiplier, _NormalCutoff;
+			float _MinBrightness, _MaxBrightness, _ColorBands, _LightToNormalFactor;
+			fixed4 _DarkColor, _BrightColor;
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv);
-				
 				float4 depthnormal = tex2D(_CameraDepthNormalsTexture, i.uv);
+				fixed4 col = tex2D(_MainTex, i.uv);
 
 				//decode depthnormal
 				float3 normal;
 				float depth;
 				DecodeDepthNormal(depthnormal, depth, normal);
 
+				//Get the luminance and process it
+				fixed normalLuminance = Luminance(fixed3(normal.b, normal.b, normal.b));
+				fixed lightLuminance = Luminance(fixed3(col.r, col.g, col.b));
 
-				fixed luminance = Luminance(fixed3(normal.b, normal.b, normal.b));
+				fixed luminance = lerp(normalLuminance, lightLuminance, _LightToNormalFactor);
 
-				luminance = pow(luminance, _NormalPower) * _NormalMultiplier;
+				luminance = remap(luminance, 0, 1, _MinBrightness, _MaxBrightness);
+				luminance = floor(luminance * _ColorBands) / _ColorBands;
 
-				luminance = when_lt(_NormalCutoff, luminance);
+				float depthFactor = 1 - step(1, depth);
+				fixed4 output = lerp(_DarkColor, _BrightColor, luminance);
+				output = fixed4(output.r, output.g, output.b, depthFactor);
 
-				float depthFactor = when_lt(depth, 1);
-				//float depthFactor = 1;
-				col = fixed4(luminance, luminance, luminance, depthFactor);
-
-				return col;
+				return output;
 			}
 			ENDCG
 		}
