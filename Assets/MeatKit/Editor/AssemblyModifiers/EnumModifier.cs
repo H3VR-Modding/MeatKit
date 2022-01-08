@@ -26,6 +26,7 @@ namespace MeatKit
             if (!definition.IsEnum)
             {
                 Debug.LogError(EnumName + " is not an enum type!", this);
+                Applied = true;
                 return;
             }
 

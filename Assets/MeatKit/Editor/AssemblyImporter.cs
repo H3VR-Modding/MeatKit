@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
+using NStrip;
 using UnityEditor;
 using UnityEngine;
 
@@ -104,6 +105,9 @@ namespace MeatKit
                 // Apply modifications
                 foreach (var editor in editors) editor.ApplyModification(firstpassAssembly);
 
+                // Publicize Assembly
+                AssemblyStripper.MakePublic(firstpassAssembly, new string[0], false, false);
+                
                 firstpassAssembly.Write(Path.Combine(destinationDirectory, AssemblyFirstpassRename + ".dll"));
                 firstpassAssembly.Dispose();
             }
@@ -132,6 +136,9 @@ namespace MeatKit
                 // Apply modifications
                 foreach (var editor in editors) editor.ApplyModification(mainAssembly);
 
+                // Publicize assembly
+                AssemblyStripper.MakePublic(mainAssembly, new string[0], false, false);
+                
                 // Write the main assembly out into the destination folder and dispose it
                 mainAssembly.Write(Path.Combine(destinationDirectory, AssemblyRename + ".dll"));
             }
