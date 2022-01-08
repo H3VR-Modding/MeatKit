@@ -83,6 +83,8 @@ ImportedBundles/
 /[Aa]ssets/MeatKit/Managed/*
 !/[Aa]ssets/MeatKit/Managed/BepInEx.dll
 !/[Aa]ssets/MeatKit/Managed/Sodalite.dll
+!/[Aa]ssets/MeatKit/Managed/OtherLoader.dll
+!/[Aa]ssets/MeatKit/Managed/Stratum.dll
 !/[Aa]ssets/MeatKit/Managed/Atlas.dll
 !/[Aa]ssets/MeatKit/Managed/Valve.Newtonsoft.Json.dll
 !/[Aa]ssets/MeatKit/Managed/DotNetZip.dll
