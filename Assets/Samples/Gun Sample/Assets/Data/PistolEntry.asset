@@ -22,6 +22,7 @@ MonoBehaviour:
   EntryIcon: {fileID: 0}
   DisplayName: Homemade Pistol
   IsDisplayedInMainEntry: 1
+  ModTags: []
   TutorialBlockIDs: []
   UsesLargeSpawnPad: 0
   IsReward: 0

@@ -7,6 +7,7 @@ namespace MeatKit
     public class BuildWindow : EditorWindow
     {
         private static BuildProfile _selectedProfileInternal;
+        private static BuildProfileEditor _editor;
 
         public static BuildProfile SelectedProfile
         {
@@ -31,7 +32,13 @@ namespace MeatKit
 
             EditorGUI.BeginChangeCheck();
             SelectedProfile = EditorGUILayout.ObjectField(SelectedProfile, typeof(BuildProfile), false) as BuildProfile;
-            if (EditorGUI.EndChangeCheck()) MeatKitCache.LastSelectedProfile = SelectedProfile;
+            if (EditorGUI.EndChangeCheck())
+            {
+                MeatKitCache.LastSelectedProfile = SelectedProfile;
+                if (SelectedProfile)
+                    _editor = (BuildProfileEditor) Editor.CreateEditor(SelectedProfile, typeof(BuildProfileEditor));
+                else _editor = null;
+            }
 
             if (!SelectedProfile)
             {
@@ -40,9 +47,8 @@ namespace MeatKit
             }
 
             EditorGUILayout.Space();
-
-            BuildSettingsEditor editor = (BuildSettingsEditor) Editor.CreateEditor(SelectedProfile, typeof(BuildSettingsEditor));
-            editor.OnInspectorGUI();
+            
+            if (_editor) _editor.OnInspectorGUI();
 
             GUILayout.FlexibleSpace();
 

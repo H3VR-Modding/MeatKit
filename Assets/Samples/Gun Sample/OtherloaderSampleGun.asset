@@ -14,13 +14,13 @@ MonoBehaviour:
   PackageName: HomemadeGun
   Author: Devyndamonster
   Version: 1.0.0
-  Icon: {fileID: 2800000, guid: b8bd76ac1d7a9b142bd9e822c1310cbb, type: 3}
-  ReadMe: {fileID: 102900000, guid: 0ef972042aeb3144a87158168db7cdbc, type: 3}
+  Icon: {fileID: 2800000, guid: 0c6d82fe1e8d42744a22fe651bd3c61a, type: 3}
+  ReadMe: {fileID: 102900000, guid: 1277b0bfbb589024daf0f97a042f855b, type: 3}
   WebsiteURL: 
   Description: Made in a garage
   AdditionalDependencies: []
   BuildItems:
   - {fileID: 11400000, guid: d8e5766fdf08d0545baf9c4c42bddce5, type: 2}
   BundleCompressionType: 2
-  BuildAction: 0
-  OutputProfile: 
+  BuildAction: 1
+  OutputProfile: C:/Users/nrgil/AppData/Roaming/r2modmanPlus-local/H3VR/profiles/Default

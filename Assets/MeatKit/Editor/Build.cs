@@ -63,18 +63,19 @@ namespace MeatKit
 
             // Check if the icon is already 256x256
             Texture2D icon = profile.Icon;
+            
+            // Make sure our icon is marked as readable
+            var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(profile.Icon));
+            if (!importSettings.isReadable || importSettings.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                importSettings.isReadable = true;
+                importSettings.textureCompression = TextureImporterCompression.Uncompressed;
+                importSettings.SaveAndReimport();
+            }
+            
             if (profile.Icon.width != 256 || profile.Icon.height != 256)
             {
-                // If not, make sure the texture is readable and not compressed
-                var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(profile.Icon));
-                if (!importSettings.isReadable || importSettings.textureCompression != TextureImporterCompression.Uncompressed)
-                {
-                    importSettings.isReadable = true;
-                    importSettings.textureCompression = TextureImporterCompression.Uncompressed;
-                    importSettings.SaveAndReimport();
-                }
-
-                // Then resize it for the build
+                // Resize it for the build
                 icon = icon.ScaleTexture(256, 256);
             }
 

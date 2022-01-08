@@ -6,7 +6,7 @@ using UnityEngine;
 namespace MeatKit
 {
     [CustomEditor(typeof(BuildProfile))]
-    public class BuildSettingsEditor : BuildItemEditor
+    public class BuildProfileEditor : BuildItemEditor
     {
         private bool _folded;
         private BuildProfile _profile;
