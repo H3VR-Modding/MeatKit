@@ -736,7 +736,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1776191499781498}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.00065, y: 0.03856, z: 0.0843}
+  m_LocalPosition: {x: -0.00065, y: 0.03856, z: 0.09856}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4103701597037966}
@@ -1204,7 +1204,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1100829120874320}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.00065, y: 0.03856, z: 0.0843}
+  m_LocalPosition: {x: -0.00065, y: 0.03856, z: 0.09856}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4103701597037966}
@@ -1257,7 +1257,7 @@ Transform:
   m_GameObject: {fileID: 1723925176352904}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.00099, y: 0.038828, z: -0.04859}
-  m_LocalScale: {x: 1, y: 1, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4257361572844192}
   m_Father: {fileID: 4103701597037966}
@@ -2393,7 +2393,6 @@ MonoBehaviour:
   m_isHovered: 0
   m_isHeld: 0
   m_colliders: []
-  <RootRigidbody>k__BackingField: {fileID: 0}
   ObjectWrapper: {fileID: 11400000, guid: 33a1295e48c2c3c47a7bb3f2d8a84af1, type: 2}
   SpawnLockable: 0
   Harnessable: 1
@@ -2569,10 +2568,9 @@ MonoBehaviour:
   ClipTrigger: {fileID: 0}
   m_clipEjectDelay: 0
   RecoilingPoseHolder: {fileID: 4440832823026124}
-  RecoilProfile: {fileID: 11400000, guid: 5142ae131546b684a87a1621fd4e80cb, type: 2}
+  RecoilProfile: {fileID: 11400000, guid: 3a4c56598ab8eaa409e405210d26f68b, type: 2}
   UsesStockedRecoilProfile: 0
-  RecoilProfileStocked: {fileID: 11400000, guid: 5142ae131546b684a87a1621fd4e80cb,
-    type: 2}
+  RecoilProfileStocked: {fileID: 0}
   m_recoilPoseHolderLocalPosStart: {x: 0, y: 0, z: 0}
   m_recoilX: 0
   m_recoilY: 0
@@ -2770,7 +2768,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.01
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: -0.02}
 --- !u!135 &135225933328584758
 SphereCollider:
   m_ObjectHideFlags: 1

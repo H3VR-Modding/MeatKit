@@ -19,7 +19,7 @@ MonoBehaviour:
   EntryPath: Firearms/AutomaticPistol/HomemadePistol
   Page: 1
   SubCategory: 1
-  EntryIcon: {fileID: 0}
+  EntryIcon: {fileID: 21300000, guid: 3ccbef88a8f68454bad5324d9f420654, type: 3}
   DisplayName: Homemade Pistol
   IsDisplayedInMainEntry: 1
   ModTags: []

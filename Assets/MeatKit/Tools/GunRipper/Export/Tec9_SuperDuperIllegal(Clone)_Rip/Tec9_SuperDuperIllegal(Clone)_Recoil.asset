@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -964389625, guid: 61df6207064b6df9f1154d3f48a90696, type: 3}
-  m_Name: PistolRecoil
+  m_Name: Tec9_SuperDuperIllegal(Clone)_Recoil
   m_EditorClassIdentifier: 
   VerticalRotPerShot: 15
   HorizontalRotPerShot: 2.2
