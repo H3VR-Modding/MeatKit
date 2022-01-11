@@ -58,7 +58,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.aab
-*.unitypackage
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -76,11 +75,17 @@ crashlytics-build.properties
 # Built asset bundles
 AssetBundles/
 
+# Imported Bundles
+ImportedBundles/
+
 # MeatKit stuffs
 /[Aa]ssets/MeatKit/Managed/*
 !/[Aa]ssets/MeatKit/Managed/BepInEx.dll
 !/[Aa]ssets/MeatKit/Managed/Sodalite.dll
+!/[Aa]ssets/MeatKit/Managed/OtherLoader.dll
+!/[Aa]ssets/MeatKit/Managed/Stratum.dll
 !/[Aa]ssets/MeatKit/Managed/Atlas.dll
+!/[Aa]ssets/MeatKit/Managed/ReadOnlyCollectionsInterfaces.dll
 !/[Aa]ssets/MeatKit/Managed/Valve.Newtonsoft.Json.dll
 !/[Aa]ssets/MeatKit/Managed/DotNetZip.dll
 !/[Aa]ssets/MeatKit/Managed/0Harmony.dll

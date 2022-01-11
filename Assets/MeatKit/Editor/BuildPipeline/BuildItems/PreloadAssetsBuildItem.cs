@@ -22,13 +22,17 @@ namespace MeatKit
             get { return new[] {"nrgill28-Sodalite-1.2.0"}; }
         }
 
-        public override AssetBundleBuild? ConfigureBuild()
+        public override List<AssetBundleBuild> ConfigureBuild()
         {
-            return new AssetBundleBuild
+            List<AssetBundleBuild> bundles = new List<AssetBundleBuild>();
+
+            bundles.Add(new AssetBundleBuild
             {
                 assetBundleName = BuildWindow.SelectedProfile.PackageName.ToLower() + "_preload",
                 assetNames = Items.Select(AssetDatabase.GetAssetPath).ToArray()
-            };
+            });
+
+            return bundles;
         }
 
         public override void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)

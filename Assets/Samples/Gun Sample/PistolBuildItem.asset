@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54a1d00d4b41c9f4499068404207acdf, type: 3}
+  m_Name: PistolBuildItem
+  m_EditorClassIdentifier: 
+  BundleName: homemade_pistol
+  Prefabs:
+  - {fileID: 1822641050373764, guid: 6be66e3404b01ed4e93538a038683b35, type: 2}
+  SpawnerEntries:
+  - {fileID: 11400000, guid: 56c61a3d4bb0a114e9339127fa971c12, type: 2}
+  FVRObjects:
+  - {fileID: 11400000, guid: 33a1295e48c2c3c47a7bb3f2d8a84af1, type: 2}
+  OnDemand: 1

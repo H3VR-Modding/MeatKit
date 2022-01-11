@@ -6,6 +6,7 @@ using System.Linq;
 using Ionic.Zip;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace MeatKit
 {
@@ -13,13 +14,33 @@ namespace MeatKit
     {
         public static void DoBuild()
         {
+            try
+            {
+                DoBuildInternal();
+            }
+            catch (MeatKitBuildException e)
+            {
+                string message = e.Message;
+                if (e.InnerException != null) message += "\n\n" + e.InnerException.Message;
+                EditorUtility.DisplayDialog("Build failed", message, "Ok.");
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("Build failed with unknown error",
+                    "Error message: " + e.Message + "\n\nCheck console for full exception text.", "Ok.");
+                Debug.LogException(e);
+            }
+        }
+
+        private static void DoBuildInternal()
+        {
             // Make sure the scripts are imported.
             if (ShowErrorIfH3VRNotImported()) return;
 
             // Get our profile and make sure it isn't null
             BuildProfile profile = BuildWindow.SelectedProfile;
             if (!profile) return;
-            
+
             // Start a stopwatch to time the build
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -33,10 +54,7 @@ namespace MeatKit
             ExportEditorAssembly(BundleOutputPath);
 
             // Then get their asset bundle configurations
-            var bundles = profile.BuildItems
-                .Select(x => x.ConfigureBuild())
-                .Where(x => x != null)
-                .Select(x => x.Value).ToArray();
+            var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
 
             BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
                 BuildTarget.StandaloneWindows64);
@@ -66,18 +84,20 @@ namespace MeatKit
 
             // Check if the icon is already 256x256
             Texture2D icon = profile.Icon;
+
+            // Make sure our icon is marked as readable
+            var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(profile.Icon));
+            if (!importSettings.isReadable ||
+                importSettings.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                importSettings.isReadable = true;
+                importSettings.textureCompression = TextureImporterCompression.Uncompressed;
+                importSettings.SaveAndReimport();
+            }
+
             if (profile.Icon.width != 256 || profile.Icon.height != 256)
             {
-                // If not, make sure the texture is readable and not compressed
-                var importSettings = (TextureImporter) AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(profile.Icon));
-                if (!importSettings.isReadable || importSettings.textureCompression != TextureImporterCompression.Uncompressed)
-                {
-                    importSettings.isReadable = true;
-                    importSettings.textureCompression = TextureImporterCompression.Uncompressed;
-                    importSettings.SaveAndReimport();
-                }
-
-                // Then resize it for the build
+                // Resize it for the build
                 icon = icon.ScaleTexture(256, 256);
             }
 
@@ -108,7 +128,7 @@ namespace MeatKit
             MeatKitCache.LastBuildDuration = sw.Elapsed;
             MeatKitCache.LastBuildTime = DateTime.Now;
         }
-        
+
         public static void CleanBuild()
         {
             if (Directory.Exists(BundleOutputPath)) Directory.Delete(BundleOutputPath, true);

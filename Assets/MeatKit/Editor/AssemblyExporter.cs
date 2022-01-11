@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
@@ -20,10 +21,16 @@ namespace MeatKit
             var exportPath = folder + settings.PackageName + ".dll";
             if (File.Exists(exportPath)) File.Delete(exportPath);
 
+            var rParams = new ReaderParameters
+            {
+                AssemblyResolver =
+                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location))
+            };
+
             // Get the MeatKitPlugin class and rename it
             string tempFile = Path.GetTempFileName();
             File.Copy(EditorAssemblyPath + AssemblyName + ".dll", tempFile, true);
-            using (var asm = AssemblyDefinition.ReadAssembly(tempFile))
+            using (var asm = AssemblyDefinition.ReadAssembly(tempFile, rParams))
             {
                 var plugin = asm.MainModule.GetType("MeatKitPlugin");
                 plugin.Name = settings.PackageName + "Plugin";
@@ -70,14 +77,36 @@ namespace MeatKit
                             break;
                     }
 
-                // Remove the same types we didn't want to import
+                if (BuildWindow.SelectedProfile.StripNamespaces)
+                {
+                    // Remove types not in an allowed namespace or the global namespace
+                    string[] allowedNamespaces = BuildWindow.SelectedProfile.GetAllAllowedNamespaces();
+                    List<TypeDefinition> typesToRemove = new List<TypeDefinition>();
+                    foreach (var type in asm.MainModule.Types)
+                    {
+                        if (type.Namespace == "" || allowedNamespaces.Any(x => type.Namespace.Contains(x)))
+                            continue;
+                        typesToRemove.Add(type);
+                    }
+
+                    foreach (var type in typesToRemove) asm.MainModule.Types.Remove(type);
+                }
+
+                // Remove the same types we didn't want to import. This cannot be skipped.
                 foreach (var type in StripAssemblyTypes
                              .Select(x => asm.MainModule.GetType(x))
                              .Where(x => x != null))
                     asm.MainModule.Types.Remove(type);
 
-                // Save it
-                asm.Write(exportPath);
+                try
+                {
+                    // Save it
+                    asm.Write(exportPath);
+                }
+                catch (ArgumentException e)
+                {
+                    throw new MeatKitBuildException("Unable to write exported scripts file. This is likely due to namespace stripping being enabled and a required namespace is not whitelisted.", e);
+                }
             }
 
             // Delete temp file now that we're done.
@@ -89,7 +118,8 @@ namespace MeatKit
             foreach (var type in asm.MainModule.Types)
             {
                 foreach (var attrib in type.CustomAttributes) yield return attrib;
-                foreach (CustomAttribute attrib in type.Methods.SelectMany(method => method.CustomAttributes)) yield return attrib;
+                foreach (CustomAttribute attrib in type.Methods.SelectMany(method => method.CustomAttributes))
+                    yield return attrib;
             }
         }
     }
