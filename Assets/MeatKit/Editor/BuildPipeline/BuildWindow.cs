@@ -17,7 +17,21 @@ namespace MeatKit
                     _selectedProfileInternal = MeatKitCache.LastSelectedProfile;
                 return _selectedProfileInternal;
             }
-            private set { _selectedProfileInternal = value; }
+            private set
+            {
+                _selectedProfileInternal = value;
+                _editor = null;
+            }
+        }
+
+        private static BuildProfileEditor EditorInstance
+        {
+            get
+            {
+                if (!_editor && SelectedProfile)
+                    _editor = (BuildProfileEditor) Editor.CreateEditor(SelectedProfile, typeof(BuildProfileEditor));
+                return _editor;
+            }
         }
 
         [MenuItem("MeatKit/Build Window")]
@@ -35,9 +49,6 @@ namespace MeatKit
             if (EditorGUI.EndChangeCheck())
             {
                 MeatKitCache.LastSelectedProfile = SelectedProfile;
-                if (SelectedProfile)
-                    _editor = (BuildProfileEditor) Editor.CreateEditor(SelectedProfile, typeof(BuildProfileEditor));
-                else _editor = null;
             }
 
             if (!SelectedProfile)
@@ -47,17 +58,17 @@ namespace MeatKit
             }
 
             EditorGUILayout.Space();
-            
-            if (_editor) _editor.OnInspectorGUI();
+
+            EditorInstance.OnInspectorGUI();
 
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button("Build!", GUILayout.Height(50)))
                 MeatKit.DoBuild();
 
-
             if (MeatKitCache.LastBuildTime != default(DateTime))
-                GUILayout.Label("Last build: " + MeatKitCache.LastBuildTime + " (" + MeatKitCache.LastBuildDuration.GetReadableTimespan() + ")");
+                GUILayout.Label("Last build: " + MeatKitCache.LastBuildTime + " (" +
+                                MeatKitCache.LastBuildDuration.GetReadableTimespan() + ")");
             else GUILayout.Label("Last build: Never");
         }
     }

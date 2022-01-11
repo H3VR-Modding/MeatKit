@@ -2,24 +2,27 @@
 using FistVR;
 using UnityEngine;
 
-public class CTF_Sosig : MonoBehaviour
+namespace nrgill28.AtlasSampleScene
 {
-    public CTF_Team Team;
-    public CTF_Flag HeldFlag;
-    public Sosig Sosig;
-
-    private void Awake()
+    public class CTF_Sosig : MonoBehaviour
     {
-        Sosig = GetComponent<Sosig>();
-    }
+        public CTF_Team Team;
+        public CTF_Flag HeldFlag;
+        public Sosig Sosig;
 
-    private void Update()
-    {
-        if (HeldFlag)
+        private void Awake()
         {
-            // Move the flag into position on the Sosig
-            var pos = Sosig.transform.position - Sosig.transform.forward * 0.1f;
-            HeldFlag.transform.SetPositionAndRotation(pos, Sosig.transform.rotation);
+            Sosig = GetComponent<Sosig>();
+        }
+
+        private void Update()
+        {
+            if (HeldFlag)
+            {
+                // Move the flag into position on the Sosig
+                var pos = Sosig.transform.position - Sosig.transform.forward * 0.1f;
+                HeldFlag.transform.SetPositionAndRotation(pos, Sosig.transform.rotation);
+            }
         }
     }
 }

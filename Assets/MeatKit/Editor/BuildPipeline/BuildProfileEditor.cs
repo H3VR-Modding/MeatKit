@@ -8,7 +8,7 @@ namespace MeatKit
     [CustomEditor(typeof(BuildProfile))]
     public class BuildProfileEditor : BuildItemEditor
     {
-        private bool _folded;
+        private bool _folded1, _folded2;
         private BuildProfile _profile;
 
         private void OnEnable()
@@ -20,34 +20,19 @@ namespace MeatKit
         {
             if (property.name == "AdditionalDependencies")
             {
-                _folded = EditorGUILayout.Foldout(_folded, "Dependencies");
-                if (_folded)
+                _folded1 = EditorGUILayout.Foldout(_folded1, "Dependencies");
+                if (_folded1) DrawListWithRequiredElements(_profile.GetRequiredDependencies(), property);
+            }
+            else if (property.name == "AdditionalNamespaces")
+            {
+                if (!_profile.StripNamespaces) return;
+                
+                _folded2 = EditorGUILayout.Foldout(_folded2, "Allowed Namespaces");
+                if (_folded2)
                 {
-                    var requiredDeps = _profile.GetRequiredDependencies();
-
+                    DrawListWithRequiredElements(_profile.GetRequiredNamespaces(), property);
                     EditorGUI.indentLevel++;
-
-                    // Draw the size field
-                    var size = EditorGUILayout.DelayedIntField("Size", requiredDeps.Length + property.arraySize);
-                    size = Mathf.Max(requiredDeps.Length, size);
-
-                    // Resize the array if necessary
-                    var newSize = size - requiredDeps.Length;
-                    if (newSize != property.arraySize) property.arraySize = newSize;
-
-                    // Draw the required dependencies. These are disabled.
-                    EditorGUI.BeginDisabledGroup(true);
-                    foreach (var dep in requiredDeps)
-                        EditorGUILayout.TextField(dep);
-                    EditorGUI.EndDisabledGroup();
-
-                    // Draw the additional dependencies
-                    for (var i = 0; i < property.arraySize; i++)
-                    {
-                        var value = property.GetArrayElementAtIndex(i);
-                        value.stringValue = EditorGUILayout.TextField(value.stringValue);
-                    }
-
+                    EditorGUILayout.HelpBox("Namespaces relate to custom scripts in your project. Any code in a namespace not included here will not be included in your final build. Note this only applies to .cs files directly in your project. Scripts coming from .dll files are not affected by this setting.", MessageType.Info);
                     EditorGUI.indentLevel--;
                 }
             }
@@ -72,5 +57,7 @@ namespace MeatKit
             }
             else base.DrawProperty(property);
         }
+        
+        
     }
 }

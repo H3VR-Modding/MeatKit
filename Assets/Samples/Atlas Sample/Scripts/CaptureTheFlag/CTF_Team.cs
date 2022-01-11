@@ -1,5 +1,8 @@
-﻿public enum CTF_Team
+﻿namespace nrgill28.AtlasSampleScene
 {
-    Red,
-    Blue
+    public enum CTF_Team
+    {
+        Red,
+        Blue
+    }
 }

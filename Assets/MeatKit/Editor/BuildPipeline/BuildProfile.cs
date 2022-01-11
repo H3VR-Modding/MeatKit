@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using AssetsTools.NET;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.WSA;
 using Object = UnityEngine.Object;
 #if H3VR_IMPORTED
 using Valve.Newtonsoft.Json;
@@ -28,13 +27,14 @@ namespace MeatKit
         public string WebsiteURL = "";
         public string Description = "";
         public string[] AdditionalDependencies = new string[0];
+
+        [Header("Script Options")]
+        public bool StripNamespaces = true;
+        public string[] AdditionalNamespaces = new string[0];
         
         [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
-
         public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;
-
-        // Post build action
         public BuildAction BuildAction = BuildAction.JustBuildFiles;
 
         [HideInInspector]
@@ -81,19 +81,26 @@ namespace MeatKit
             switch (BuildAction)
             {
                 case BuildAction.JustBuildFiles:
-                    messages["BuildAction"] = BuildMessage.Info("This will just create the files for a Thunderstore package in your AssetBundles folder.");
+                    messages["BuildAction"] =
+                        BuildMessage.Info(
+                            "This will just create the files for a Thunderstore package in your AssetBundles folder.");
                     break;
                 case BuildAction.CopyToProfile:
-                    messages["BuildAction"] = BuildMessage.Info("This will copy the built files into the plugins folder of the selected profile.");
+                    messages["BuildAction"] =
+                        BuildMessage.Info(
+                            "This will copy the built files into the plugins folder of the selected profile.");
                     if (string.IsNullOrEmpty(OutputProfile))
                         messages["OutputProfile"] = BuildMessage.Error("Please set the output profile.");
                     else if (!Directory.Exists(OutputProfile))
                         messages["OutputProfile"] = BuildMessage.Error("Selected profile no longer exists.");
                     else if (!File.Exists(Path.Combine(OutputProfile, "mods.yml")))
-                        messages["OutputProfile"] = BuildMessage.Error("Selected folder is not a r2mm profile. Please select the folder which contains the plugins folder.");
+                        messages["OutputProfile"] = BuildMessage.Error(
+                            "Selected folder is not a r2mm profile. Please select the folder which contains the plugins folder.");
                     break;
                 case BuildAction.CreateThunderstorePackage:
-                    messages["BuildAction"] = BuildMessage.Info("This will zip up the built files as a final build for importing into r2mm / uploading to Thunderstore.");
+                    messages["BuildAction"] =
+                        BuildMessage.Info(
+                            "This will zip up the built files as a final build for importing into r2mm / uploading to Thunderstore.");
                     break;
             }
 
@@ -149,6 +156,24 @@ namespace MeatKit
                 .SelectMany(x => x.RequiredDependencies).ToArray();
         }
 
+        public string MainNamespace
+        {
+            get
+            {
+                return Author + "." + PackageName;
+            }
+        }
+        
+        public string[] GetRequiredNamespaces()
+        {
+            return new[] {MainNamespace};
+        }
+
+        public string[] GetAllAllowedNamespaces()
+        {
+            return GetRequiredNamespaces().Concat(AdditionalNamespaces).ToArray();
+        }
+        
         public void WriteThunderstoreManifest(string location)
         {
 #if H3VR_IMPORTED
