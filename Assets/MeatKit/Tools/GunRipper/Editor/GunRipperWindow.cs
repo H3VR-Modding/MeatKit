@@ -1,6 +1,4 @@
-﻿#if H3VR_IMPORTED
-using FistVR;
-#endif
+﻿using FistVR;
 using MeatKit;
 using System;
 using System.Collections;
@@ -23,8 +21,6 @@ public class GunRipperWindow : EditorWindow
 		GetWindow<GunRipperWindow>("Gun Ripper").Show();
 	}
 
-	#if H3VR_IMPORTED
-
 	private void OnGUI()
 	{
 		EditorGUILayout.LabelField("Selected GameObject", EditorStyles.boldLabel);
@@ -44,37 +40,14 @@ public class GunRipperWindow : EditorWindow
 		EditorGUILayout.Space();
 
 		FVRFireArm firearmComp = SelectedGameObject.GetComponent<FVRFireArm>();
-		FVRFireArmMagazine magazineComp = SelectedGameObject.GetComponent<FVRFireArmMagazine>();
-		FVRFireArmAttachment attachment = SelectedGameObject.GetComponent<FVRFireArmAttachment>();
 
-		if (firearmComp != null && firearmComp.AudioClipSet != null && GUILayout.Button("Rip Firearm Audio"))
+		if (firearmComp != null && firearmComp.AudioClipSet != null && GUILayout.Button("Rip Audio"))
 		{
 			Debug.Log("Ripping Audio!");
 			RipAudio(firearmComp.AudioClipSet, "AudioSet");
 		}
 
-		if (magazineComp != null && magazineComp.Profile != null && GUILayout.Button("Rip Magazine Audio"))
-		{
-			Debug.Log("Ripping Audio!");
-			RipAudio(magazineComp.Profile, "AudioSet");
-		}
-
-		if(attachment != null && (attachment.AudClipAttach != null || attachment.AudClipDettach != null) && GUILayout.Button("Rip Attachment Audio"))
-        {
-			if(attachment.AudClipAttach != null)
-            {
-				Debug.Log("Ripping Audio!");
-				RipAudio(attachment.AudClipAttach, "AudioAttach");
-			}
-
-			if (attachment.AudClipDettach != null)
-			{
-				Debug.Log("Ripping Audio!");
-				RipAudio(attachment.AudClipDettach, "AudioDettach");
-			}
-		}
-
-		if (firearmComp != null && (firearmComp.RecoilProfile != null || firearmComp.RecoilProfileStocked != null) && GUILayout.Button("Rip Firearm Recoil"))
+		if (firearmComp != null && (firearmComp.RecoilProfile != null || firearmComp.RecoilProfileStocked != null) && GUILayout.Button("Rip Recoil"))
 		{
 			if(firearmComp.RecoilProfile != null)
             {
@@ -88,24 +61,6 @@ public class GunRipperWindow : EditorWindow
 				RipRecoil(firearmComp.RecoilProfileStocked, "RecoilStocked");
 			}
 		}
-
-
-	}
-
-
-
-	private void RipAudio(AudioEvent audioEvent, string suffix)
-    {
-		string exportFolderPath = "Assets/" + ExportPath.Trim('/');
-		string destinationFolderName = SelectedGameObject.name + "_Rip";
-		string destinationFolderPath = exportFolderPath + "/" + destinationFolderName;
-
-		if (!AssetDatabase.IsValidFolder(destinationFolderPath))
-		{
-			AssetDatabase.CreateFolder(exportFolderPath, destinationFolderName);
-		}
-
-		RipAudioClips(audioEvent, destinationFolderPath);
 	}
 
 
@@ -196,19 +151,17 @@ public class GunRipperWindow : EditorWindow
 		{
 			Debug.Log("Field: " + finfo.Name + ", Type: " + finfo.FieldType);
 
-			if(finfo.GetValue(asset) is List<AudioClip>)
+			if(finfo.GetValue(asset) is IEnumerable)
             {
 				Debug.Log("List!");
 
-				List<AudioClip> audioList = finfo.GetValue(asset) as List<AudioClip>;
-
-				for (int i = 0; i < audioList.Count; i++)
+				foreach(System.Object element in finfo.GetValue(asset) as IEnumerable)
                 {
-					AudioClip clip = audioList[i];
-					if(clip != null)
-                    {
+					if (element.GetType() == typeof(AudioClip))
+					{
+						AudioClip clip = (AudioClip)element;
 						Debug.Log("Audio Clip! " + clip.name);
-						audioList[i] = SavWav.Save(exportPath, clip);
+						SavWav.Save(exportPath, clip);
 					}
 				}
             }
@@ -220,7 +173,6 @@ public class GunRipperWindow : EditorWindow
 			}
 		}
 	}
-#endif
 }
 
 
