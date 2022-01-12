@@ -22,7 +22,7 @@ public static class SavWav
 
 	}
 
-	public static bool Save(string path, AudioClip clip)
+	public static AudioClip Save(string path, AudioClip clip)
 	{
 		var assetPath = path.Trim('/') + "/" + clip.name + ".wav";
 		var filepath = Directory.GetParent(Application.dataPath) + "/" + path.Trim('/') + "/" + clip.name + ".wav";
@@ -51,7 +51,7 @@ public static class SavWav
 		AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
 		AssetDatabase.Refresh();
 
-		return true;
+		return (AudioClip)AssetDatabase.LoadAssetAtPath(assetPath, typeof(AudioClip));
 	}
 
 	public static AudioClip TrimSilence(AudioClip clip, float min)
@@ -91,10 +91,8 @@ public static class SavWav
 		}
 
 		samples.RemoveRange(i, samples.Count - i);
-		
-#pragma warning disable 0618
+
 		var clip = AudioClip.Create("TempClip", samples.Count, channels, hz, _3D, stream);
-#pragma warning restore 0618
 
 		clip.SetData(samples.ToArray(), 0);
 
@@ -158,7 +156,8 @@ public static class SavWav
 
 		Byte[] subChunk1 = BitConverter.GetBytes(16);
 		fileStream.Write(subChunk1, 0, 4);
-		
+
+		UInt16 two = 2;
 		UInt16 one = 1;
 
 		Byte[] audioFormat = BitConverter.GetBytes(one);
