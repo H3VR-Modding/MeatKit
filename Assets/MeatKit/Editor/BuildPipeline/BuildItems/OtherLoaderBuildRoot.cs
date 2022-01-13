@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿
+#if H3VR_IMPORTED
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Atlas;
 using BepInEx;
-
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using OtherLoader;
 using UnityEditor;
 using UnityEngine;
-#if H3VR_IMPORTED
 using FistVR;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
-#endif
+
 
 namespace MeatKit
 {
@@ -117,9 +117,7 @@ namespace MeatKit
 
         public override void GenerateLoadAssets(TypeDefinition plugin, ILProcessor il)
         {
-#if H3VR_IMPORTED
             EnsurePluginDependsOn(plugin, "h3vr.otherloader", "1.1.5");
-#endif
 
             //If set to self load, we add a bunch of code to load the items
             if (SelfLoading)
@@ -150,3 +148,4 @@ namespace MeatKit
     }
 }
 
+#endif

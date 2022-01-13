@@ -1,4 +1,7 @@
 ﻿
+
+#if H3VR_IMPORTED
+
 using MeatKit;
 using System;
 using System.Collections.Generic;
@@ -7,9 +10,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-#if H3VR_IMPORTED
 using FistVR;
-#endif
 
 [CustomEditor(typeof(OtherLoaderBuildRoot), true)]
 public class OtherLoaderBuildRootEditor : BuildItemEditor
@@ -50,7 +51,6 @@ public class OtherLoaderBuildRootEditor : BuildItemEditor
     private void PopulatePathTree(SerializedProperty itemList)
     {
 
-#if H3VR_IMPORTED
 
         int listCount = itemList.arraySize;
         for (int i = 0; i < listCount; i++)
@@ -106,7 +106,6 @@ public class OtherLoaderBuildRootEditor : BuildItemEditor
                 currNode.declared = true;
             }
         }
-#endif
     }
 
 
@@ -165,3 +164,4 @@ public class OtherLoaderBuildRootEditor : BuildItemEditor
 
 }
 
+#endif

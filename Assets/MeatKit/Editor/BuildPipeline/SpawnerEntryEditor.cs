@@ -2,7 +2,6 @@
 
 #if H3VR_IMPORTED
 using FistVR;
-#endif
 
 using System.Collections;
 using System.Collections.Generic;
@@ -16,8 +15,6 @@ public class SpawnerEntryEditor : Editor
 {
     public bool hasInit = false;
     public bool isItemIDEmpty = false;
-
-#if H3VR_IMPORTED
 
     public override void OnInspectorGUI()
     {
@@ -93,10 +90,11 @@ public class SpawnerEntryEditor : Editor
         while (property.NextVisible(false));
     }
 
-#endif
 
     protected virtual void DrawProperty(SerializedProperty property)
     {
         EditorGUILayout.PropertyField(property, true);
     }
 }
+
+#endif
