@@ -4,7 +4,6 @@ using UnityEditor;
 using UnityEngine;
 using System.Linq;
 using System.Reflection;
-using Atlas;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Sodalite;

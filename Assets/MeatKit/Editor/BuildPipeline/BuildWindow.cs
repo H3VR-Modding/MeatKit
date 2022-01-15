@@ -19,8 +19,9 @@ namespace MeatKit
             }
             private set
             {
+                if (_selectedProfileInternal != value)
+                    _editor = null;
                 _selectedProfileInternal = value;
-                _editor = null;
             }
         }
 
