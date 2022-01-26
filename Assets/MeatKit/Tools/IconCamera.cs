@@ -3,7 +3,9 @@
 using System.IO;
 using UnityEngine;
 using UnityEditor;
- 
+using System.Collections.Generic;
+using System.Linq;
+
 [ExecuteInEditMode]
 public class IconCamera : MonoBehaviour
 {
@@ -24,7 +26,7 @@ public class IconCamera : MonoBehaviour
     public DepthTextureMode CameraDepthMode = DepthTextureMode.DepthNormals;
 
     [Tooltip("Material that determines the post effect of the image")]
-    public Material effectMaterial;
+    public List<Material> effectMaterials = new List<Material>();
 
     [Tooltip("The background image that will be applied in areas with full transparency")]
     public Texture2D background;
@@ -63,11 +65,49 @@ public class IconCamera : MonoBehaviour
         {
             RenderTexture.ReleaseTemporary(renderTexture);
         }
-        
-        if (effectMaterial != null)
+
+        //Handle rendering through the effect materials
+        if (effectMaterials.Count > 1)
         {
-            Graphics.Blit(source, destination, effectMaterial);
+            List<RenderTexture> renderTextures = new List<RenderTexture>();
+
+            for (int i = 0; i < effectMaterials.Count; i++)
+            {
+                RenderTexture tempDest = RenderTexture.GetTemporary(source.width, source.height);
+
+                //If this is the first material, start from the source texture
+                if (i == 0)
+                {
+                    Graphics.Blit(source, tempDest, effectMaterials[i]);
+                }
+
+                //If this is the last material, send the resulting texture to destination
+                else if(i == effectMaterials.Count - 1)
+                {
+                    Graphics.Blit(renderTextures.Last(), destination, effectMaterials[i]);
+                }
+
+                //If this is inbetween, pass between temp textures
+                else
+                {
+                    Graphics.Blit(renderTextures.Last(), tempDest, effectMaterials[i]);
+                }
+                
+                renderTextures.Add(tempDest);
+            }
+
+            for(int i = 0; i < renderTextures.Count; i++)
+            {
+                RenderTexture.ReleaseTemporary(renderTextures[i]);
+            }
+            
         }
+
+        else if(effectMaterials.Count == 1)
+        {
+            Graphics.Blit(source, destination, effectMaterials[0]);
+        }
+
         else
         {
             Graphics.Blit(source, destination);
