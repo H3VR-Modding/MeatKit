@@ -26,7 +26,7 @@ public class IconCamera : MonoBehaviour
     public DepthTextureMode CameraDepthMode = DepthTextureMode.DepthNormals;
 
     [Tooltip("Material that determines the post effect of the image")]
-    public List<Material> effectMaterials;
+    public List<Material> effectMaterials = new List<Material>();
 
     [Tooltip("The background image that will be applied in areas with full transparency")]
     public Texture2D background;
@@ -65,7 +65,6 @@ public class IconCamera : MonoBehaviour
         {
             RenderTexture.ReleaseTemporary(renderTexture);
         }
-        
 
         //Handle rendering through the effect materials
         if (effectMaterials.Count > 1)
