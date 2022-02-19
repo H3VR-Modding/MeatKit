@@ -64,7 +64,7 @@ public class IconCameraEditor : Editor {
 
         if (GUILayout.Button("Take Picture"))
         {
-            Selection.activeGameObject.GetComponent<IconCamera>().Capture();
+            iconCamera.Capture();
         }
     }
 }
