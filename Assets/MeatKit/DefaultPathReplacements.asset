@@ -1,0 +1,186 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6389bd26f6b33074ba8afe182d11c33d, type: 3}
+  m_Name: DefaultPathReplacements
+  m_EditorClassIdentifier: 
+  ReplacementPaths:
+  - ScriptableObjectName: FistVR.MainMenuSceneDef
+    NewPath: Misc/MainMenuSceneDef
+    NewDefaultName: MainMenuSceneDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ZosigMoodPreset
+    NewPath: Sosig/Zosig/MoodPreset
+    NewDefaultName: MoodPreset
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ZBldgTileList
+    NewPath: Sosig/Zosig/zBldgTileList
+    NewDefaultName: zBldgTileList
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ZosigEnemyTemplate
+    NewPath: Sosig/Zosig/ZosigEnemyTemplate
+    NewDefaultName: ZosigEnemyTemplate
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ZosigItemSpawnTable
+    NewPath: Sosig/Zosig/ZosigItemSpawnTable
+    NewDefaultName: ZosigItemSpawnTable
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ZosigNPCProfile
+    NewPath: Sosig/Zosig/ZosigNPCProfile
+    NewDefaultName: ZosigNPCProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.HangableDef
+    NewPath: Misc/HangableDef
+    NewDefaultName: HangableDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.AutoMeaterFirearmSoundProfile
+    NewPath: Misc/AutoMeaterFirearmSoundProfile
+    NewDefaultName: AutoMeaterFirearmSoundProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.wwBotWurstGunSoundConfig
+    NewPath: Misc/wwBotWurstGunSoundConfig
+    NewDefaultName: wwBotWurstGunSoundConfig
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.DestructibleChunkProfile
+    NewPath: Destruction/DestructibleChunkProfile
+    NewDefaultName: DestructibleChunkProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.BreakableGlassPattern
+    NewPath: Destruction/BreakableGlassPattern
+    NewDefaultName: BreakableGlassPattern
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.CubeGameWaveType
+    NewPath: Misc/CubeGameWaveType
+    NewDefaultName: CubeGameWaveType
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.CubeGameWaveElement
+    NewPath: Misc/CubeGameWaveElement
+    NewDefaultName: CubeGameWaveElement
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.CubeGameWaveSequence
+    NewPath: Misc/CubeGameWaveSequence
+    NewDefaultName: CubeGameWaveSequence
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.UberShatterableDamageConfig
+    NewPath: Destruction/UberShatterableDamageConfig
+    NewDefaultName: UberShatterableDamageConfig
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.UberShatterableMeshDecalConfig
+    NewPath: Destruction/UberShatterableMeshDecalConfig
+    NewDefaultName: UberShatterableMeshDecalConfig
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.BallisticChart
+    NewPath: Ballistics/BallisticChart
+    NewDefaultName: BallisticChart
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.PMaterialDefinition
+    NewPath: Misc/PMaterialDefinition
+    NewDefaultName: PMaterialDefinition
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.MatDef
+    NewPath: Misc/MatDef
+    NewDefaultName: MatDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.FVRControllerDefinition
+    NewPath: Misc/FVRControllerDefinition
+    NewDefaultName: FVRControllerDefinition
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.FVREntityFlagUsage
+    NewPath: Misc/FVREntityFlagUsage
+    NewDefaultName: FVREntityFlagUsage
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.FVREntityDefinition
+    NewPath: Misc/FVREntityDefinition
+    NewDefaultName: FVREntityDefinition
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.HG_ModeProfile
+    NewPath: Misc/HG_ModeProfile
+    NewDefaultName: HG_ModeProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.MF_SquadDefinition
+    NewPath: Misc/MF_SquadDefinition
+    NewDefaultName: MF_SquadDefinition
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.MG_EventAIConfig
+    NewPath: Misc/MG_EventAIConfig
+    NewDefaultName: MG_EventAIConfig
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.MG_IncidenceChart
+    NewPath: Misc/MG_IncidenceChart
+    NewDefaultName: MG_IncidenceChart
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.OmniSequencerSequenceDefinition
+    NewPath: Misc/OmniSequencerSequenceDefinition
+    NewDefaultName: OmniSequencerSequenceDefinition
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.SV_LootTable
+    NewPath: Misc/SV_LootTable
+    NewDefaultName: SV_LootTable
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.wwBotWurstConfig
+    NewPath: Misc/wwBotWurstConfig
+    NewDefaultName: wwBotWurstConfig
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.wwMagicKeypadHash
+    NewPath: Misc/wwMagicKeypadHash
+    NewDefaultName: wwMagicKeypadHash
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.SlideSequenceDef
+    NewPath: Misc/SlideSequenceDef
+    NewDefaultName: SlideSequenceDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.PTargetCategoryDic
+    NewPath: Misc/PTargetCategoryDic
+    NewDefaultName: PTargetCategoryDic
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ReticleColorProgression
+    NewPath: Misc/ReticleColorProgression
+    NewDefaultName: ReticleColorProgression
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.FVRHapticBuzzProfile
+    NewPath: Misc/FVRHapticBuzzProfile
+    NewDefaultName: FVRHapticBuzzProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ItemSpawnerCategoryDefinitionsV2
+    NewPath: ItemSpawner/ItemSpawnerCategoryDefinitionsV2
+    NewDefaultName: ItemSpawnerCategoryDefinitionsV2
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ItemSpawnerNewItemManifest
+    NewPath: ItemSpawner/ItemSpawnerNewItemManifest
+    NewDefaultName: ItemSpawnerNewItemManifest
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ItemSpawnerV2TagCatDef
+    NewPath: ItemSpawner/ItemSpawnerV2TagCatDef
+    NewDefaultName: ItemSpawnerV2TagCatDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.EquipmentPoolDef
+    NewPath: TNH/EquipmentPoolDef
+    NewDefaultName: EquipmentPoolDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.TNH_CharacterDef
+    NewPath: TNH/TNH_CharacterDef
+    NewDefaultName: TNH_CharacterDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.ObjectTableDef
+    NewPath: TNH/ObjectTableDef
+    NewDefaultName: ObjectTableDef
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.TNH_PointSequence
+    NewPath: TNH/TNH_PointSequence
+    NewDefaultName: TNH_PointSequence
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.PTargetProfile
+    NewPath: Misc/PTargetProfile
+    NewDefaultName: PTargetProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.TutorialBlock
+    NewPath: ItemSpawner/TutorialBlock
+    NewDefaultName: TutorialBlock
+    NewOrder: 0
