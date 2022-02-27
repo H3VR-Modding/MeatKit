@@ -172,3 +172,15 @@ MonoBehaviour:
     NewPath: TNH/ObjectTableDef
     NewDefaultName: ObjectTableDef
     NewOrder: 0
+  - ScriptableObjectName: FistVR.TNH_PointSequence
+    NewPath: TNH/TNH_PointSequence
+    NewDefaultName: TNH_PointSequence
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.PTargetProfile
+    NewPath: Misc/PTargetProfile
+    NewDefaultName: PTargetProfile
+    NewOrder: 0
+  - ScriptableObjectName: FistVR.TutorialBlock
+    NewPath: ItemSpawner/TutorialBlock
+    NewDefaultName: TutorialBlock
+    NewOrder: 0

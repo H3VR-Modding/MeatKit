@@ -13,54 +13,42 @@ namespace MeatKit
 
         public override void ApplyModification(AssemblyDefinition assembly)
         {
-            foreach(ReplacementPath replacementPath in ReplacementPaths)
+            TypeReference stringRef = assembly.MainModule.TypeSystem.String;
+            TypeReference intRef = assembly.MainModule.TypeSystem.Int32;
+            if (stringRef == null || intRef == null) return;
+
+            foreach (ReplacementPath replacementPath in ReplacementPaths)
             {
                 TypeReference type = assembly.MainModule.GetType(replacementPath.ScriptableObjectName);
-                TypeReference refType = assembly.MainModule.GetType("FistVR.MainMenuSceneDef");
-
-                if (type == null || refType == null) continue;
+                if (type == null) continue;
 
                 Debug.Log("Patching asset menu path for type: " + replacementPath.ScriptableObjectName);
 
                 TypeDefinition definition = type.Resolve();
-                TypeDefinition refDefinition = refType.Resolve();
+                CustomAttribute createMenuAttribute = GetCreateAssetMenuAttribute(definition);
 
-                CustomAttribute oldAttribute = GetCreateAssetMenuAttribute(definition);
-                CustomAttribute referenceAttribute = GetCreateAssetMenuAttribute(refDefinition);
-
-                if (oldAttribute == null)
+                if (createMenuAttribute == null)
                 {
                     Debug.LogWarning("Could not get CreateAssetMenuAttribute for scriptable object: " + replacementPath.ScriptableObjectName);
                     continue;
                 }
 
-                definition.CustomAttributes.Remove(oldAttribute);
+                CustomAttributeArgument pathArgumentValue = new CustomAttributeArgument(stringRef, replacementPath.NewPath);
+                CustomAttributeArgument fileNameArgumentValue = new CustomAttributeArgument(stringRef, replacementPath.NewDefaultName);
+                CustomAttributeArgument orderArgumentValue = new CustomAttributeArgument(intRef, replacementPath.NewOrder);
 
-                CustomAttribute newAttribute = new CustomAttribute(referenceAttribute.Constructor)
-                {
-                    Properties =
-                    {
-                        new CustomAttributeNamedArgument(
-                            referenceAttribute.Properties[0].Name,
-                            new CustomAttributeArgument(referenceAttribute.Properties[0].Argument.Type, replacementPath.NewDefaultName)
-                        ),
-                        new CustomAttributeNamedArgument(
-                            referenceAttribute.Properties[1].Name,
-                            new CustomAttributeArgument(referenceAttribute.Properties[1].Argument.Type, replacementPath.NewPath)
-                        ),
-                        new CustomAttributeNamedArgument(
-                            referenceAttribute.Properties[2].Name,
-                            new CustomAttributeArgument(referenceAttribute.Properties[2].Argument.Type, replacementPath.NewOrder)
-                        )
-                    }
-                };
+                CustomAttributeNamedArgument pathArgument = new CustomAttributeNamedArgument("menuName", pathArgumentValue);
+                CustomAttributeNamedArgument fileNameArgument = new CustomAttributeNamedArgument("fileName", fileNameArgumentValue);
+                CustomAttributeNamedArgument orderArgument = new CustomAttributeNamedArgument("order", orderArgumentValue);
 
-                definition.CustomAttributes.Add(newAttribute);
+                createMenuAttribute.Properties.Clear();
+                createMenuAttribute.Properties.Add(pathArgument);
+                createMenuAttribute.Properties.Add(fileNameArgument);
+                createMenuAttribute.Properties.Add(orderArgument);
             }
 
             Applied = true;
         }
-
 
         private CustomAttribute GetCreateAssetMenuAttribute(TypeDefinition definition)
         {
