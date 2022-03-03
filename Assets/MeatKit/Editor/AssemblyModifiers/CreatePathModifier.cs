@@ -22,8 +22,6 @@ namespace MeatKit
                 TypeReference type = assembly.MainModule.GetType(replacementPath.ScriptableObjectName);
                 if (type == null) continue;
 
-                Debug.Log("Patching asset menu path for type: " + replacementPath.ScriptableObjectName);
-
                 TypeDefinition definition = type.Resolve();
                 CustomAttribute createMenuAttribute = GetCreateAssetMenuAttribute(definition);
 
