@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using UnityEngine;
 
 namespace MeatKit
 {
@@ -24,7 +25,7 @@ namespace MeatKit
             var rParams = new ReaderParameters
             {
                 AssemblyResolver =
-                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location))
+                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location), Application.dataPath + "/MeatKit/Managed/")
             };
 
             // Get the MeatKitPlugin class and rename it
