@@ -153,7 +153,8 @@ namespace MeatKit
         {
             return BuildItems
                 .Where(x => x != null)
-                .SelectMany(x => x.RequiredDependencies).ToArray();
+                .SelectMany(x => x.RequiredDependencies)
+                .Distinct().ToArray();
         }
 
         public string MainNamespace

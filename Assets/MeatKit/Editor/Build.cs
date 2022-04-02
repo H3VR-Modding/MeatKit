@@ -120,7 +120,7 @@ namespace MeatKit
                 using (var zip = new ZipFile())
                 {
                     zip.AddDirectory(BundleOutputPath, "");
-                    zip.Save(Path.Combine(BundleOutputPath, packageName + ".zip"));
+                    zip.Save(Path.Combine(BundleOutputPath, packageName + "-" + profile.Version + ".zip"));
                 }
             }
 
