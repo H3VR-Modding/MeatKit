@@ -66,6 +66,8 @@ namespace MeatKit
         {
             // Make sure the scripts are imported and there are no errors before exporting
             if (ShowErrorIfH3VRNotImported()) return;
+            if (!BuildWindow.SelectedProfile) return;
+            
             if (!BuildWindow.SelectedProfile.EnsureValidForEditor()) return;
             ExportEditorAssembly(BundleOutputPath);
         }

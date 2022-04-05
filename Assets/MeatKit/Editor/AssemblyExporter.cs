@@ -68,15 +68,25 @@ namespace MeatKit
 
                 // References to renamed unity code must be swapped out.
                 foreach (var ii in asm.MainModule.AssemblyReferences)
-                    switch (ii.Name)
+                {
+                    // Rename any references to the game's code
+                    if (ii.Name.Contains("H3VRCode-CSharp"))
                     {
-                        case AssemblyRename:
-                            ii.Name = AssemblyName;
-                            break;
-                        case AssemblyFirstpassRename:
-                            ii.Name = AssemblyFirstpassName;
-                            break;
+                        ii.Name = ii.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
                     }
+                    
+                    // And also if we're referencing a MonoMod DLL, we need to fix reference too
+                    if (ii.Name.EndsWith(".mm"))
+                    {
+                        // What the name currently is:
+                        //    Assembly-CSharp.PatchName.mm
+                        // What we want:
+                        //    Assembly-CSharp
+                        // So just lop off anything past the second to last dot
+                        int idx = ii.Name.LastIndexOf('.', ii.Name.Length -4);
+                        ii.Name = ii.Name.Substring(0, idx);
+                    }
+                }
 
                 if (BuildWindow.SelectedProfile.StripNamespaces)
                 {

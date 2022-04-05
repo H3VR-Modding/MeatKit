@@ -169,20 +169,27 @@ namespace MeatKit
                     new RedirectedAssemblyResolver(Path.GetDirectoryName(assemblyPath), destinationDirectory)
             };
 
-            // We just want to rename the references to the game's assemblies here
+            // If this assembly uses the Assembly-CSharp name at all for any reason, replace it with H3VRCode-CSharp
+            // This would probably only be done on MonoMod patches but is required to make Unity shut up
             var asm = AssemblyDefinition.ReadAssembly(assemblyPath, rParams);
+            string name = asm.Name.Name;
+            if (name.Contains("Assembly-CSharp"))
+            {
+                name = name.Replace("Assembly-CSharp", "H3VRCode-CSharp");
+                asm.Name = new AssemblyNameDefinition(name, asm.Name.Version);
+                asm.MainModule.Name = name + ".dll";
+            }
+            
+            // Replace all occurrences to references of Assembly-CSharp with H3VRCode-CSharp
             foreach (var reference in asm.MainModule.AssemblyReferences)
-                switch (reference.Name)
+            {
+                if (reference.Name.Contains("Assembly-CSharp"))
                 {
-                    case AssemblyName:
-                        reference.Name = AssemblyRename;
-                        break;
-                    case AssemblyFirstpassName:
-                        reference.Name = AssemblyFirstpassRename;
-                        break;
+                    reference.Name = reference.Name.Replace("Assembly-CSharp", "H3VRCode-CSharp");
                 }
+            }
 
-            asm.Write(Path.Combine(destinationDirectory, Path.GetFileName(assemblyPath)));
+            asm.Write(Path.Combine(destinationDirectory, asm.MainModule.Name));
             NormalizeMetaFileGUIDs();
         }
 
