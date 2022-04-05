@@ -49,7 +49,7 @@ namespace MeatKit
                         // We want to just lop off anything after the third-to-last . in the name,
                         // then also replace H3VRCode-CSharp with Assembly-CSharp.
                         int idx = asmName.LastIndexOf('.', asmName.Length - 8);
-                        assemblyNameValue.Set(asmName.Substring(0, idx).Replace("H3VRCode-CSharp", "Assembly-CSharp"));
+                        assemblyNameValue.Set(asmName.Substring(0, idx).Replace("H3VRCode-CSharp", "Assembly-CSharp") + ".dll");
                         
                         // Write the modifications to the list
                         var newBytes = field.WriteToByteArray();
