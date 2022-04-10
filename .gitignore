@@ -98,9 +98,6 @@ ImportedBundles/
 # Ignore Samples
 Assets/Samples/
 
-# Ignore Tools
-/Assets/MeatKit/Tools
-
 # Ignore any imported build items
 /[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/*.cs
 /[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/*.meta
