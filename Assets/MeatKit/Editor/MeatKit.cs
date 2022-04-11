@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using AssetsTools.NET;
@@ -28,7 +29,8 @@ namespace MeatKit
             var gameManagedLocation = MeatKitCache.GameManagedLocation;
             if (string.IsNullOrEmpty(gameManagedLocation) || !Directory.Exists(gameManagedLocation))
             {
-                gameManagedLocation = EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
+                gameManagedLocation =
+                    EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
                 MeatKitCache.GameManagedLocation = gameManagedLocation;
             }
 
@@ -67,7 +69,7 @@ namespace MeatKit
             // Make sure the scripts are imported and there are no errors before exporting
             if (ShowErrorIfH3VRNotImported()) return;
             if (!BuildWindow.SelectedProfile) return;
-            
+
             if (!BuildWindow.SelectedProfile.EnsureValidForEditor()) return;
             ExportEditorAssembly(BundleOutputPath);
         }
@@ -93,6 +95,8 @@ namespace MeatKit
         public static void ImportBundle()
         {
             var assetBundlePath = EditorUtility.OpenFilePanel("Select asset bundle", Application.dataPath, "");
+            if (string.IsNullOrEmpty(assetBundlePath)) return;
+
             var replaceMap = new Dictionary<string, string>
             {
                 {"Assembly-CSharp.dll", "H3VRCode-CSharp.dll"},
@@ -100,6 +104,41 @@ namespace MeatKit
             };
 
             ProcessBundle(assetBundlePath, assetBundlePath + "-imported", replaceMap, AssetBundleCompressionType.NONE);
+        }
+
+        [MenuItem("MeatKit/Asset Bundle/Import Folder", priority = 1)]
+        public static void ImportBundlesInFolder()
+        {
+            // Get a folder from the user (or exit if they cancel)
+            var folderPath = EditorUtility.OpenFolderPanel("Select folder", Application.dataPath, "");
+            if (string.IsNullOrEmpty(folderPath)) return;
+
+            var replaceMap = new Dictionary<string, string>
+            {
+                {"Assembly-CSharp.dll", "H3VRCode-CSharp.dll"},
+                {"Assembly-CSharp-firstpass.dll", "H3VRCode-CSharp-firstpass.dll"}
+            };
+
+            if (!Directory.Exists(Application.streamingAssetsPath))
+                Directory.CreateDirectory(Application.streamingAssetsPath);
+            
+            // Iterate over all the files in the selected folder and try to convert them.
+            foreach (var file in Directory.GetFiles(folderPath))
+            {
+                // We're only interested in the files with no extension.
+                if (Path.GetExtension(file) != "") continue;
+
+                try
+                {
+                    string destinationFileName = Path.Combine(Application.streamingAssetsPath, Path.GetFileName(file));
+                    ProcessBundle(file, destinationFileName, replaceMap, AssetBundleCompressionType.NONE);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                    // Ignored.
+                }
+            }
         }
 
         public static void ClearCache()

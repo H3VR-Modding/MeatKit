@@ -50,9 +50,11 @@ namespace MeatKit
             // Clean the output folder
             CleanBuild();
 
-            // And export the assembly to the folder
-            ExportEditorAssembly(BundleOutputPath);
-
+            // Make a copy of the editor assembly because when we build an asset bundle, Unity will delete it
+            string editorAssembly = EditorAssemblyPath + AssemblyName + ".dll";
+            string tempAssemblyFile = Path.GetTempFileName();
+            File.Copy(editorAssembly, tempAssemblyFile, true);
+            
             // Then get their asset bundle configurations
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
 
@@ -73,12 +75,16 @@ namespace MeatKit
                 {"H3VRCode-CSharp-firstpass.dll", "Assembly-CSharp-firstpass.dll"}
             };
 
+            Dictionary<string, List<string>> requiredScripts = new Dictionary<string, List<string>>();
             foreach (var bundle in bundles)
             {
                 var path = Path.Combine(BundleOutputPath, bundle.assetBundleName);
-                ProcessBundle(path, path, replaceMap, profile.BundleCompressionType);
+                ProcessBundle(path, path, replaceMap, profile.BundleCompressionType, requiredScripts);
             }
 
+            // And export the assembly to the folder
+            ExportEditorAssembly(BundleOutputPath, tempAssemblyFile, requiredScripts);
+            
             // Now we can write the Thunderstore stuff to the folder
             profile.WriteThunderstoreManifest(BundleOutputPath + "manifest.json");
 

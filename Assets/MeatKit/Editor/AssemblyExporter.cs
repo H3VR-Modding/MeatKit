@@ -13,9 +13,19 @@ namespace MeatKit
         private const string EditorAssemblyPath = "Library/ScriptAssemblies/";
         public const string BundleOutputPath = "AssetBundles/";
 
-        private static void ExportEditorAssembly(string folder)
+        private static void ExportEditorAssembly(string folder, string tempFile = null, Dictionary<string, List<string>> requiredScripts = null)
         {
-            if (!File.Exists(EditorAssemblyPath + AssemblyName + ".dll")) return;
+            // Make a copy of the file if we aren't already given one
+            string editorAssembly = EditorAssemblyPath + AssemblyName + ".dll";
+            if (!File.Exists(editorAssembly) && !File.Exists(tempFile))
+            {
+                Debug.LogError("Editor assembly missing! Can't export scripts.");
+            }
+            else if (string.IsNullOrEmpty(tempFile))
+            {
+                tempFile = Path.GetTempFileName();
+                File.Copy(editorAssembly, tempFile, true);
+            }
 
             // Delete the old file
             var settings = BuildWindow.SelectedProfile;
@@ -29,8 +39,6 @@ namespace MeatKit
             };
 
             // Get the MeatKitPlugin class and rename it
-            string tempFile = Path.GetTempFileName();
-            File.Copy(EditorAssemblyPath + AssemblyName + ".dll", tempFile, true);
             using (var asm = AssemblyDefinition.ReadAssembly(tempFile, rParams))
             {
                 var plugin = asm.MainModule.GetType("MeatKitPlugin");
@@ -63,8 +71,9 @@ namespace MeatKit
                 il.Emit(OpCodes.Ret);
 
                 // Module name needs to be changed away from Assembly-CSharp.dll because it is a reserved name.
+                string newAssemblyName = settings.PackageName + ".dll";
                 asm.Name = new AssemblyNameDefinition(settings.PackageName, asm.Name.Version);
-                asm.MainModule.Name = settings.PackageName + ".dll";
+                asm.MainModule.Name = newAssemblyName;
 
                 // References to renamed unity code must be swapped out.
                 foreach (var ii in asm.MainModule.AssemblyReferences)
@@ -109,6 +118,22 @@ namespace MeatKit
                              .Where(x => x != null))
                     asm.MainModule.Types.Remove(type);
 
+                // Check if we're now missing any scripts from the export
+                List<string> missing = new List<string>();
+                if (requiredScripts != null && requiredScripts.ContainsKey(newAssemblyName))
+                {
+                    missing.AddRange(requiredScripts[newAssemblyName]
+                        .Where(typeName => asm.MainModule.GetType(typeName) == null));
+                }
+
+                // If we're missing anything, fail the build.
+                if (missing.Count > 0)
+                {
+                    string missingTypes = string.Join("\n", missing.ToArray());
+                    throw new MeatKitBuildException(
+                        "Exported objects reference scripts which do not exist in the exported assembly... Did you forget to allow a namespace?\n\nMissing types:\n" + missingTypes, null);
+                }
+                
                 try
                 {
                     // Save it

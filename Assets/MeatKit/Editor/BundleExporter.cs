@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using UnityEditor;
@@ -10,8 +11,10 @@ namespace MeatKit
     public static partial class MeatKit
     {
         private static void ProcessBundle(string source, string destination, IDictionary<string, string> replaceMap,
-            AssetBundleCompressionType recompressAs)
+            AssetBundleCompressionType recompressAs, Dictionary<string, List<string>> scripts = null)
         {
+            if (scripts == null) scripts = new Dictionary<string, List<string>>();
+            
             try
             {
                 // Step 1: Load the asset bundle.
@@ -31,11 +34,17 @@ namespace MeatKit
                     // Get the field for this asset
                     var field = am.GetTypeInstance(assets, assetInfo).GetBaseField();
                     var assemblyNameValue = field["m_AssemblyName"].GetValue();
-
-                    // Check if we want to replace this name
+                    var classNameValue = field["m_ClassName"].GetValue();
+                    var namespaceValue = field["m_Namespace"].GetValue();
                     var asmName = assemblyNameValue.AsString();
-                    if (replaceMap.ContainsKey(asmName))
+                    string namespaceStr = namespaceValue.AsString();
+                    var fullTypeName = (namespaceStr != "" ? namespaceStr + "." : "") + classNameValue.AsString();
+                    
+                    // Check if we want to replace this name.
+                    if (replaceMap.ContainsKey(asmName) && !StripAssemblyTypes.Contains(fullTypeName))
                     {
+                        
+                        
                         // Modify it's assembly name
                         assemblyNameValue.Set(replaceMap[asmName]);
 
@@ -56,6 +65,11 @@ namespace MeatKit
                         modifications.Add(new AssetsReplacerFromMemory(0, assetInfo.index, (int) assetInfo.curFileType,
                             0xFFFF, newBytes));
                     }
+                    
+                    // Add the monoscript entry to the dictionary
+                    asmName = assemblyNameValue.AsString();
+                    if (!scripts.ContainsKey(asmName)) scripts[asmName] = new List<string>();
+                    scripts[asmName].Add(fullTypeName);
                 }
 
                 // Step 3: Write the modified assets back into an uncompressed bundle
