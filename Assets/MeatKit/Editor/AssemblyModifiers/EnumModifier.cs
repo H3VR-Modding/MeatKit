@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Mono.Cecil;
 using UnityEngine;
 
@@ -18,8 +19,28 @@ namespace MeatKit
 
         public override void ApplyModification(AssemblyDefinition assembly)
         {
-            // Try to get this type from the assembly. If it doesn't exist, we can just skip.
-            TypeReference type = assembly.MainModule.GetType(EnumName);
+            // Try to get the enum type. If it contains a '+' in the name, it's nested and we have to do a bit of extra stuff
+            TypeDefinition type;
+            if (EnumName.Contains("+"))
+            {
+                
+                string[] parts = EnumName.Split('+');
+                type = assembly.MainModule.GetType(parts[0]);
+                if (type != null)
+                {
+                    for (int i = 1; i < parts.Length; i++)
+                    {
+                        Debug.Log(type);
+                        type = type.NestedTypes.FirstOrDefault(x => x.Name == parts[i]);
+                        if (type == null) break;
+                    }
+                }
+            }
+            
+            // Otherwise we can just grab it directly if it isn't nested
+            else type = assembly.MainModule.GetType(EnumName);
+            
+            // If we can't find the type, skip.
             if (type == null) return;
 
             var definition = type.Resolve();
