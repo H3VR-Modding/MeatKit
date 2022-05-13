@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -41,6 +41,10 @@ namespace MeatKit
             BuildProfile profile = BuildWindow.SelectedProfile;
             if (!profile) return;
 
+            //BundleOutputPath = BundleOutputPathBase;
+            BundleOutputPath = Path.Combine(Path.Combine(BundleOutputPathBase, profile.PackageName),profile.Version) + "/";
+
+
             // Start a stopwatch to time the build
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -57,14 +61,15 @@ namespace MeatKit
             
             // Then get their asset bundle configurations
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
-
+            //Debug.Log("BundleOutputPath: " + BundleOutputPath);
             BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
                 BuildTarget.StandaloneWindows64);
-
+            //Debug.Log("Bloop!");
             // Cleanup the unused files created with building the bundles
             foreach (var file in Directory.GetFiles(BundleOutputPath, "*.manifest"))
                 File.Delete(file);
-            File.Delete(Path.Combine(BundleOutputPath, "AssetBundles"));
+            //File.Delete(Path.Combine(BundleOutputPath, "AssetBundles"));
+            File.Delete(Path.Combine(BundleOutputPath, profile.Version));
 
             // With the bundles done building we can process them
             var replaceMap = new Dictionary<string, string>
