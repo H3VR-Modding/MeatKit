@@ -71,7 +71,7 @@ namespace MeatKit
             if (!BuildWindow.SelectedProfile) return;
 
             if (!BuildWindow.SelectedProfile.EnsureValidForEditor()) return;
-            ExportEditorAssembly(BundleOutputPath);
+            ExportEditorAssembly(BundleOutputPathBase);
         }
 
 

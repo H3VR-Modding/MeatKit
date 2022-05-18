@@ -12,7 +12,6 @@ namespace MeatKit
     {
         private const string EditorAssemblyPath = "Library/ScriptAssemblies/";
         public const string BundleOutputPathBase = "AssetBundles/";
-        public static string BundleOutputPath = "AssetBundles/";
 
         private static void ExportEditorAssembly(string folder, string tempFile = null, Dictionary<string, List<string>> requiredScripts = null)
         {

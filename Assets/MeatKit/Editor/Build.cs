@@ -42,8 +42,7 @@ namespace MeatKit
             if (!profile) return;
 
             //BundleOutputPath = BundleOutputPathBase;
-            BundleOutputPath = Path.Combine(Path.Combine(BundleOutputPathBase, profile.PackageName),profile.Version) + "/";
-
+            string BundleOutputPath = Path.Combine(Path.Combine(BundleOutputPathBase, profile.PackageName),profile.Version) + "/";
 
             // Start a stopwatch to time the build
             Stopwatch sw = Stopwatch.StartNew();
@@ -52,7 +51,7 @@ namespace MeatKit
             if (!profile.EnsureValidForEditor()) return;
 
             // Clean the output folder
-            CleanBuild();
+            CleanBuild(BundleOutputPath);
 
             // Make a copy of the editor assembly because when we build an asset bundle, Unity will delete it
             string editorAssembly = EditorAssemblyPath + AssemblyName + ".dll";
@@ -61,14 +60,11 @@ namespace MeatKit
             
             // Then get their asset bundle configurations
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
-            //Debug.Log("BundleOutputPath: " + BundleOutputPath);
             BuildPipeline.BuildAssetBundles(BundleOutputPath, bundles, BuildAssetBundleOptions.None,
                 BuildTarget.StandaloneWindows64);
-            //Debug.Log("Bloop!");
             // Cleanup the unused files created with building the bundles
             foreach (var file in Directory.GetFiles(BundleOutputPath, "*.manifest"))
                 File.Delete(file);
-            //File.Delete(Path.Combine(BundleOutputPath, "AssetBundles"));
             File.Delete(Path.Combine(BundleOutputPath, profile.Version));
 
             // With the bundles done building we can process them
@@ -140,7 +136,7 @@ namespace MeatKit
             MeatKitCache.LastBuildTime = DateTime.Now;
         }
 
-        public static void CleanBuild()
+        public static void CleanBuild(string BundleOutputPath)
         {
             if (Directory.Exists(BundleOutputPath)) Directory.Delete(BundleOutputPath, true);
             Directory.CreateDirectory(BundleOutputPath);
