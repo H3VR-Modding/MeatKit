@@ -132,7 +132,17 @@ public class EnumPicker : PropertyDrawer
     {
         Array valuesRaw = null;
         Type enumType = fieldInfo.FieldType;
-        if (enumType.IsArray) enumType = enumType.GetElementType(); //this turns the enum array into just the enum to prevent issues with arrays of enums
+        
+        // Check if the property is an array or a list
+        if (enumType.IsArray) enumType = enumType.GetElementType();
+        else if (enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(List<>))
+            enumType = enumType.GetGenericArguments()[0];
+
+        if (enumType == null || !enumType.IsEnum)
+        {
+            Debug.LogError("Can't determine how to draw a field for " + fieldInfo.FieldType);
+            return;
+        }
         
         valuesRaw = Enum.GetValues(enumType);
         if (valuesRaw.Length <= 0)
