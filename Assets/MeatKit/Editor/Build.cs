@@ -12,13 +12,6 @@ namespace MeatKit
 {
     public partial class MeatKit
     {
-        private const string BaseOutputPath = "AssetBundles/";
-
-        private static string GetPackageOutputPath(BuildProfile profile)
-        {
-            return Path.Combine(BaseOutputPath, Path.Combine(profile.PackageName, profile.Version)) + Path.DirectorySeparatorChar;
-        }
-        
         public static void DoBuild()
         {
             try
@@ -48,7 +41,7 @@ namespace MeatKit
             BuildProfile profile = BuildWindow.SelectedProfile;
             if (!profile) return;
 
-            string bundleOutputPath = GetPackageOutputPath(profile);
+            string bundleOutputPath = profile.ExportPath;
 
             // Start a stopwatch to time the build
             Stopwatch sw = Stopwatch.StartNew();
@@ -144,7 +137,7 @@ namespace MeatKit
 
         public static void CleanBuild(BuildProfile profile)
         {
-            string outputPath = GetPackageOutputPath(profile);
+            string outputPath = profile.ExportPath;
             if (Directory.Exists(outputPath)) Directory.Delete(outputPath, true);
             Directory.CreateDirectory(outputPath);
         }

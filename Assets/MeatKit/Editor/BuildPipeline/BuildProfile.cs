@@ -18,6 +18,8 @@ namespace MeatKit
     [CreateAssetMenu(menuName = "MeatKit/Build Profile")]
     public class BuildProfile : ScriptableObject, IValidatable
     {
+        private const string BaseOutputPath = "AssetBundles/";
+        
         [Header("Thunderstore Metadata")]
         public string PackageName = "";
         public string Author = "";
@@ -49,6 +51,11 @@ namespace MeatKit
                 messages["PackageName"] =
                     BuildMessage.Error("Package name can only contain letters, numbers, and underscores.");
 
+            // Author needs to match regex
+            if (!Regex.IsMatch(Author, @"^[a-zA-Z_0-9]+$"))
+                messages["Author"] =
+                    BuildMessage.Error("Author can only contain letters, numbers, and underscores.");
+            
             // Make sure the version number is a valid x.x.x
             if (!Regex.IsMatch(Version, @"^\d+\.\d+\.\d+$"))
                 messages["Version"] = BuildMessage.Error("Version number must be in format 'x.x.x'.");
@@ -173,6 +180,14 @@ namespace MeatKit
         public string[] GetAllAllowedNamespaces()
         {
             return GetRequiredNamespaces().Concat(AdditionalNamespaces).ToArray();
+        }
+
+        public string ExportPath
+        {
+            get
+            {
+                return Path.Combine(BaseOutputPath, Path.Combine(PackageName, Version)) + Path.DirectorySeparatorChar;
+            }
         }
         
         public void WriteThunderstoreManifest(string location)
