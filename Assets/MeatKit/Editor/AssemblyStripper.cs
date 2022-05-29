@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
+using UnityEngine;
 
 namespace NStrip
 {
@@ -78,9 +79,14 @@ namespace NStrip
 
 					if (isExplicitlySerialized == null)
 					{
-						var constructor = typeof(NonSerializedAttribute).GetConstructor(Type.EmptyTypes);
-						var reference = assembly.MainModule.ImportReference(constructor);
-						field.CustomAttributes.Add(new CustomAttribute(reference));
+						var nonSerializedAttributeCtor = typeof(NonSerializedAttribute).GetConstructor(Type.EmptyTypes);
+						var nonSerializedAttributeRef = assembly.MainModule.ImportReference(nonSerializedAttributeCtor);
+						attributes.Add(new CustomAttribute(nonSerializedAttributeRef));
+						
+						var hideInInspectorCtor = typeof(HideInInspector).GetConstructor(Type.EmptyTypes);
+						var hideInInspectorRef = assembly.MainModule.ImportReference(hideInInspectorCtor);
+						attributes.Add(new CustomAttribute(hideInInspectorRef));
+						
 					}
 				}
 			}
