@@ -36,6 +36,13 @@ namespace MeatKit
 
             // If it's _still_ empty, the user must have cancelled.
             if (string.IsNullOrEmpty(gameManagedLocation)) return;
+            if (!File.Exists(Path.Combine(gameManagedLocation, "Assembly-CSharp.dll")))
+            {
+                EditorUtility.DisplayDialog("Error", "Looks like the path you selected is invalid. Make sure you are selecting the h3vr_Data/Managed folder in the game directory.", "Ok");
+                MeatKitCache.GameManagedLocation = "";
+                return;
+            }
+            
             ImportAssemblies(gameManagedLocation, ManagedDirectory);
         }
 
