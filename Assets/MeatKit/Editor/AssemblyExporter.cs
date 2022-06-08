@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BepInEx;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEngine;
@@ -12,7 +13,8 @@ namespace MeatKit
     {
         private const string EditorAssemblyPath = "Library/ScriptAssemblies/";
 
-        private static void ExportEditorAssembly(string folder, string tempFile = null, Dictionary<string, List<string>> requiredScripts = null)
+        private static void ExportEditorAssembly(string folder, string tempFile = null,
+            Dictionary<string, List<string>> requiredScripts = null)
         {
             // Make a copy of the file if we aren't already given one
             string editorAssembly = EditorAssemblyPath + AssemblyName + ".dll";
@@ -34,13 +36,16 @@ namespace MeatKit
             var rParams = new ReaderParameters
             {
                 AssemblyResolver =
-                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location), Application.dataPath + "/MeatKit/Managed/")
+                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location),
+                        Application.dataPath + "/MeatKit/Managed/")
             };
 
             // Get the MeatKitPlugin class and rename it
             using (var asm = AssemblyDefinition.ReadAssembly(tempFile, rParams))
             {
-                var plugin = asm.MainModule.GetType("MeatKitPlugin");
+                string mainNamespace = BuildWindow.SelectedProfile.MainNamespace;
+                var plugin = FindPluginClass(asm.MainModule, mainNamespace);
+                plugin.Namespace = mainNamespace;
                 plugin.Name = settings.PackageName + "Plugin";
 
                 // This is some quantum bullshit.
@@ -82,7 +87,7 @@ namespace MeatKit
                     {
                         ii.Name = ii.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
                     }
-                    
+
                     // And also if we're referencing a MonoMod DLL, we need to fix reference too
                     if (ii.Name.EndsWith(".mm"))
                     {
@@ -91,7 +96,7 @@ namespace MeatKit
                         // What we want:
                         //    Assembly-CSharp
                         // So just lop off anything past the second to last dot
-                        int idx = ii.Name.LastIndexOf('.', ii.Name.Length -4);
+                        int idx = ii.Name.LastIndexOf('.', ii.Name.Length - 4);
                         ii.Name = ii.Name.Substring(0, idx);
                     }
                 }
@@ -130,9 +135,10 @@ namespace MeatKit
                 {
                     string missingTypes = string.Join("\n", missing.ToArray());
                     throw new MeatKitBuildException(
-                        "Exported objects reference scripts which do not exist in the exported assembly... Did you forget to allow a namespace?\n\nMissing types:\n" + missingTypes, null);
+                        "Exported objects reference scripts which do not exist in the exported assembly... Did you forget to allow a namespace?\n\nMissing types:\n" +
+                        missingTypes, null);
                 }
-                
+
                 try
                 {
                     // Save it
@@ -140,12 +146,49 @@ namespace MeatKit
                 }
                 catch (ArgumentException e)
                 {
-                    throw new MeatKitBuildException("Unable to write exported scripts file. This is likely due to namespace stripping being enabled and a required namespace is not whitelisted.", e);
+                    throw new MeatKitBuildException(
+                        "Unable to write exported scripts file. This is likely due to namespace stripping being enabled and a required namespace is not whitelisted.",
+                        e);
                 }
             }
 
             // Delete temp file now that we're done.
             File.Delete(tempFile);
+        }
+
+        private static TypeDefinition FindPluginClass(ModuleDefinition module, string mainNamespace)
+        {
+            // Enumerate the types in the module.
+            var pluginClasses = new List<TypeDefinition>();
+            foreach (var type in module.Types)
+            {
+                // We're looking for types that extend the BaseUnityPlugin class
+                if (type.IsSubtypeOf(typeof(BaseUnityPlugin))) pluginClasses.Add(type);
+            }
+
+            // Now that we have a list of all the classes, check if there is a custom one
+            switch (pluginClasses.Count)
+            {
+                case 0:
+                    // User somehow deleted default plugin class and has no alternatives :P
+                    throw new MeatKitBuildException(
+                        "No suitable BepInEx plugin class was found! Was the default one deleted???");
+                case 1:
+                    // There is only one, so just use that.
+                    return pluginClasses[0];
+                default:
+                    // Use the included class as default, and then see if there is one in the mod's main namespace
+                    // If there is a custom one, use that instead. And then remove the default one.
+                    TypeDefinition selected = module.GetType("MeatKitPlugin");
+                    foreach (var type in pluginClasses)
+                    {
+                        module.Types.Remove(selected);
+                        selected = type;
+                        break;
+                    }
+
+                    return selected;
+            }
         }
 
         private static IEnumerable<CustomAttribute> GetAllCustomAttributes(AssemblyDefinition asm)
