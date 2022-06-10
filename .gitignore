@@ -95,8 +95,9 @@ ImportedBundles/
 /[Aa]ssets/BakeryLightmaps/
 /[Aa]ssets/BakeryLightmaps.meta
 
-# Ignore Samples
-Assets/Samples/
+# Ignore packages
+/[Aa]ssets/Packages/
+/[Aa]ssets/Packages.meta
 
 # Ignore any imported build items
 /[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/*.cs
