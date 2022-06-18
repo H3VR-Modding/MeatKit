@@ -72,6 +72,8 @@ namespace MeatKit
 
             if (!ReadMe)
                 messages["ReadMe"] = BuildMessage.Error("Missing readme.");
+            else if (!AssetDatabase.GetAssetPath(ReadMe).EndsWith(".md", StringComparison.InvariantCultureIgnoreCase))
+                messages["ReadMe"] = BuildMessage.Warning("Are you sure this is a Markdown file? It doesn't have the .md file extension.");
 
             switch (BundleCompressionType)
             {
