@@ -79,13 +79,13 @@ AssetBundles/
 ImportedBundles/
 
 # MeatKit stuffs
-/[Aa]ssets/MeatKit/Managed/DinoFracture.*
-/[Aa]ssets/MeatKit/Managed/ES2.*
-/[Aa]ssets/MeatKit/Managed/H3VRCode*
-/[Aa]ssets/MeatKit/Managed/Atlas.*
-/[Aa]ssets/MeatKit/Managed/OtherLoader.*
-/[Aa]ssets/MeatKit/Managed/ReadOnlyCollectionsInterfaces.*
-/[Aa]ssets/MeatKit/Managed/Stratum.*
+/[Aa]ssets/MeatKit/Managed/*
+!/[Aa]ssets/MeatKit/Managed/0Harmony.*
+!/[Aa]ssets/MeatKit/Managed/BepInEx.*
+!/[Aa]ssets/MeatKit/Managed/DotNetZip.*
+!/[Aa]ssets/MeatKit/Managed/MonoMod.Utils.*
+!/[Aa]ssets/MeatKit/Managed/Sodalite.*
+!/[Aa]ssets/MeatKit/Managed/Valve.Newtonsoft.Json.*
 
 # No Bakery 4 U
 /[Aa]ssets/Bakery/
