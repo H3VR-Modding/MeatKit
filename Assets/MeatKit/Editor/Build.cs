@@ -57,6 +57,11 @@ namespace MeatKit
             string tempAssemblyFile = Path.GetTempFileName();
             File.Copy(editorAssembly, tempAssemblyFile, true);
             
+            // Make sure we have the virtual reality supported checkbox enabled
+            // If this is not set to true when we build our asset bundles, the shaders will not compile correctly
+            bool wasVirtualRealitySupported = PlayerSettings.virtualRealitySupported;
+            PlayerSettings.virtualRealitySupported = true;
+            
             // Create a map of assembly names to what we want to rename them to, then enable bundle processing
             var replaceMap = new Dictionary<string, string>
             {
@@ -79,6 +84,9 @@ namespace MeatKit
             foreach (var file in Directory.GetFiles(bundleOutputPath, "*.manifest"))
                 File.Delete(file);
             File.Delete(Path.Combine(bundleOutputPath, profile.Version));
+            
+            // Reset the virtual reality supported checkbox, so if the user had it disabled it will stay disabled
+            PlayerSettings.virtualRealitySupported = wasVirtualRealitySupported;
             
             // And export the assembly to the folder
             ExportEditorAssembly(bundleOutputPath, tempAssemblyFile, requiredScripts);
