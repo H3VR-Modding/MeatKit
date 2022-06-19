@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using BepInEx;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 using UnityEngine;
 
 namespace MeatKit
@@ -43,10 +45,19 @@ namespace MeatKit
             // Get the MeatKitPlugin class and rename it
             using (var asm = AssemblyDefinition.ReadAssembly(tempFile, rParams))
             {
+                // Locate the plugin class for this profile and set it's name and namespace
                 string mainNamespace = BuildWindow.SelectedProfile.MainNamespace;
                 var plugin = FindPluginClass(asm.MainModule, mainNamespace);
                 plugin.Namespace = mainNamespace;
                 plugin.Name = settings.PackageName + "Plugin";
+
+                // Watermark the plugin just in case it's useful to someone
+                var str = asm.MainModule.TypeSystem.String;
+                var descriptionAttributeConstructor = typeof(DescriptionAttribute).GetConstructor(new[] {typeof(string)});
+                var descriptionAttributeRef = asm.MainModule.ImportReference(descriptionAttributeConstructor);
+                var descriptionAttribute = new CustomAttribute(descriptionAttributeRef);
+                descriptionAttribute.ConstructorArguments.Add(new CustomAttributeArgument(str, "Built with MeatKit"));
+                plugin.CustomAttributes.Add(descriptionAttribute);
 
                 // This is some quantum bullshit.
                 // If you don't enumerate the constructor arguments for attributes their values aren't updated correctly. 
@@ -55,7 +66,6 @@ namespace MeatKit
                 }
 
                 // Get the BepInPlugin attribute and replace the values in it with our own
-                var str = asm.MainModule.TypeSystem.String;
                 var guid = settings.Author + "." + settings.PackageName;
                 var pluginAttribute = plugin.CustomAttributes.First(a => a.AttributeType.Name == "BepInPlugin");
                 pluginAttribute.ConstructorArguments[0] = new CustomAttributeArgument(str, guid);

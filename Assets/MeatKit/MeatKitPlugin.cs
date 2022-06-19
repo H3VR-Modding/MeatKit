@@ -2,20 +2,18 @@
 using System.IO;
 using System.Reflection;
 using BepInEx;
-using FistVR;
-using Sodalite.Api;
-using UnityEngine;
 
 /*
  * SUPER LARGE WARNING ABOUT THIS CLASS
- * This class can be used to add custom behaviour to your generated BepInEx plugin.
- * Please note, however, that all of the things in here already are REQUIRED and CANNOT BE CHANGED.
- * There are LARGE TEXT WARNINGS above such items so you don't forget.
- * You may add to this class so long as you do not modify anything with those notices (lest you want build errors)
+ * This is the default and fallback class that MeatKit uses as a template to generate a BepInEx plugin
+ * when building your mod. DO NOT MODIFY THIS FILE AT ALL, IN ANY WAY.
  *
- * The class name and BepInPlugin attribute are modified at build-time to reflect your build settings.
- * BepInDependency attributes will automatically be generated if they're required by a build item, otherwise
- * may add it yourself here.
+ * If you want to add custom behavior to your mod, you should make a copy of this class, and put it inside
+ * the main namespace of your mod (that namespace can be found by opening the 'Allowed Namespaces' list on your build
+ * profile). MeatKit will then detect and use that class instead of this one, for that one specific profile.
+ *
+ * HOWEVER, YOU MUST KEEP ALL OF THE STUFF FROM THIS TEMPLATE, otherwise MeatKit may fail to correctly build
+ * your plugin, or your mod may fail to correctly load.
  */
 
 // DO NOT REMOVE OR CHANGE ANY OF THESE ATTRIBUTES

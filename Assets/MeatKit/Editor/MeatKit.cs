@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using AssetsTools.NET;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
