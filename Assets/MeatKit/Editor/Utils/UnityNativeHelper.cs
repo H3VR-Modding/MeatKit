@@ -5,6 +5,15 @@ namespace MeatKit
 {
     public static class UnityNativeHelper
     {
+        private delegate IntPtr StringAssignType(IntPtr ptr, string str, ulong len, IntPtr nul);
+
+        private static readonly StringAssignType AssignNativeString;
+        
+        static UnityNativeHelper()
+        {
+            AssignNativeString = (StringAssignType) NativeHookManager.GetDelegateForFunctionPointer<StringAssignType>(0x1480);
+        }
+        
         /// <summary>
         /// Reads a native string structure from unmanaged memory
         /// </summary>
@@ -39,23 +48,11 @@ namespace MeatKit
         /// <param name="ptr">The pointer to the structure in memory</param>
         /// <param name="ofs">Offset to the pointer</param>
         /// <param name="str">The string to write</param>
-        /// <returns>The pointer to the allocated memory for the string</returns>
-        /// <remarks>You must free the pointer this returns when you're done with it</remarks>
-        public static IntPtr WriteNativeString(IntPtr ptr, int ofs, string str)
+        public static void WriteNativeString(IntPtr ptr, int ofs, string str)
         {
-            // Apply the offset
-            IntPtr real = (IntPtr) (ptr.ToInt64() + ofs);
-
-            // Allocate unmanaged memory for the string and copy it into there
-            var stringPointer = Marshal.StringToHGlobalAnsi(str);
-
-            // Write the values into the struct
-            Marshal.WriteIntPtr(real, stringPointer);
-            Marshal.WriteInt64(real, 8, str.Length);
-            Marshal.WriteInt64(real, 24, str.Length);
-
-            // Return the allocated pointer which must be freed later
-            return stringPointer;
+            // Apply the offset and call the assign function of native Unity code
+            var real = (IntPtr) (ptr.ToInt64() + ofs);
+            AssignNativeString(real, str, (ulong) str.Length, IntPtr.Zero);
         }
     }
 }

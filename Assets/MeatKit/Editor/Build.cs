@@ -65,7 +65,7 @@ namespace MeatKit
                 {"H3VRCode-CSharp.dll", "Assembly-CSharp.dll"},
                 {"H3VRCode-CSharp-firstpass.dll", "Assembly-CSharp-firstpass.dll"}
             };
-            AssetBundleExport.EnableProcessing(replaceMap);
+            AssetBundleIO.EnableProcessing(replaceMap);
 
             // Get the list of asset bundle configurations and build them
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
@@ -73,7 +73,7 @@ namespace MeatKit
                 BuildTarget.StandaloneWindows64);
             
             // Disable bundle processing now that we're done with it.
-            var requiredScripts = AssetBundleExport.DisableProcessing();
+            var requiredScripts = AssetBundleIO.DisableProcessing();
             
             // Cleanup the unused files created with building the bundles
             foreach (var file in Directory.GetFiles(bundleOutputPath, "*.manifest"))

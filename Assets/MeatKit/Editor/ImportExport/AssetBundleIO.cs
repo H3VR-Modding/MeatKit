@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MeatKit
 {
     [InitializeOnLoad]
-    public static class AssetBundleExport
+    public static class AssetBundleIO
     {
         /// <summary>
         /// Toggle for enabling the asset bundle processing, just so we don't
@@ -18,10 +18,11 @@ namespace MeatKit
         private static Dictionary<string, string> _replaceMap;
         private static Dictionary<string, List<string>> _scriptUsage;
 
-        static AssetBundleExport()
+        static AssetBundleIO()
         {
             // Apply the one hook we need here
-            OrigMonoScriptTransfer = NativeHookManager.ApplyEditorDetour<MonoScriptTransfer>(0xE321E0, new MonoScriptTransfer(OnMonoScriptTransfer));
+            OrigMonoScriptTransferWrite = NativeHookManager.ApplyEditorDetour<MonoScriptTransferWrite>(0xE321E0, new MonoScriptTransferWrite(OnMonoScriptTransferWrite));
+            OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(0xE34000, new MonoScriptTransferRead(OnMonoScriptTransferRead));
         }
 
         public static void EnableProcessing(Dictionary<string, string> replaceMap)
@@ -36,7 +37,7 @@ namespace MeatKit
             ProcessingEnabled = false;
             return _scriptUsage;
         }
-        
+
         /// <summary>
         /// This is a detour on some of the native Unity editor code which is part of writing data to asset bundles.
         /// When Unity goes to serialize a MonoScript struct, we want to pre-process it a bit before it actually
@@ -46,23 +47,22 @@ namespace MeatKit
         /// properly, as well as remapping the assembly names for some scripts so that references are maintained
         /// correctly when loaded in the game.
         /// </summary>
-        private static void OnMonoScriptTransfer(IntPtr monoScript, IntPtr streamedBinaryWrite)
+        private static void OnMonoScriptTransferWrite(IntPtr monoScript, IntPtr streamedBinaryWrite)
         {
             // If processing is disabled just run the original and skip.
             if (!ProcessingEnabled)
             {
-                OrigMonoScriptTransfer(monoScript, streamedBinaryWrite);
+                OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
                 return;
             }
-            
+
             // Create a couple variables for later
             var applied = false;
-            var newAssemblyNameLocation = IntPtr.Zero;
 
             // Read the assembly name and class name from memory
             var className = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptClassName);
             var assemblyName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptAssemblyName);
-            
+
             // Add it to the scripts usage dictionary
             if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
             _scriptUsage[assemblyName].Add(className);
@@ -72,25 +72,58 @@ namespace MeatKit
             if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // Write the new assembly name into memory
-                newAssemblyNameLocation = UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
+                UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
                 applied = true;
             }
 
             // Let the original method run
-            OrigMonoScriptTransfer(monoScript, streamedBinaryWrite);
+            OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
 
             // If we didn't apply any remapping, skip this last part.
             if (!applied) return;
-            
+
             // Cleanup by writing the original value back to memory and freeing the memory allocated for the new name.
             UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, assemblyName);
-            Marshal.FreeHGlobal(newAssemblyNameLocation);
+        }
+
+        /// <summary>
+        /// Any time the editor reads from an asset bundle, we want to apply our remapping so that references from
+        /// the game can be properly deserialized.
+        /// </summary>
+        private static long OnMonoScriptTransferRead(IntPtr monoScript, IntPtr streamedBinaryRead)
+        {
+            // Run the original method and return the result if processing is disabled.
+            long result = OrigMonoScriptTransferRead(monoScript, streamedBinaryRead);
+            if (!ProcessingEnabled) return result;
+
+            // Read the assembly name and class name from memory
+            var className = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptClassName);
+            var assemblyName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptAssemblyName);
+
+            // Add it to the scripts usage dictionary
+            if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
+            _scriptUsage[assemblyName].Add(className);
+
+            // Check if we want to remap this assembly name
+            var newAssemblyName = "";
+            if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
+            {
+                // Write the new assembly name into memory
+                UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
+            }
+
+            return result;
         }
 
         // Actual name: MonoScript::Transfer<StreamedBinaryWrite<0>>(StreamedBinaryWrite<0> &)
-        private delegate void MonoScriptTransfer(IntPtr monoScript, IntPtr streamedBinaryWrite);
+        private delegate void MonoScriptTransferWrite(IntPtr monoScript, IntPtr streamedBinaryWrite);
 
-        private static readonly MonoScriptTransfer OrigMonoScriptTransfer;
+        private static readonly MonoScriptTransferWrite OrigMonoScriptTransferWrite;
+
+        // Actual name: MonoScript::Transfer<StreamedBinaryRead<1>>(StreamedBinaryRead<1> &)
+        private delegate long MonoScriptTransferRead(IntPtr monoScript, IntPtr streamedBinaryRead);
+
+        private static readonly MonoScriptTransferRead OrigMonoScriptTransferRead;
 
         private const int MonoScriptClassName = 224;
 

@@ -48,6 +48,13 @@ namespace MeatKit
             return original;
         }
 
+        public static Delegate GetDelegateForFunctionPointer<T>(long from)
+        {
+            // Get the base address for the Unity module and apply the offset
+            IntPtr editorBase = DynDll.OpenLibrary("Unity.exe");
+            return Marshal.GetDelegateForFunctionPointer((IntPtr) (editorBase.ToInt64() + from), typeof(T));
+        }
+        
         private static void OnShutdownManaged()
         {
             // Unity is about to shutdown the mono runtime! Quickly dispose of our detours!
