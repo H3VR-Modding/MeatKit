@@ -26,21 +26,32 @@ namespace MeatKit
             var gameManagedLocation = MeatKitCache.GameManagedLocation;
             if (string.IsNullOrEmpty(gameManagedLocation) || !Directory.Exists(gameManagedLocation))
             {
-                gameManagedLocation =
-                    EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
-                MeatKitCache.GameManagedLocation = gameManagedLocation;
+                // Cache wasn't set or directory doesn't exist. Lets see if we can find it automatically via Steam
+                gameManagedLocation = SteamAppLocator.LocateGame();
+                if (string.IsNullOrEmpty(gameManagedLocation))
+                {
+                    // Still nope. Ask the user for it directly.
+                    gameManagedLocation =
+                        EditorUtility.OpenFolderPanel("Select H3VR Managed directory", string.Empty, "Managed");
+                }
+                else gameManagedLocation = Path.Combine(gameManagedLocation, "h3vr_Data/Managed");
             }
 
-            // If it's _still_ empty, the user must have cancelled.
+            // If it's _still_ empty, the user must have cancelled the input prompt, so cancel the import.
             if (string.IsNullOrEmpty(gameManagedLocation)) return;
+
+            // Also, check if the path is even valid
             if (!File.Exists(Path.Combine(gameManagedLocation, "Assembly-CSharp.dll")))
             {
-                EditorUtility.DisplayDialog("Error", "Looks like the path you selected is invalid. Make sure you are selecting the h3vr_Data/Managed folder in the game directory.", "Ok");
-                MeatKitCache.GameManagedLocation = "";
+                EditorUtility.DisplayDialog("Error",
+                    "Looks like the path you selected is invalid. Make sure you are selecting the h3vr_Data/Managed folder in the game directory.",
+                    "Ok");
                 return;
             }
             
+            // Import the assemblies and update the cache so we can find it in the future
             ImportAssemblies(gameManagedLocation, ManagedDirectory);
+            MeatKitCache.GameManagedLocation = gameManagedLocation;
         }
 
         [MenuItem("MeatKit/Scripts/Import Single", priority = 0)]
