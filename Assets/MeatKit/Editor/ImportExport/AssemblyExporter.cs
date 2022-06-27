@@ -168,37 +168,21 @@ namespace MeatKit
 
         private static TypeDefinition FindPluginClass(ModuleDefinition module, string mainNamespace)
         {
-            // Enumerate the types in the module.
-            var pluginClasses = new List<TypeDefinition>();
+            // Get the default MeatKitPlugin class from the module
+            var pluginClass = module.GetType("MeatKitPlugin");
+            
+            // Try and locate any alternative plugin classes
             foreach (var type in module.Types)
             {
-                // We're looking for types that extend the BaseUnityPlugin class
-                if (type.IsSubtypeOf(typeof(BaseUnityPlugin))) pluginClasses.Add(type);
+                // We're looking for types that extend the BaseUnityPlugin class and is in the main namespace of our mod
+                if (type.IsSubtypeOf(typeof(BaseUnityPlugin)) && type.Namespace == mainNamespace)
+                {
+                    pluginClass = type;
+                    break;
+                }
             }
 
-            // Now that we have a list of all the classes, check if there is a custom one
-            switch (pluginClasses.Count)
-            {
-                case 0:
-                    // User somehow deleted default plugin class and has no alternatives :P
-                    throw new MeatKitBuildException(
-                        "No suitable BepInEx plugin class was found! Was the default one deleted???");
-                case 1:
-                    // There is only one, so just use that.
-                    return pluginClasses[0];
-                default:
-                    // Use the included class as default, and then see if there is one in the mod's main namespace
-                    // If there is a custom one, use that instead. And then remove the default one.
-                    TypeDefinition selected = module.GetType("MeatKitPlugin");
-                    foreach (var type in pluginClasses)
-                    {
-                        module.Types.Remove(selected);
-                        selected = type;
-                        break;
-                    }
-
-                    return selected;
-            }
+            return pluginClass;
         }
 
         private static IEnumerable<CustomAttribute> GetAllCustomAttributes(AssemblyDefinition asm)
