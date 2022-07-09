@@ -71,6 +71,7 @@ crashlytics-build.properties
 
 # I like Rider
 /.idea/
+/[Aa]ssets/Editor.meta
 
 # Built asset bundles
 AssetBundles/
@@ -94,6 +95,9 @@ ImportedBundles/
 /[Aa]ssets/Editor/x64.meta
 /[Aa]ssets/BakeryLightmaps/
 /[Aa]ssets/BakeryLightmaps.meta
+/bakery_times.log
+/[Aa]ssets/Settings
+/[Aa]ssets/Settings.meta
 
 # Ignore packages
 /[Aa]ssets/Packages/
