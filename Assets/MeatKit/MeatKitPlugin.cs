@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using BepInEx;
+using BepInEx.Logging;
 
 /*
  * SUPER LARGE WARNING ABOUT THIS CLASS
@@ -26,10 +27,14 @@ public class MeatKitPlugin : BaseUnityPlugin
     // DO NOT CHANGE OR REMOVE THIS FIELD.
 #pragma warning disable 414
     private static readonly string BasePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+    internal new static ManualLogSource Logger;
 #pragma warning restore 414
 
     private void Awake()
     {
+        // This lets you use your BepInEx-provided logger from other scripts in your project
+        Logger = base.Logger;
+        
         // You are free to edit this method, however please ensure LoadAssets is still called somewhere inside it.
         LoadAssets();
     }

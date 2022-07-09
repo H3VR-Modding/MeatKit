@@ -75,6 +75,14 @@ namespace MeatKit
                 UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
                 applied = true;
             }
+            
+            // If it didn't exist in the replace map, check if it contains H3VRCode-CSharp. This is for MonoMod assemblies.
+            else if (assemblyName.Contains("H3VRCode-CSharp"))
+            {
+                // Write the new assembly name into memory
+                UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, assemblyName.Replace("H3VRCode-CSharp", "Assembly-CSharp"));
+                applied = true;
+            }
 
             // Let the original method run
             OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
@@ -110,6 +118,13 @@ namespace MeatKit
             {
                 // Write the new assembly name into memory
                 UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
+            }
+            
+            // If it didn't exist in the replace map, check if it contains H3VRCode-CSharp. This is for MonoMod assemblies.
+            else if (assemblyName.Contains("Assembly-CSharp"))
+            {
+                // Write the new assembly name into memory
+                UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, assemblyName.Replace("Assembly-CSharp", "H3VRCode-CSharp"));
             }
 
             return result;
