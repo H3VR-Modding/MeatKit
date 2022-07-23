@@ -52,6 +52,9 @@ namespace MeatKit
             // Import the assemblies and update the cache so we can find it in the future
             ImportAssemblies(gameManagedLocation, ManagedDirectory);
             MeatKitCache.GameManagedLocation = gameManagedLocation;
+
+            // Let the user know we've completed the action
+            EditorUtility.DisplayDialog("Success", "Game scripts imported", "Ok");
         }
 
         [MenuItem("MeatKit/Scripts/Import Single", priority = 0)]
