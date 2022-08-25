@@ -17,13 +17,13 @@ namespace MeatKit
     /// </summary>
     public static partial class MeatKit
     {
-        private const string AssemblyName = "Assembly-CSharp";
-        private const string AssemblyRename = "H3VRCode-CSharp";
-        private const string AssemblyFirstpassName = "Assembly-CSharp-firstpass";
-        private const string AssemblyFirstpassRename = "H3VRCode-CSharp-passfirst";
-
+        public const string AssemblyName = "Assembly-CSharp";
+        public const string AssemblyRename = "H3VRCode-CSharp";
+        public const string AssemblyFirstpassName = "Assembly-CSharp-firstpass";
+        public const string AssemblyFirstpassRename = "H3VRCode-CSharp-firstpass";
+        
         // Types we want to strip from the main Unity assembly
-        private static readonly string[] StripAssemblyTypes =
+        public static readonly string[] StripAssemblyTypes =
         {
             // Alloy classes
             "MaterialMapChannelPackerDefinition",
