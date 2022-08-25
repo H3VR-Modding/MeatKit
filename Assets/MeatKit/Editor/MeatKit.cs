@@ -7,7 +7,7 @@ namespace MeatKit
 {
     public static partial class MeatKit
     {
-        private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "MeatKit/Managed/");
+        private static readonly string ManagedDirectory = Path.Combine(Application.dataPath, "Managed/");
 
         private static bool ShowErrorIfH3VRNotImported()
         {
