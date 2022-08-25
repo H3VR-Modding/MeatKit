@@ -71,6 +71,7 @@ crashlytics-build.properties
 
 # I like Rider
 /.idea/
+/[Aa]ssets/Editor.meta
 
 # Built asset bundles
 AssetBundles/
@@ -79,13 +80,14 @@ AssetBundles/
 ImportedBundles/
 
 # MeatKit stuffs
-/[Aa]ssets/MeatKit/Managed/DinoFracture.*
-/[Aa]ssets/MeatKit/Managed/ES2.*
-/[Aa]ssets/MeatKit/Managed/H3VRCode*
-/[Aa]ssets/MeatKit/Managed/Atlas.*
-/[Aa]ssets/MeatKit/Managed/OtherLoader.*
-/[Aa]ssets/MeatKit/Managed/ReadOnlyCollectionsInterfaces.*
-/[Aa]ssets/MeatKit/Managed/Stratum.*
+/[Aa]ssets/Managed/*
+!/[Aa]ssets/Managed/0Harmony.*
+!/[Aa]ssets/Managed/BepInEx.*
+!/[Aa]ssets/Managed/DotNetZip.*
+!/[Aa]ssets/Managed/Mono.Cecil*
+!/[Aa]ssets/Managed/MonoMod.*
+!/[Aa]ssets/Managed/Sodalite.*
+!/[Aa]ssets/Managed/Valve.Newtonsoft.Json.*
 
 # No Bakery 4 U
 /[Aa]ssets/Bakery/
@@ -94,18 +96,13 @@ ImportedBundles/
 /[Aa]ssets/Editor/x64.meta
 /[Aa]ssets/BakeryLightmaps/
 /[Aa]ssets/BakeryLightmaps.meta
+/[Aa]ssets/Settings
+/[Aa]ssets/Settings.meta
+/bakery_times.log
 
 # Ignore packages
 /[Aa]ssets/Packages/
 /[Aa]ssets/Packages.meta
-
-# Ignore any imported build items
-/[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/*.cs
-/[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/*.meta
-!/[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/PreloadAssetsBuildItem.*
-!/[Aa]ssets/MeatKit/Editor/BuildPipeline/BuildItems/StoreFilesBuildItem.*
-/[Aa]ssets/MeatKit/Editor/BuildPipeline/OtherLoaderBuildRootEditor.*
-/[Aa]ssets/MeatKit/Editor/BuildPipeline/SpawnerEntryEditor.*
 
 # Cache
 /meatkit.json

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using AssetsTools.NET;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -36,7 +35,6 @@ namespace MeatKit
         
         [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
-        public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;
         public BuildAction BuildAction = BuildAction.JustBuildFiles;
 
         [HideInInspector]
@@ -72,18 +70,8 @@ namespace MeatKit
 
             if (!ReadMe)
                 messages["ReadMe"] = BuildMessage.Error("Missing readme.");
-
-            switch (BundleCompressionType)
-            {
-                case AssetBundleCompressionType.NONE:
-                    messages["BundleCompressionType"] = BuildMessage.Warning(
-                        "Uncompressed bundles are not recommended for publication. They can and will be very large.");
-                    break;
-                case AssetBundleCompressionType.LZMA:
-                    messages["BundleCompressionType"] = BuildMessage.Info(
-                        "LZMA can take longer to compress than LZ4, however it will result in smaller file sizes usually.");
-                    break;
-            }
+            else if (!AssetDatabase.GetAssetPath(ReadMe).EndsWith(".md", StringComparison.InvariantCultureIgnoreCase))
+                messages["ReadMe"] = BuildMessage.Warning("Are you sure this is a Markdown file? It doesn't have the .md file extension.");
 
             switch (BuildAction)
             {

@@ -57,16 +57,12 @@ namespace MeatKit
             string tempAssemblyFile = Path.GetTempFileName();
             File.Copy(editorAssembly, tempAssemblyFile, true);
             
-            // Then get their asset bundle configurations
-            var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
-            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.None,
-                BuildTarget.StandaloneWindows64);
-            // Cleanup the unused files created with building the bundles
-            foreach (var file in Directory.GetFiles(bundleOutputPath, "*.manifest"))
-                File.Delete(file);
-            File.Delete(Path.Combine(bundleOutputPath, profile.Version));
-
-            // With the bundles done building we can process them
+            // Make sure we have the virtual reality supported checkbox enabled
+            // If this is not set to true when we build our asset bundles, the shaders will not compile correctly
+            bool wasVirtualRealitySupported = PlayerSettings.virtualRealitySupported;
+            PlayerSettings.virtualRealitySupported = true;
+            
+            // Create a map of assembly names to what we want to rename them to, then enable bundle processing
             var replaceMap = new Dictionary<string, string>
             {
                 {"Assembly-CSharp.dll", profile.PackageName + ".dll"},
@@ -74,14 +70,24 @@ namespace MeatKit
                 {"H3VRCode-CSharp.dll", "Assembly-CSharp.dll"},
                 {"H3VRCode-CSharp-firstpass.dll", "Assembly-CSharp-firstpass.dll"}
             };
+            AssetBundleIO.EnableProcessing(replaceMap);
 
-            Dictionary<string, List<string>> requiredScripts = new Dictionary<string, List<string>>();
-            foreach (var bundle in bundles)
-            {
-                var path = Path.Combine(bundleOutputPath, bundle.assetBundleName);
-                ProcessBundle(path, path, replaceMap, profile.BundleCompressionType, requiredScripts);
-            }
-
+            // Get the list of asset bundle configurations and build them
+            var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
+            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.None,
+                BuildTarget.StandaloneWindows64);
+            
+            // Disable bundle processing now that we're done with it.
+            var requiredScripts = AssetBundleIO.DisableProcessing();
+            
+            // Cleanup the unused files created with building the bundles
+            foreach (var file in Directory.GetFiles(bundleOutputPath, "*.manifest"))
+                File.Delete(file);
+            File.Delete(Path.Combine(bundleOutputPath, profile.Version));
+            
+            // Reset the virtual reality supported checkbox, so if the user had it disabled it will stay disabled
+            PlayerSettings.virtualRealitySupported = wasVirtualRealitySupported;
+            
             // And export the assembly to the folder
             ExportEditorAssembly(bundleOutputPath, tempAssemblyFile, requiredScripts);
             
