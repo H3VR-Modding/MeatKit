@@ -38,8 +38,7 @@ namespace MeatKit
             var rParams = new ReaderParameters
             {
                 AssemblyResolver =
-                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location),
-                        Application.dataPath + "/MeatKit/Managed/")
+                    new RedirectedAssemblyResolver(Path.GetDirectoryName(typeof(UnityEngine.Object).Assembly.Location), ManagedDirectory)
             };
 
             // Get the MeatKitPlugin class and rename it
