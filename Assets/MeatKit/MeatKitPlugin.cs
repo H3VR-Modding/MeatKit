@@ -21,7 +21,7 @@ using BepInEx.Logging;
 [BepInPlugin("MeatKit", "MeatKit Plugin", "1.0.0")]
 [BepInProcess("h3vr.exe")]
 
-// DO NOT CHANGE THE NAME OF THIS CLASS.
+// DO NOT CHANGE THE NAME OF THIS CLASS OR THE BASE CLASS. If you're making a custom plugin, make sure it extends BaseUnityPlugin.
 public class MeatKitPlugin : BaseUnityPlugin
 {
     // DO NOT CHANGE OR REMOVE THIS FIELD.
@@ -30,18 +30,20 @@ public class MeatKitPlugin : BaseUnityPlugin
     internal new static ManualLogSource Logger;
 #pragma warning restore 414
 
+    // You are free to edit this method, however please ensure LoadAssets is still called somewhere inside it.
     private void Awake()
     {
         // This lets you use your BepInEx-provided logger from other scripts in your project
         Logger = base.Logger;
         
-        // You are free to edit this method, however please ensure LoadAssets is still called somewhere inside it.
+        // You may place code before/after this, but do not remove this call to LoadAssets
         LoadAssets();
     }
 
     // DO NOT CHANGE OR REMOVE THIS METHOD. It's contents will be overwritten when building your package.
     private void LoadAssets()
     {
+        // Code to load your build items will be generated at build-time and inserted here
     }
 }
 #endif

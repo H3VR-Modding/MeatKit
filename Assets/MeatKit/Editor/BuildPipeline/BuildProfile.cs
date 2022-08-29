@@ -32,6 +32,7 @@ namespace MeatKit
         [Header("Script Options")]
         public bool StripNamespaces = true;
         public string[] AdditionalNamespaces = new string[0];
+        public bool ApplyHarmonyPatches = true;
         
         [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];

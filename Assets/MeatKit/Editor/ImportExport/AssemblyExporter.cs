@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using BepInEx;
+using HarmonyLib;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Collections.Generic;
 using UnityEngine;
+using MethodBody = Mono.Cecil.Cil.MethodBody;
 
 namespace MeatKit
 {
@@ -76,6 +78,18 @@ namespace MeatKit
                 loadAssetsMethod.Body = new MethodBody(loadAssetsMethod);
                 var il = loadAssetsMethod.Body.GetILProcessor();
 
+                // If we're automatically applying Harmony patches, do that now
+                // This IL translates to Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "PluginGuid");
+                if (settings.ApplyHarmonyPatches)
+                {
+                    var assemblyGetExecutingAssembly = typeof(Assembly).GetMethod("GetExecutingAssembly");
+                    var harmonyCreateAndPatchALl = typeof(Harmony).GetMethod("CreateAndPatchAll", new[] {typeof(Assembly), typeof(string)});
+                    il.Emit(OpCodes.Call, plugin.Module.ImportReference(assemblyGetExecutingAssembly));
+                    il.Emit(OpCodes.Ldstr, guid);
+                    il.Emit(OpCodes.Call, plugin.Module.ImportReference(harmonyCreateAndPatchALl));
+                    il.Emit(OpCodes.Pop);
+                }
+                
                 // Let any build items insert their own code in here
                 foreach (var item in settings.BuildItems)
                     item.GenerateLoadAssets(plugin, il);
@@ -169,7 +183,7 @@ namespace MeatKit
         {
             // Get the default MeatKitPlugin class from the module
             var pluginClass = module.GetType("MeatKitPlugin");
-            
+
             // Try and locate any alternative plugin classes
             foreach (var type in module.Types)
             {
