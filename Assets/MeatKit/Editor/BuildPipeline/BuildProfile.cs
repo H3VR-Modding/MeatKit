@@ -107,7 +107,7 @@ namespace MeatKit
         {
             // Go over each build item
             bool hasErrors = false, hasWarnings = false;
-            foreach (var item in BuildItems)
+            foreach (var item in BuildItems.Where(x => x != null))
                 // Check if it has any validation messages
             foreach (var message in item.Validate().Values)
                 // Log them

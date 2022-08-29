@@ -65,10 +65,10 @@ namespace MeatKit
             // Create a map of assembly names to what we want to rename them to, then enable bundle processing
             var replaceMap = new Dictionary<string, string>
             {
-                {"Assembly-CSharp.dll", profile.PackageName + ".dll"},
-                {"Assembly-CSharp-firstpass.dll", profile.PackageName + "-firstpass.dll"},
-                {"H3VRCode-CSharp.dll", "Assembly-CSharp.dll"},
-                {"H3VRCode-CSharp-firstpass.dll", "Assembly-CSharp-firstpass.dll"}
+                {AssemblyName, profile.PackageName + ".dll"},
+                {AssemblyFirstpassName, profile.PackageName + "-firstpass.dll"},
+                {AssemblyRename, AssemblyName},
+                {AssemblyFirstpassRename, AssemblyFirstpassName}
             };
             AssetBundleIO.EnableProcessing(replaceMap);
 

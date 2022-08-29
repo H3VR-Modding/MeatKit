@@ -11,8 +11,8 @@ public class PrefabLoader : EditorWindow
 
     private static readonly Dictionary<string, string> AssemblyNameReplaceMap = new Dictionary<string, string>
     {
-        {"Assembly-CSharp.dll", "H3VRCode-CSharp.dll"},
-        {"Assembly-CSharp-firstpass.dll", "H3VRCode-CSharp-passfirst.dll"}
+        {MeatKit.MeatKit.AssemblyName, MeatKit.MeatKit.AssemblyRename},
+        {MeatKit.MeatKit.AssemblyFirstpassName, MeatKit.MeatKit.AssemblyFirstpassRename}
     };
 
     private static readonly Dictionary<string, AssetBundle> LoadedAssetBundles = new Dictionary<string, AssetBundle>();
