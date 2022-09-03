@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using AssetsTools.NET;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -18,6 +17,8 @@ namespace MeatKit
     [CreateAssetMenu(menuName = "MeatKit/Build Profile")]
     public class BuildProfile : ScriptableObject, IValidatable
     {
+        private const string BaseOutputPath = "AssetBundles/";
+        
         [Header("Thunderstore Metadata")]
         public string PackageName = "";
         public string Author = "";
@@ -31,10 +32,10 @@ namespace MeatKit
         [Header("Script Options")]
         public bool StripNamespaces = true;
         public string[] AdditionalNamespaces = new string[0];
+        public bool ApplyHarmonyPatches = true;
         
         [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
-        public AssetBundleCompressionType BundleCompressionType = AssetBundleCompressionType.LZ4;
         public BuildAction BuildAction = BuildAction.JustBuildFiles;
 
         [HideInInspector]
@@ -49,6 +50,11 @@ namespace MeatKit
                 messages["PackageName"] =
                     BuildMessage.Error("Package name can only contain letters, numbers, and underscores.");
 
+            // Author needs to match regex
+            if (!Regex.IsMatch(Author, @"^[a-zA-Z_0-9]+$"))
+                messages["Author"] =
+                    BuildMessage.Error("Author can only contain letters, numbers, and underscores.");
+            
             // Make sure the version number is a valid x.x.x
             if (!Regex.IsMatch(Version, @"^\d+\.\d+\.\d+$"))
                 messages["Version"] = BuildMessage.Error("Version number must be in format 'x.x.x'.");
@@ -65,18 +71,8 @@ namespace MeatKit
 
             if (!ReadMe)
                 messages["ReadMe"] = BuildMessage.Error("Missing readme.");
-
-            switch (BundleCompressionType)
-            {
-                case AssetBundleCompressionType.NONE:
-                    messages["BundleCompressionType"] = BuildMessage.Warning(
-                        "Uncompressed bundles are not recommended for publication. They can and will be very large.");
-                    break;
-                case AssetBundleCompressionType.LZMA:
-                    messages["BundleCompressionType"] = BuildMessage.Info(
-                        "LZMA can take longer to compress than LZ4, however it will result in smaller file sizes usually.");
-                    break;
-            }
+            else if (!AssetDatabase.GetAssetPath(ReadMe).EndsWith(".md", StringComparison.InvariantCultureIgnoreCase))
+                messages["ReadMe"] = BuildMessage.Warning("Are you sure this is a Markdown file? It doesn't have the .md file extension.");
 
             switch (BuildAction)
             {
@@ -111,7 +107,7 @@ namespace MeatKit
         {
             // Go over each build item
             bool hasErrors = false, hasWarnings = false;
-            foreach (var item in BuildItems)
+            foreach (var item in BuildItems.Where(x => x != null))
                 // Check if it has any validation messages
             foreach (var message in item.Validate().Values)
                 // Log them
@@ -173,6 +169,14 @@ namespace MeatKit
         public string[] GetAllAllowedNamespaces()
         {
             return GetRequiredNamespaces().Concat(AdditionalNamespaces).ToArray();
+        }
+
+        public string ExportPath
+        {
+            get
+            {
+                return Path.Combine(BaseOutputPath, Path.Combine(PackageName, Version)) + Path.DirectorySeparatorChar;
+            }
         }
         
         public void WriteThunderstoreManifest(string location)
