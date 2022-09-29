@@ -230,7 +230,6 @@ PlayerSettings:
   - m_BuildTarget: Standalone
     m_Enabled: 1
     m_Devices:
-    - Oculus
     - OpenVR
   openGLRequireES31: 0
   openGLRequireES31AEP: 0
@@ -502,7 +501,7 @@ PlayerSettings:
   webGLUseWasm: 0
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
-    1:
+    1: H3VR_IMPORTED
   platformArchitecture: {}
   scriptingBackend: {}
   incrementalIl2cppBuild: {}

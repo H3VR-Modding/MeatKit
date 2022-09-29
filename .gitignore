@@ -100,6 +100,20 @@ ImportedBundles/
 /[Aa]ssets/Settings.meta
 /bakery_times.log
 
+# My stuff
+/[Aa]ssets/CommonAssets
+/[Aa]ssets/CommonAssets.meta
+/[Aa]ssets/VHS-2
+/[Aa]ssets/VHS-2.meta
+/[Aa]ssets/PoseTester
+/[Aa]ssets/PoseTester.meta
+/[Aa]ssets/AmmoModels
+/[Aa]ssets/AmmoModels.meta
+/[Aa]ssets/TestingStuff
+/[Aa]ssets/TestingStuff.meta
+/[Aa]ssets/GasOutEffects
+/[Aa]ssets/GasOutEffects.meta
+
 # Ignore packages
 /[Aa]ssets/Packages/
 /[Aa]ssets/Packages.meta
