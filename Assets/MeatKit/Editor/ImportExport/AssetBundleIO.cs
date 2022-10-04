@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEditor;
-using UnityEngine;
 
 namespace MeatKit
 {
@@ -68,6 +66,9 @@ namespace MeatKit
             if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
             _scriptUsage[assemblyName].Add(className);
 
+            // Prepare some debugging string
+            string debug = "  " + assemblyName + " " + className + ": ";
+            
             // Check if we want to remap this assembly name
             string newAssemblyName;
             if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
@@ -78,6 +79,11 @@ namespace MeatKit
                     // Write the new assembly name into memory
                     UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
                     applied = true;
+                    debug += "ReplaceMap";
+                }
+                else
+                {
+                    debug += "Ignored";
                 }
             }
             
@@ -87,8 +93,15 @@ namespace MeatKit
                 // Write the new assembly name into memory
                 UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, assemblyName.Replace(MeatKit.AssemblyRename, MeatKit.AssemblyName));
                 applied = true;
+                debug += "MonoMod";
+            }
+            else
+            {
+                debug += "Unchanged";
             }
 
+            BuildLog.WriteLine(debug);
+            
             // Let the original method run
             OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
 

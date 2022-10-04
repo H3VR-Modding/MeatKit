@@ -8,7 +8,6 @@ using BepInEx;
 using HarmonyLib;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using UnityEngine;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
 namespace MeatKit
@@ -24,9 +23,9 @@ namespace MeatKit
             string editorAssembly = EditorAssemblyPath + AssemblyName + ".dll";
             if (!File.Exists(editorAssembly) && !File.Exists(tempFile))
             {
-                Debug.LogError("Editor assembly missing! Can't export scripts.");
+                throw new MeatKitBuildException("Editor assembly missing! Can't export scripts.");
             }
-            else if (string.IsNullOrEmpty(tempFile))
+            if (string.IsNullOrEmpty(tempFile))
             {
                 tempFile = Path.GetTempFileName();
                 File.Copy(editorAssembly, tempFile, true);
@@ -49,10 +48,12 @@ namespace MeatKit
                 // Locate the plugin class for this profile and set it's name and namespace
                 string mainNamespace = BuildWindow.SelectedProfile.MainNamespace;
                 var plugin = FindPluginClass(asm.MainModule, mainNamespace);
+                BuildLog.WriteLine("Using plugin class " + plugin.FullName);
                 plugin.Namespace = mainNamespace;
                 plugin.Name = settings.PackageName + "Plugin";
 
                 // Watermark the plugin just in case it's useful to someone
+                BuildLog.WriteLine("Watermarking plugin class");
                 var str = asm.MainModule.TypeSystem.String;
                 var descriptionAttributeConstructor = typeof(DescriptionAttribute).GetConstructor(new[] {typeof(string)});
                 var descriptionAttributeRef = asm.MainModule.ImportReference(descriptionAttributeConstructor);
@@ -62,11 +63,13 @@ namespace MeatKit
 
                 // This is some quantum bullshit.
                 // If you don't enumerate the constructor arguments for attributes their values aren't updated correctly. 
+                BuildLog.WriteLine("Performing quantum bullshit");
                 foreach (var x in GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments))
                 {
                 }
 
                 // Get the BepInPlugin attribute and replace the values in it with our own
+                BuildLog.WriteLine("Applying BepInPlugin attribute params");
                 var guid = settings.Author + "." + settings.PackageName;
                 var pluginAttribute = plugin.CustomAttributes.First(a => a.AttributeType.Name == "BepInPlugin");
                 pluginAttribute.ConstructorArguments[0] = new CustomAttributeArgument(str, guid);
@@ -74,6 +77,7 @@ namespace MeatKit
                 pluginAttribute.ConstructorArguments[2] = new CustomAttributeArgument(str, settings.Version);
 
                 // Get the LoadAssets method and make a new body for it
+                BuildLog.WriteLine("Generating LoadAssets()");
                 var loadAssetsMethod = plugin.Methods.First(m => m.Name == "LoadAssets");
                 loadAssetsMethod.Body = new MethodBody(loadAssetsMethod);
                 var il = loadAssetsMethod.Body.GetILProcessor();
@@ -82,6 +86,7 @@ namespace MeatKit
                 // This IL translates to Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "PluginGuid");
                 if (settings.ApplyHarmonyPatches)
                 {
+                    BuildLog.WriteLine("  Code to apply harmony patches");
                     var assemblyGetExecutingAssembly = typeof(Assembly).GetMethod("GetExecutingAssembly");
                     var harmonyCreateAndPatchALl = typeof(Harmony).GetMethod("CreateAndPatchAll", new[] {typeof(Assembly), typeof(string)});
                     il.Emit(OpCodes.Call, plugin.Module.ImportReference(assemblyGetExecutingAssembly));
@@ -92,23 +97,30 @@ namespace MeatKit
                 
                 // Let any build items insert their own code in here
                 foreach (var item in settings.BuildItems)
+                {
+                    BuildLog.WriteLine("  " + item);
                     item.GenerateLoadAssets(plugin, il);
+                }
 
                 // Insert a ret at the end so it's valid
                 il.Emit(OpCodes.Ret);
 
                 // Module name needs to be changed away from Assembly-CSharp.dll because it is a reserved name.
                 string newAssemblyName = settings.PackageName + ".dll";
+                BuildLog.WriteLine("Renaming assembly (" + newAssemblyName + ")");
                 asm.Name = new AssemblyNameDefinition(settings.PackageName, asm.Name.Version);
                 asm.MainModule.Name = newAssemblyName;
 
                 // References to renamed unity code must be swapped out.
+                BuildLog.WriteLine("Renaming assembly references");
                 foreach (var ii in asm.MainModule.AssemblyReferences)
                 {
                     // Rename any references to the game's code
                     if (ii.Name.Contains("H3VRCode-CSharp"))
                     {
-                        ii.Name = ii.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
+                        var newReference = ii.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
+                        BuildLog.WriteLine("  " + ii.Name + " -> " + newReference);
+                        ii.Name = newReference;
                     }
 
                     // And also if we're referencing a MonoMod DLL, we need to fix reference too
@@ -120,19 +132,23 @@ namespace MeatKit
                         //    Assembly-CSharp
                         // So just lop off anything past the second to last dot
                         int idx = ii.Name.LastIndexOf('.', ii.Name.Length - 4);
-                        ii.Name = ii.Name.Substring(0, idx);
+                        var newReference = ii.Name.Substring(0, idx);
+                        BuildLog.WriteLine("  " + ii.Name + " -> " + newReference);
+                        ii.Name = newReference;
                     }
                 }
 
                 if (BuildWindow.SelectedProfile.StripNamespaces)
                 {
                     // Remove types not in an allowed namespace or the global namespace
+                    BuildLog.WriteLine("Stripping namespaces");
                     string[] allowedNamespaces = BuildWindow.SelectedProfile.GetAllAllowedNamespaces();
                     List<TypeDefinition> typesToRemove = new List<TypeDefinition>();
                     foreach (var type in asm.MainModule.Types)
                     {
                         if (type.Namespace == "" || allowedNamespaces.Any(x => type.Namespace.Contains(x)))
                             continue;
+                        BuildLog.WriteLine("  " + type.FullName);
                         typesToRemove.Add(type);
                     }
 
@@ -142,10 +158,10 @@ namespace MeatKit
                 // Remove the same types we didn't want to import. This cannot be skipped.
                 foreach (var type in StripAssemblyTypes
                              .Select(x => asm.MainModule.GetType(x))
-                             .Where(x => x != null))
-                    asm.MainModule.Types.Remove(type);
+                             .Where(x => x != null)) asm.MainModule.Types.Remove(type);
 
                 // Check if we're now missing any scripts from the export
+                BuildLog.WriteLine("Checking for missing types");
                 List<string> missing = new List<string>();
                 if (requiredScripts != null && requiredScripts.ContainsKey(newAssemblyName))
                 {
@@ -194,7 +210,7 @@ namespace MeatKit
                     break;
                 }
             }
-
+            
             return pluginClass;
         }
 
