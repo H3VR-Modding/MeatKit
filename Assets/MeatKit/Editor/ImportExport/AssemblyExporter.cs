@@ -163,10 +163,11 @@ namespace MeatKit
                 // Check if we're now missing any scripts from the export
                 BuildLog.WriteLine("Checking for missing types");
                 List<string> missing = new List<string>();
-                if (requiredScripts != null && requiredScripts.ContainsKey(newAssemblyName))
+                string originalAssemblyName = AssemblyName + ".dll";
+                if (requiredScripts != null && requiredScripts.ContainsKey(originalAssemblyName))
                 {
-                    missing.AddRange(requiredScripts[newAssemblyName]
-                        .Where(typeName => asm.MainModule.GetType(typeName) == null));
+                    missing.AddRange(requiredScripts[originalAssemblyName]
+                        .Where(typeName => !StripAssemblyTypes.Contains(typeName) && asm.MainModule.GetType(typeName) == null));
                 }
 
                 // If we're missing anything, fail the build.

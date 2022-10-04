@@ -52,7 +52,7 @@ namespace MeatKit
                 _output.WriteLine("Message   : " + _completionMessage);
             if (_exception != null)
             {
-                _output.WriteLine("Exception :\n");
+                _output.WriteLine("Exception :");
                 _output.WriteLine(_exception.ToString());
             }
 
