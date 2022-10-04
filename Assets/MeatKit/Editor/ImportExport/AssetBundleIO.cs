@@ -76,7 +76,7 @@ namespace MeatKit
             if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // If we're processing a type that should exist in the main game assembly, skip translation
-                if (assemblyName != MeatKit.AssemblyName || !MeatKit.StripAssemblyTypes.Contains(fullName))
+                if (assemblyName != MeatKit.AssemblyName + ".dll" || !MeatKit.StripAssemblyTypes.Contains(fullName))
                 {
                     // Write the new assembly name into memory
                     UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
