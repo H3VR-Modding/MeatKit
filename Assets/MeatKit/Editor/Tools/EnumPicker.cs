@@ -185,6 +185,8 @@ public class EnumPicker : PropertyDrawer
 [CustomPropertyDrawer(typeof(ItemSpawnerID.ESubCategory))]
 [CustomPropertyDrawer(typeof(FireArmRoundType))]
 [CustomPropertyDrawer(typeof(SosigEnemyID))]
+[CustomPropertyDrawer(typeof(FVRFireArmAttachementMountType))]
+
 public class EnumDrawers : EnumPicker
 {
 }

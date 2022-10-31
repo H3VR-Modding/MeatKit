@@ -47,5 +47,24 @@ namespace MeatKit
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginVersion));
             }
         }
+
+        protected void EnsurePluginIsIncompatibleWith(TypeDefinition plugin, string pluginGuid)
+        {
+            // Check if the plugin already has this dependency
+            var alreadyIncompatibleWith = plugin.CustomAttributes
+                .Where(a => a.AttributeType.Name == "BepInIncompatibility")
+                .Any(attribute => (string)attribute.ConstructorArguments[0].Value == pluginGuid);
+
+            // If it doesn't we need to add it.
+            if (!alreadyIncompatibleWith)
+            {
+                MethodBase constructor = typeof(BepInIncompatibility).GetConstructor(new[] {typeof(string)});
+                var attribute = new CustomAttribute(plugin.Module.ImportReference(constructor));
+                plugin.CustomAttributes.Add(attribute);
+
+                var str = plugin.Module.TypeSystem.String;
+                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, pluginGuid));
+            }
+        }
     }
 }

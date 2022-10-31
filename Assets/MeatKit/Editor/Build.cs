@@ -81,7 +81,7 @@ namespace MeatKit
 
             // Get the list of asset bundle configurations and build them
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
-            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.None,
+            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.ChunkBasedCompression,
                 BuildTarget.StandaloneWindows64);
             
             // Disable bundle processing now that we're done with it.
