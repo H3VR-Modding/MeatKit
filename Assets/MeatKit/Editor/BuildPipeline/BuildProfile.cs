@@ -18,7 +18,7 @@ namespace MeatKit
     public class BuildProfile : ScriptableObject, IValidatable
     {
         private const string BaseOutputPath = "AssetBundles/";
-        
+
         [Header("Thunderstore Metadata")]
         public string PackageName = "";
         public string Author = "";
@@ -33,7 +33,7 @@ namespace MeatKit
         public bool StripNamespaces = true;
         public string[] AdditionalNamespaces = new string[0];
         public bool ApplyHarmonyPatches = true;
-        
+
         [Header("Export Options")]
         public BuildItem[] BuildItems = new BuildItem[0];
         public BuildAction BuildAction = BuildAction.JustBuildFiles;
@@ -54,7 +54,7 @@ namespace MeatKit
             if (!Regex.IsMatch(Author, @"^[a-zA-Z_0-9]+$"))
                 messages["Author"] =
                     BuildMessage.Error("Author can only contain letters, numbers, and underscores.");
-            
+
             // Make sure the version number is a valid x.x.x
             if (!Regex.IsMatch(Version, @"^\d+\.\d+\.\d+$"))
                 messages["Version"] = BuildMessage.Error("Version number must be in format 'x.x.x'.");
@@ -105,11 +105,32 @@ namespace MeatKit
 
         public bool EnsureValidForEditor()
         {
-            // Go over each build item
+            BuildLog.WriteLine("Starting build profile check...");
+
+            // Check ourselves
             bool hasErrors = false, hasWarnings = false;
+            foreach (var message in Validate().Values)
+            {
+                // Log them
+                switch (message.Type)
+                {
+                    case MessageType.Error:
+                        Debug.LogError(AssetDatabase.GetAssetPath(this) + ": " + message.Message);
+                        hasErrors = true;
+                        break;
+                    case MessageType.Warning:
+                        Debug.LogWarning(AssetDatabase.GetAssetPath(this) + ": " + message.Message);
+                        hasWarnings = true;
+                        break;
+                }
+
+                BuildLog.WriteLine("  " + message.Type + ": " + this + ": " + message.Message);
+            }
+
+            // Go over each build item and check for any validation messages
             foreach (var item in BuildItems.Where(x => x != null))
-                // Check if it has any validation messages
             foreach (var message in item.Validate().Values)
+            {
                 // Log them
                 switch (message.Type)
                 {
@@ -121,28 +142,39 @@ namespace MeatKit
                         Debug.LogWarning(AssetDatabase.GetAssetPath(item) + ": " + message.Message);
                         hasWarnings = true;
                         break;
-                    case MessageType.Info:
-                        Debug.Log(AssetDatabase.GetAssetPath(item) + ": " + message.Message);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
+
+                BuildLog.WriteLine("  " + message.Type + ": " + item + ": " + message.Message);
+            }
+
 
             // If there's errors don't let anything continue
             if (hasErrors)
             {
                 EditorUtility.DisplayDialog("Build errors",
                     "There were errors validating your build items. Please check the console for more info.", "Ok.");
+                BuildLog.SetCompletionStatus(true, "Build profile failed one or more checks", null);
                 return false;
             }
 
             // If there's only warnings, let the user decide if they want to continue
             if (hasWarnings)
-                return EditorUtility.DisplayDialog("Build warnings",
+            {
+                var continueAnyway = EditorUtility.DisplayDialog("Build warnings",
                     "Some build items validated with warnings. Continue with build anyway?", "Yes", "No");
 
-            // Otherwise continue
-            return true;
+                BuildLog.WriteLine("Build profile has one or more warnings.");
+                BuildLog.WriteLine("  Continue anyway? " + continueAnyway);
+                BuildLog.SetCompletionStatus(true, "User canceled build", null);
+
+                return continueAnyway;
+            }
+            else
+            {
+                // Otherwise continue
+                BuildLog.WriteLine("  Build profile passed all checks!");
+                return true;
+            }
         }
 
         public string[] GetRequiredDependencies()
@@ -155,12 +187,9 @@ namespace MeatKit
 
         public string MainNamespace
         {
-            get
-            {
-                return Author + "." + PackageName;
-            }
+            get { return Author + "." + PackageName; }
         }
-        
+
         public string[] GetRequiredNamespaces()
         {
             return new[] {MainNamespace};
@@ -173,12 +202,9 @@ namespace MeatKit
 
         public string ExportPath
         {
-            get
-            {
-                return Path.Combine(BaseOutputPath, Path.Combine(PackageName, Version)) + Path.DirectorySeparatorChar;
-            }
+            get { return Path.Combine(BaseOutputPath, Path.Combine(PackageName, Version)) + Path.DirectorySeparatorChar; }
         }
-        
+
         public void WriteThunderstoreManifest(string location)
         {
 #if H3VR_IMPORTED

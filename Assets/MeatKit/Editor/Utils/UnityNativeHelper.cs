@@ -37,7 +37,7 @@ namespace MeatKit
             else
             {
                 // If it isn't null, we can just go out into that memory location and read it.
-                var length = Marshal.ReadInt64(real, 8);
+                var length = Marshal.ReadInt64(real, 24);
                 return Marshal.PtrToStringAnsi(stringPointer, (int) length);
             }
         }

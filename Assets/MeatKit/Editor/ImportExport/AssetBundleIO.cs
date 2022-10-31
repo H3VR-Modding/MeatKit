@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEditor;
-using UnityEngine;
 
 namespace MeatKit
 {
@@ -63,31 +61,48 @@ namespace MeatKit
             // Read the assembly name and class name from memory
             var className = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptClassName);
             var assemblyName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptAssemblyName);
+            var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
+            var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
 
             // Add it to the scripts usage dictionary
             if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
-            _scriptUsage[assemblyName].Add(className);
+            _scriptUsage[assemblyName].Add(fullName);
+
+            // Prepare some debugging string
+            string debug = "  " + assemblyName + " " + fullName + ": ";
 
             // Check if we want to remap this assembly name
             string newAssemblyName;
             if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // If we're processing a type that should exist in the main game assembly, skip translation
-                if (assemblyName != MeatKit.AssemblyName || !MeatKit.StripAssemblyTypes.Contains(className))
+                if (assemblyName != MeatKit.AssemblyName + ".dll" || !MeatKit.StripAssemblyTypes.Contains(fullName))
                 {
                     // Write the new assembly name into memory
                     UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
                     applied = true;
+                    debug += "ReplaceMap";
+                }
+                else
+                {
+                    debug += "Ignored";
                 }
             }
-            
+
             // If it didn't exist in the replace map, check if it contains H3VRCode-CSharp. This is for MonoMod assemblies.
             else if (assemblyName.Contains(MeatKit.AssemblyRename))
             {
                 // Write the new assembly name into memory
                 UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, assemblyName.Replace(MeatKit.AssemblyRename, MeatKit.AssemblyName));
                 applied = true;
+                debug += "MonoMod";
             }
+            else
+            {
+                debug += "Unchanged";
+            }
+
+            BuildLog.WriteLine(debug);
 
             // Let the original method run
             OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
@@ -126,7 +141,7 @@ namespace MeatKit
                     // Write the new assembly name into memory
                     UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
             }
-            
+
             // If it didn't exist in the replace map, check if it contains H3VRCode-CSharp. This is for MonoMod assemblies.
             else if (assemblyName.Contains(MeatKit.AssemblyName))
             {
@@ -148,6 +163,8 @@ namespace MeatKit
         private static readonly MonoScriptTransferRead OrigMonoScriptTransferRead;
 
         private const int MonoScriptClassName = 224;
+        
+        private const int MonoScriptNamespace = 272;
 
         private const int MonoScriptAssemblyName = 320;
     }
