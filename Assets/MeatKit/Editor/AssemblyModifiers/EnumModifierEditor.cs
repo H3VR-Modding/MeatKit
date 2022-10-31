@@ -12,8 +12,10 @@ namespace MeatKit
             "FistVR.FireArmRoundType",
             "FistVR.FireArmRoundClass",
             "FistVR.FireArmMagazineType",
-            "FistVR.ItemSpawnerObjectDefinition.ItemSpawnerCategory",
-            "FistVR.SosigEnemyID"
+            "FistVR.ItemSpawnerObjectDefinition+ItemSpawnerCategory",
+            "FistVR.SosigEnemyID",
+            "FistVR.FVRFireArmAttachementMountType",
+            "FistVR.FireArmClipType"
         };
 
         private SerializedProperty _addedValues;

@@ -218,7 +218,7 @@ namespace MeatKit
             // ReSharper disable once CoVariantArrayConversion
             obj["dependencies"] = new JArray(GetRequiredDependencies().Concat(AdditionalDependencies).ToArray());
 
-            File.WriteAllText(location, JsonConvert.SerializeObject(obj));
+            File.WriteAllText(location, JsonConvert.SerializeObject(obj,Formatting.Indented));
 #endif
         }
     }

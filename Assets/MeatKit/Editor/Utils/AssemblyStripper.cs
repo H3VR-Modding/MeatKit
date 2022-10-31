@@ -83,7 +83,7 @@ namespace NStrip
 						var nonSerializedAttributeRef = assembly.MainModule.ImportReference(nonSerializedAttributeCtor);
 						attributes.Add(new CustomAttribute(nonSerializedAttributeRef));
 						
-						var hideInInspectorCtor = typeof(HideInInspector).GetConstructor(Type.EmptyTypes);
+						var hideInInspectorCtor = typeof(MeatKit.HideInNormalInspectorAttribute).GetConstructor(Type.EmptyTypes);
 						var hideInInspectorRef = assembly.MainModule.ImportReference(hideInInspectorCtor);
 						attributes.Add(new CustomAttribute(hideInInspectorRef));
 						

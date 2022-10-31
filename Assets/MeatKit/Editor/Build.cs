@@ -92,7 +92,7 @@ namespace MeatKit
             BuildLog.WriteLine("Collecting bundles from build items");
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
             BuildLog.WriteLine(bundles.Length + " bundles to build. Building bundles.");
-            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.None,
+            BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.ChunkBasedCompression,
                 BuildTarget.StandaloneWindows64);
             
             // Disable bundle processing now that we're done with it.
