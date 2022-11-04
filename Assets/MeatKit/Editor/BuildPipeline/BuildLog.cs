@@ -6,7 +6,6 @@ namespace MeatKit
 {
     public static class BuildLog
     {
-        private static StreamWriter _output;
         private static StringWriter _temp;
         private static Stopwatch _sw;
         private static DateTime _startTime;
@@ -16,8 +15,6 @@ namespace MeatKit
 
         public static void StartNew()
         {
-            // Initialize our output file and stopwatch
-            _output = new StreamWriter("AssetBundles/buildlog.txt", false);
             _temp = new StringWriter();
             _sw = Stopwatch.StartNew();
             _startTime = DateTime.Now;
@@ -25,7 +22,7 @@ namespace MeatKit
 
         public static void WriteLine(string text)
         {
-            if (_output == null) return;
+            if (_temp == null) return;
             _temp.WriteLine(text);
         }
 
@@ -39,64 +36,65 @@ namespace MeatKit
         public static void Finish()
         {
             _sw.Stop();
-
-            WriteProfileInfo();
             
-            _output.WriteLine();
-            _output.WriteLine("--- MeatKit Build Log ---");
-            _output.WriteLine("Start Time: " + _startTime.ToString("dddd, dd MMMM yyyy HH:mm:ssK"));
-            _output.WriteLine("Duration  : " + _sw.Elapsed.GetReadableTimespan());
-            _output.WriteLine("Status    : " + (_failed ? "FAILED" : "COMPLETED"));
+            StreamWriter output = new StreamWriter("AssetBundles/buildlog.txt", false);
+
+            WriteProfileInfo(output);
+            output.WriteLine();
+            output.WriteLine("--- MeatKit Build Log ---");
+            output.WriteLine("Start Time: " + _startTime.ToString("dddd, dd MMMM yyyy HH:mm:ssK"));
+            output.WriteLine("Duration  : " + _sw.Elapsed.GetReadableTimespan());
+            output.WriteLine("Status    : " + (_failed ? "FAILED" : "COMPLETED"));
             if (!string.IsNullOrEmpty(_completionMessage))
-                _output.WriteLine("Message   : " + _completionMessage);
+                output.WriteLine("Message   : " + _completionMessage);
             if (_exception != null)
             {
-                _output.WriteLine("Exception :");
-                _output.WriteLine(_exception.ToString());
+                output.WriteLine("Exception :");
+                output.WriteLine(_exception.ToString());
             }
 
-            _output.WriteLine("\n--- Full build log ---");
-            _output.Write(_temp.ToString());
+            output.WriteLine("\n--- Full build log ---");
+            output.Write(_temp.ToString());
             
-            _output.Close();
-            _output.Dispose();
-            _output = null;
+            output.Close();
+            output.Dispose();
+            _temp = null;
         }
 
-        private static void WriteProfileInfo()
+        private static void WriteProfileInfo(StreamWriter output)
         {
             var profile = BuildWindow.SelectedProfile;
             var implicitDependencies = profile.GetRequiredDependencies();
 
-            _output.WriteLine("--- Selected Build Profile ---");
-            _output.WriteLine("Thunderstore Metadata");
-            _output.WriteLine("  Package Name: " + profile.PackageName);
-            _output.WriteLine("  Author      : " + profile.Author);
-            _output.WriteLine("  Version     : " + profile.Version);
-            _output.WriteLine("  Icon Set    : " + (profile.Icon == null ? "No" : "Yes"));
-            _output.WriteLine("  Readme Set  : " + (profile.ReadMe == null ? "No" : "Yes"));
-            _output.WriteLine("  Website URL : " + profile.WebsiteURL);
-            _output.WriteLine("  Description : " + profile.Description);
-            _output.WriteLine("  Implicit Dependencies  : (" + implicitDependencies.Length + ")");
+            output.WriteLine("--- Selected Build Profile ---");
+            output.WriteLine("Thunderstore Metadata");
+            output.WriteLine("  Package Name: " + profile.PackageName);
+            output.WriteLine("  Author      : " + profile.Author);
+            output.WriteLine("  Version     : " + profile.Version);
+            output.WriteLine("  Icon Set    : " + (profile.Icon == null ? "No" : "Yes"));
+            output.WriteLine("  Readme Set  : " + (profile.ReadMe == null ? "No" : "Yes"));
+            output.WriteLine("  Website URL : " + profile.WebsiteURL);
+            output.WriteLine("  Description : " + profile.Description);
+            output.WriteLine("  Implicit Dependencies  : (" + implicitDependencies.Length + ")");
             foreach (var dependency in implicitDependencies)
-                _output.WriteLine("    " + dependency);
-            _output.WriteLine("  Additional Dependencies: (" + profile.AdditionalDependencies.Length + ")");
+                output.WriteLine("    " + dependency);
+            output.WriteLine("  Additional Dependencies: (" + profile.AdditionalDependencies.Length + ")");
             foreach (var dependency in profile.AdditionalDependencies)
-                _output.WriteLine("    " + dependency);
+                output.WriteLine("    " + dependency);
 
-            _output.WriteLine("Script Options");
-            _output.WriteLine("  Strip Namespaces     : " + profile.StripNamespaces);
-            _output.WriteLine("  Additional Namespaces: (" + profile.AdditionalNamespaces.Length + ")");
+            output.WriteLine("Script Options");
+            output.WriteLine("  Strip Namespaces     : " + profile.StripNamespaces);
+            output.WriteLine("  Additional Namespaces: (" + profile.AdditionalNamespaces.Length + ")");
             foreach (var @namespace in profile.AdditionalNamespaces)
-                _output.WriteLine("    " + @namespace);
-            _output.WriteLine("  Apply Harmony Patches: " + profile.ApplyHarmonyPatches);
+                output.WriteLine("    " + @namespace);
+            output.WriteLine("  Apply Harmony Patches: " + profile.ApplyHarmonyPatches);
 
-            _output.WriteLine("Export Options");
-            _output.WriteLine("  Build Items: (" + profile.BuildItems.Length + ")");
+            output.WriteLine("Export Options");
+            output.WriteLine("  Build Items: (" + profile.BuildItems.Length + ")");
             foreach (var buildItem in profile.BuildItems)
-                _output.WriteLine("    " + buildItem);
-            _output.WriteLine("  Build Action: " + profile.BuildAction);
-            _output.WriteLine("  Export Path : " + profile.ExportPath);
+                output.WriteLine("    " + buildItem);
+            output.WriteLine("  Build Action: " + profile.BuildAction);
+            output.WriteLine("  Export Path : " + profile.ExportPath);
         }
     }
 }
