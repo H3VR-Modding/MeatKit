@@ -28,7 +28,7 @@ namespace MeatKit
 
         static NativeHookManager()
         {
-            AreWeCorrectUnityVersion = Application.unityVersion == "5.6.3p4";
+            AreWeCorrectUnityVersion = Application.unityVersion == "5.6.7f1";
             if (!AreWeCorrectUnityVersion)
             {
                 EditorUtility.DisplayDialog("Whoops",
@@ -38,7 +38,7 @@ namespace MeatKit
             }
 
             // Apply our detours here and save the trampoline to call the original function
-            OrigShutdownManaged = ApplyEditorDetour<ShutdownManaged>(0x17542D0, new ShutdownManaged(OnShutdownManaged));
+            OrigShutdownManaged = ApplyEditorDetour<ShutdownManaged>(0x175D2C0, new ShutdownManaged(OnShutdownManaged));
         }
 
         public static T ApplyEditorDetour<T>(long from, Delegate to) where T : class
