@@ -139,6 +139,9 @@ namespace MeatKit
                 // Publicize assembly
                 AssemblyStripper.MakePublic(mainAssembly, new string[0], false, false);
                 
+                // Apply help URLs
+                ApplyWikiHelpAttribute(mainAssembly);
+                
                 // Write the main assembly out into the destination folder and dispose it
                 mainAssembly.Write(Path.Combine(destinationDirectory, AssemblyRename + ".dll"));
             }
@@ -193,6 +196,29 @@ namespace MeatKit
             NormalizeMetaFileGUIDs();
         }
 
+        private static void ApplyWikiHelpAttribute(AssemblyDefinition asm)
+        {
+            // For convenience, we can add the Unity HelpURL attribute to the components from the game assembly.
+            // We'll point the url at the wiki and just append the full type name at the end 
+
+            // Iterate over every type in the assembly and just stick the attribute on it
+            // Probably doesn't matter if types that don't need it have it.
+            foreach (var type in asm.MainModule.Types)
+            {
+                // If the type doesn't already have this attribute, add it.
+                if (type.CustomAttributes.Any(a => a.AttributeType.Name == "HelpURLAttribute")) continue;
+
+                string helpUrl = "https://h3vr-modding.github.io/wiki/docs/h3vr/" + type.FullName + ".html";
+                
+                var str = asm.MainModule.TypeSystem.String;
+                var attributeConstructor = typeof(HelpURLAttribute).GetConstructor(new[] {typeof(string)});
+                var attributeRef = asm.MainModule.ImportReference(attributeConstructor);
+                var attribute = new CustomAttribute(attributeRef);
+                attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, helpUrl));
+                type.CustomAttributes.Add(attribute);
+            }
+        }
+        
         private static void NormalizeMetaFileGUIDs()
         {
             // This is a really important step. We need to make sure that the meta files for the assemblies are generated
