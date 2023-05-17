@@ -28,17 +28,10 @@ namespace MeatKit
 
         static NativeHookManager()
         {
-            AreWeCorrectUnityVersion = Application.unityVersion == "5.6.7f1";
-            if (!AreWeCorrectUnityVersion)
-            {
-                EditorUtility.DisplayDialog("Whoops",
-                    "Looks like you aren't using Unity Editor 5.6.3p4, MeatKit v2 now requires this specific editor version.",
-                    "I'll go install that.");
-                return;
-            }
+            if (!EditorVersion.IsSupportedVersion) return;
 
             // Apply our detours here and save the trampoline to call the original function
-            OrigShutdownManaged = ApplyEditorDetour<ShutdownManaged>(0x175D2C0, new ShutdownManaged(OnShutdownManaged));
+            OrigShutdownManaged = ApplyEditorDetour<ShutdownManaged>(EditorVersion.Current.FunctionOffsets.ShutdownManaged, new ShutdownManaged(OnShutdownManaged));
         }
 
         public static T ApplyEditorDetour<T>(long from, Delegate to) where T : class

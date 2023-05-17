@@ -11,7 +11,9 @@ namespace MeatKit
         
         static UnityNativeHelper()
         {
-            AssignNativeString = (StringAssignType) NativeHookManager.GetDelegateForFunctionPointer<StringAssignType>(0x1480);
+            if (!EditorVersion.IsSupportedVersion) return;
+            
+            AssignNativeString = (StringAssignType) NativeHookManager.GetDelegateForFunctionPointer<StringAssignType>(EditorVersion.Current.FunctionOffsets.StringAssign);
         }
         
         /// <summary>

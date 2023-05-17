@@ -20,8 +20,8 @@ namespace MeatKit
         static AssetBundleIO()
         {
             // Apply the one hook we need here
-            OrigMonoScriptTransferWrite = NativeHookManager.ApplyEditorDetour<MonoScriptTransferWrite>(0xE39BF0, new MonoScriptTransferWrite(OnMonoScriptTransferWrite));
-            OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(0xE3BC50, new MonoScriptTransferRead(OnMonoScriptTransferRead));
+            OrigMonoScriptTransferWrite = NativeHookManager.ApplyEditorDetour<MonoScriptTransferWrite>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferWrite, new MonoScriptTransferWrite(OnMonoScriptTransferWrite));
+            OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferRead, new MonoScriptTransferRead(OnMonoScriptTransferRead));
         }
 
         public static void EnableProcessing(Dictionary<string, string> replaceMap)
