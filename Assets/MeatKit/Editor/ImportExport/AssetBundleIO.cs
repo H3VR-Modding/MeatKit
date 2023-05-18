@@ -19,6 +19,8 @@ namespace MeatKit
 
         static AssetBundleIO()
         {
+            if (!EditorVersion.IsSupportedVersion) return;
+            
             // Apply the one hook we need here
             OrigMonoScriptTransferWrite = NativeHookManager.ApplyEditorDetour<MonoScriptTransferWrite>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferWrite, new MonoScriptTransferWrite(OnMonoScriptTransferWrite));
             OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferRead, new MonoScriptTransferRead(OnMonoScriptTransferRead));
