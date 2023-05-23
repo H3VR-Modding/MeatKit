@@ -24,8 +24,6 @@ namespace MeatKit
         // Keep track of all the applied detours so we can quickly undo them before the mono domain is reloaded
         private static readonly List<NativeDetour> Detours = new List<NativeDetour>();
 
-        private static readonly bool AreWeCorrectUnityVersion = false;
-
         static NativeHookManager()
         {
             if (!EditorVersion.IsSupportedVersion) return;
@@ -37,7 +35,7 @@ namespace MeatKit
         public static T ApplyEditorDetour<T>(long from, Delegate to) where T : class
         {
             // Avoid crashing the editor if we're loaded in the wrong Unity version
-            if (!AreWeCorrectUnityVersion) return null;
+            if (!EditorVersion.IsSupportedVersion) return null;
 
             // Get the base address of the Unity module and the address in memory of the function
             IntPtr editorBase = DynDll.OpenLibrary("Unity.exe");
@@ -59,7 +57,7 @@ namespace MeatKit
         public static Delegate GetDelegateForFunctionPointer<T>(long from)
         {
             // Avoid crashing the editor if we're loaded in the wrong Unity version
-            if (!AreWeCorrectUnityVersion) return null;
+            if (!EditorVersion.IsSupportedVersion) return null;
 
             // Get the base address for the Unity module and apply the offset
             IntPtr editorBase = DynDll.OpenLibrary("Unity.exe");
