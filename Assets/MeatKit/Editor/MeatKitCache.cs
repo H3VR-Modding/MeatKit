@@ -25,6 +25,9 @@ namespace MeatKit
 
         [SerializeField]
         private string _lastSelectedProfileGuid;
+
+        [SerializeField]
+        private string _lastUpdateCheckTime;
         
         private static string CacheFilePath
         {
@@ -105,6 +108,16 @@ namespace MeatKit
             {
                 if (value == null) Instance._lastSelectedProfileGuid = "";
                 Instance._lastSelectedProfileGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(value));
+                WriteCache();
+            }
+        }
+
+        public static DateTime LastUpdateCheckTime
+        {
+            get { return Instance._lastUpdateCheckTime != null ? DateTime.Parse(Instance._lastUpdateCheckTime) : default(DateTime); }
+            set
+            {
+                Instance._lastUpdateCheckTime = value.ToString(CultureInfo.InvariantCulture);
                 WriteCache();
             }
         }
