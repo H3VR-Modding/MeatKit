@@ -27,7 +27,7 @@ namespace MeatKit
         private string _lastSelectedProfileGuid;
 
         [SerializeField]
-        private string _lastUpdateCheckTime;
+        private string _lastUpdateCheckTime = default(DateTime).ToString(CultureInfo.InvariantCulture);
         
         private static string CacheFilePath
         {
@@ -114,7 +114,7 @@ namespace MeatKit
 
         public static DateTime LastUpdateCheckTime
         {
-            get { return Instance._lastUpdateCheckTime != null ? DateTime.Parse(Instance._lastUpdateCheckTime) : default(DateTime); }
+            get { return DateTime.Parse(Instance._lastUpdateCheckTime); }
             set
             {
                 Instance._lastUpdateCheckTime = value.ToString(CultureInfo.InvariantCulture);
