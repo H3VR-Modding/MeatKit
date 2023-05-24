@@ -13,6 +13,7 @@ namespace MeatKit
         public const string UpdatePackageName = "MeatKitUpdate.unitypackage";
         public const string UpdateUrl = "https://api.github.com/repos/H3VR-Modding/MeatKit/releases";
 
+        
         public static bool CheckingForUpdate { get; private set; }
         private static bool AllowPreReleases { get; set; }
 
@@ -24,7 +25,13 @@ namespace MeatKit
             {
                 if (_currentVersion == null)
                 {
-                    _currentVersion = SimpleVersion.Parse(File.ReadAllText("ProjectSettings/MeatKitVersion.txt"));
+                    if (File.Exists("ProjectSettings/MeatKitVersion.txt"))
+                        _currentVersion = SimpleVersion.Parse(File.ReadAllText("ProjectSettings/MeatKitVersion.txt"));
+                    else
+                    {
+                        File.WriteAllText("ProjectSettings/MeatKitVersion.txt", "0.0.0");
+                        _currentVersion = SimpleVersion.Parse("0.0.0");
+                    }
                 }
 
                 return _currentVersion;
