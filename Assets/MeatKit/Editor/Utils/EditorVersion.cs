@@ -71,7 +71,7 @@ namespace MeatKit
                     FunctionOffsets = new NativeHookFunctionOffsets
                     {
                         MonoScriptTransferWrite = 0xE39BF0,
-                        MonoScriptTransferRead = 0xE3BC50,
+                        MonoScriptTransferRead = 0xE3BA10,
                         ShutdownManaged = 0x175D2C0,
                         StringAssign = 0x1480
                     }

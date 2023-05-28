@@ -129,17 +129,19 @@ namespace MeatKit
             // Read the assembly name and class name from memory
             var className = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptClassName);
             var assemblyName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptAssemblyName);
-
+            var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
+            var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
+            
             // Add it to the scripts usage dictionary
             if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
-            _scriptUsage[assemblyName].Add(className);
+            _scriptUsage[assemblyName].Add(fullName);
 
             // Check if we want to remap this assembly name
             string newAssemblyName;
             if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // If we're processing a type that should exist in the main game assembly, skip translation
-                if (assemblyName != MeatKit.AssemblyName || !MeatKit.StripAssemblyTypes.Contains(className))
+                if (assemblyName != MeatKit.AssemblyName || !MeatKit.StripAssemblyTypes.Contains(fullName))
                     // Write the new assembly name into memory
                     UnityNativeHelper.WriteNativeString(monoScript, MonoScriptAssemblyName, newAssemblyName);
             }
