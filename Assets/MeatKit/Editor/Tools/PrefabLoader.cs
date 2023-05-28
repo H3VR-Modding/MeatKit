@@ -58,7 +58,7 @@ public class PrefabLoader : EditorWindow
             _selectedAsset = EditorGUILayout.Popup(_selectedAsset, _assets);
             if (GUILayout.Button("Spawn"))
             {
-                AssetBundleIO.EnableProcessing(AssemblyNameReplaceMap);
+                AssetBundleIO.EnableProcessing(AssemblyNameReplaceMap, true, false);
                 Instantiate(_bundle.LoadAsset(_assets[_selectedAsset]));
                 AssetBundleIO.DisableProcessing();
             }

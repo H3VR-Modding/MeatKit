@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace MeatKit
 {
     [InitializeOnLoad]
     public static class AssetBundleIO
     {
-        /// <summary>
-        /// Toggle for enabling the asset bundle processing, just so we don't
-        /// accidentally mess with stuff we don't mean to.
-        /// </summary>
-        public static bool ProcessingEnabled { get; private set; }
+        // Toggles for keeping track if we're processing reads and/or writes
+        public static bool ProcessingEnabledRead { get; private set; }
+        public static bool ProcessingEnabledWrite { get; private set; }
+
+        // Output dictionaries for remembering what scripts got modified.
+        public static Dictionary<string, List<string>> SerializedScriptNames { get; private set; }
+        public static Dictionary<string, List<string>> DeserializedScriptNames { get; private set; }
 
         private static Dictionary<string, string> _replaceMap;
-        private static Dictionary<string, List<string>> _scriptUsage;
 
         static AssetBundleIO()
         {
@@ -26,17 +28,19 @@ namespace MeatKit
             OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferRead, new MonoScriptTransferRead(OnMonoScriptTransferRead));
         }
 
-        public static void EnableProcessing(Dictionary<string, string> replaceMap)
+        public static void EnableProcessing(Dictionary<string, string> replaceMap, bool read, bool write)
         {
             _replaceMap = replaceMap;
-            _scriptUsage = new Dictionary<string, List<string>>();
-            ProcessingEnabled = true;
+            SerializedScriptNames = new Dictionary<string, List<string>>();
+            DeserializedScriptNames = new Dictionary<string, List<string>>();
+            ProcessingEnabledRead = read;
+            ProcessingEnabledWrite = write;
         }
 
-        public static Dictionary<string, List<string>> DisableProcessing()
+        public static void DisableProcessing()
         {
-            ProcessingEnabled = false;
-            return _scriptUsage;
+            ProcessingEnabledRead = false;
+            ProcessingEnabledWrite = false;
         }
 
         /// <summary>
@@ -51,7 +55,7 @@ namespace MeatKit
         private static void OnMonoScriptTransferWrite(IntPtr monoScript, IntPtr streamedBinaryWrite)
         {
             // If processing is disabled just run the original and skip.
-            if (!ProcessingEnabled)
+            if (!ProcessingEnabledWrite)
             {
                 OrigMonoScriptTransferWrite(monoScript, streamedBinaryWrite);
                 return;
@@ -66,9 +70,11 @@ namespace MeatKit
             var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
             var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
 
+            Debug.Log("WRITE " + assemblyName + " " + fullName);
+            
             // Add it to the scripts usage dictionary
-            if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
-            _scriptUsage[assemblyName].Add(fullName);
+            if (!SerializedScriptNames.ContainsKey(assemblyName)) SerializedScriptNames[assemblyName] = new List<string>();
+            SerializedScriptNames[assemblyName].Add(fullName);
 
             // Prepare some debugging string
             string debug = "  " + assemblyName + " " + fullName + ": ";
@@ -124,7 +130,7 @@ namespace MeatKit
         {
             // Run the original method and return the result if processing is disabled.
             long result = OrigMonoScriptTransferRead(monoScript, streamedBinaryRead);
-            if (!ProcessingEnabled) return result;
+            if (!ProcessingEnabledRead) return result;
 
             // Read the assembly name and class name from memory
             var className = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptClassName);
@@ -132,9 +138,11 @@ namespace MeatKit
             var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
             var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
             
+            Debug.Log("READ " + assemblyName + " " + fullName);
+            
             // Add it to the scripts usage dictionary
-            if (!_scriptUsage.ContainsKey(assemblyName)) _scriptUsage[assemblyName] = new List<string>();
-            _scriptUsage[assemblyName].Add(fullName);
+            if (!DeserializedScriptNames.ContainsKey(assemblyName)) DeserializedScriptNames[assemblyName] = new List<string>();
+            DeserializedScriptNames[assemblyName].Add(fullName);
 
             // Check if we want to remap this assembly name
             string newAssemblyName;

@@ -86,7 +86,7 @@ namespace MeatKit
             BuildLog.WriteLine("Ignored types (Assembly-CSharp.dll):");
             foreach (var type in StripAssemblyTypes)
                 BuildLog.WriteLine("  " + type);
-            AssetBundleIO.EnableProcessing(replaceMap);
+            AssetBundleIO.EnableProcessing(replaceMap, false, true);
 
             // Get the list of asset bundle configurations and build them
             BuildLog.WriteLine("Collecting bundles from build items");
@@ -96,7 +96,8 @@ namespace MeatKit
                 BuildTarget.StandaloneWindows64);
             
             // Disable bundle processing now that we're done with it.
-            var requiredScripts = AssetBundleIO.DisableProcessing();
+            AssetBundleIO.DisableProcessing();
+            var requiredScripts = AssetBundleIO.SerializedScriptNames;
             BuildLog.WriteLine("Bundles built");
             
             // Cleanup the unused files created with building the bundles
