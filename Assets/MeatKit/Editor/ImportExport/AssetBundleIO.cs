@@ -70,8 +70,6 @@ namespace MeatKit
             var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
             var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
 
-            Debug.Log("WRITE " + assemblyName + " " + fullName);
-            
             // Add it to the scripts usage dictionary
             if (!SerializedScriptNames.ContainsKey(assemblyName)) SerializedScriptNames[assemblyName] = new List<string>();
             SerializedScriptNames[assemblyName].Add(fullName);
@@ -137,9 +135,7 @@ namespace MeatKit
             var assemblyName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptAssemblyName);
             var namespaceName = UnityNativeHelper.ReadNativeString(monoScript, MonoScriptNamespace);
             var fullName = string.IsNullOrEmpty(namespaceName) ? className : (namespaceName + "." + className);
-            
-            Debug.Log("READ " + assemblyName + " " + fullName);
-            
+
             // Add it to the scripts usage dictionary
             if (!DeserializedScriptNames.ContainsKey(assemblyName)) DeserializedScriptNames[assemblyName] = new List<string>();
             DeserializedScriptNames[assemblyName].Add(fullName);
