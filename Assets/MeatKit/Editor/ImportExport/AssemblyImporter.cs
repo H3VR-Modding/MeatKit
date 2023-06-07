@@ -208,7 +208,9 @@ namespace MeatKit
                 // If the type doesn't already have this attribute, add it.
                 if (type.CustomAttributes.Any(a => a.AttributeType.Name == "HelpURLAttribute")) continue;
 
-                string helpUrl = "https://h3vr-modding.github.io/wiki/docs/h3vr/" + type.FullName + ".html";
+                // Append 'Global.' to the type name if it's in the global namespace. This is a workaround for docfx.
+                string typeName = string.IsNullOrEmpty(type.Namespace) ? ("Global." + type.FullName) : type.FullName;
+                string helpUrl = "https://h3vr-modding.github.io/docs/api/" + typeName + ".html";
                 
                 var str = asm.MainModule.TypeSystem.String;
                 var attributeConstructor = typeof(HelpURLAttribute).GetConstructor(new[] {typeof(string)});
