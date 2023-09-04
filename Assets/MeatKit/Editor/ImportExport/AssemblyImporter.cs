@@ -184,14 +184,28 @@ namespace MeatKit
             }
             
             // Replace all occurrences to references of Assembly-CSharp with H3VRCode-CSharp
+            bool referencesMmhook = false;
             foreach (var reference in asm.MainModule.AssemblyReferences)
             {
-                if (reference.Name.Contains("Assembly-CSharp"))
+                string refName = reference.Name;
+                Debug.Log(refName);
+                
+                if (refName == "Assembly-CSharp" || refName == "Assembly-CSharp-firstpass")
                 {
-                    reference.Name = reference.Name.Replace("Assembly-CSharp", "H3VRCode-CSharp");
+                    reference.Name = refName.Replace("Assembly-CSharp", "H3VRCode-CSharp");
+                } else if (refName.Contains("MMHOOK"))
+                {
+                    referencesMmhook = true;
                 }
             }
 
+            // If we detected this library references MMHOOK, confirm with the user if we should ocontinue.
+            if (referencesMmhook)
+            {
+                bool shouldContinue = EditorUtility.DisplayDialog("Warning", "The selected library appears to reference MMHOOK. If you don't know what this means, do not continue with the import as it will likely result in instability and crashes in your project. Ask the author of the library for a version that does not reference MMHOOK.", "Continue", "Cancel");
+                if (!shouldContinue) return;
+            }
+            
             asm.Write(Path.Combine(destinationDirectory, asm.MainModule.Name));
             NormalizeMetaFileGUIDs();
         }
