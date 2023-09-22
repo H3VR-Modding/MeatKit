@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace MeatKit
         static AssetBundleIO()
         {
             if (!EditorVersion.IsSupportedVersion) return;
-            
+
             // Apply the one hook we need here
             OrigMonoScriptTransferWrite = NativeHookManager.ApplyEditorDetour<MonoScriptTransferWrite>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferWrite, new MonoScriptTransferWrite(OnMonoScriptTransferWrite));
             OrigMonoScriptTransferRead = NativeHookManager.ApplyEditorDetour<MonoScriptTransferRead>(EditorVersion.Current.FunctionOffsets.MonoScriptTransferRead, new MonoScriptTransferRead(OnMonoScriptTransferRead));
@@ -161,17 +162,19 @@ namespace MeatKit
         }
 
         // Actual name: MonoScript::Transfer<StreamedBinaryWrite<0>>(StreamedBinaryWrite<0> &)
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         private delegate void MonoScriptTransferWrite(IntPtr monoScript, IntPtr streamedBinaryWrite);
 
         private static readonly MonoScriptTransferWrite OrigMonoScriptTransferWrite;
 
         // Actual name: MonoScript::Transfer<StreamedBinaryRead<1>>(StreamedBinaryRead<1> &)
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         private delegate long MonoScriptTransferRead(IntPtr monoScript, IntPtr streamedBinaryRead);
 
         private static readonly MonoScriptTransferRead OrigMonoScriptTransferRead;
 
         private const int MonoScriptClassName = 224;
-        
+
         private const int MonoScriptNamespace = 272;
 
         private const int MonoScriptAssemblyName = 320;

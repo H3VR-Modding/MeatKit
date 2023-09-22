@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
 using UnityEditor;
-using UnityEngine;
 
 namespace MeatKit
 {
@@ -17,6 +16,7 @@ namespace MeatKit
     public static class NativeHookManager
     {
         // Actual name: ShutdownPlatformSupportModulesInManaged(void)
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void ShutdownManaged();
 
         private static readonly ShutdownManaged OrigShutdownManaged;
