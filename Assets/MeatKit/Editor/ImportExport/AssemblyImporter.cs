@@ -63,6 +63,25 @@ namespace MeatKit
             "ftLightmapsStorage",
             "ftLocalStorage",
 
+            // WarFX
+            "CFX_AutoDestructShuriken",
+            "CFX_AutoStopLoopedEffect",
+            "CFX_Demo_GTButton",
+            "CFX_Demo_GTToggle",
+            "CFX_Demo_RandomDir",
+            "CFX_Demo_RotateCamera",
+            "CFX_Demo_Translate",
+            "CFX_LightIntensityFade",
+            "CFX_SpawnSystem",
+            "WFX_BulletHoleDecal",
+            "WFX_Demo",
+            "WFX_Demo_DeleteAfterDelay",
+            "WFX_Demo_New",
+            "WFX_Demo_RandomDir",
+            "WFX_Demo_Wall",
+            "WFX_LightFlicker",
+
+            
             // Bakery supporting types
             "ftUniqueIDRegistry",
             "BakeryLightmapGroupPlain",
@@ -188,7 +207,6 @@ namespace MeatKit
             foreach (var reference in asm.MainModule.AssemblyReferences)
             {
                 string refName = reference.Name;
-                Debug.Log(refName);
                 
                 if (refName == "Assembly-CSharp" || refName == "Assembly-CSharp-firstpass")
                 {
