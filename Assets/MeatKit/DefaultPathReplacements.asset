@@ -60,10 +60,6 @@ MonoBehaviour:
     NewPath: Misc/CubeGameWaveType
     NewDefaultName: CubeGameWaveType
     NewOrder: 0
-  - ScriptableObjectName: FistVR.CubeGameWaveElement
-    NewPath: Misc/CubeGameWaveElement
-    NewDefaultName: CubeGameWaveElement
-    NewOrder: 0
   - ScriptableObjectName: FistVR.CubeGameWaveSequence
     NewPath: Misc/CubeGameWaveSequence
     NewDefaultName: CubeGameWaveSequence

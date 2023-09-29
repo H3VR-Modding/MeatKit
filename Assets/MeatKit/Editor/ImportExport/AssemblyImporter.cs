@@ -149,7 +149,6 @@ namespace MeatKit
                 {
                     var type = mainAssembly.MainModule.GetType(typename);
                     if (type != null) mainAssembly.MainModule.Types.Remove(type);
-                    else Debug.LogWarning("Type " + typename + " was not found in assembly.");
                 }
 
                 // Apply modifications
