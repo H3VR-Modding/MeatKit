@@ -25,6 +25,7 @@ namespace MeatKit
             {
                 throw new MeatKitBuildException("Editor assembly missing! Can't export scripts.");
             }
+
             if (string.IsNullOrEmpty(tempFile))
             {
                 tempFile = Path.GetTempFileName();
@@ -55,18 +56,11 @@ namespace MeatKit
                 // Watermark the plugin just in case it's useful to someone
                 BuildLog.WriteLine("Watermarking plugin class");
                 var str = asm.MainModule.TypeSystem.String;
-                var descriptionAttributeConstructor = typeof(DescriptionAttribute).GetConstructor(new[] {typeof(string)});
+                var descriptionAttributeConstructor = typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) });
                 var descriptionAttributeRef = asm.MainModule.ImportReference(descriptionAttributeConstructor);
                 var descriptionAttribute = new CustomAttribute(descriptionAttributeRef);
                 descriptionAttribute.ConstructorArguments.Add(new CustomAttributeArgument(str, "Built with MeatKit"));
                 plugin.CustomAttributes.Add(descriptionAttribute);
-
-                // This is some quantum bullshit.
-                // If you don't enumerate the constructor arguments for attributes their values aren't updated correctly. 
-                BuildLog.WriteLine("Performing quantum bullshit");
-                foreach (var x in GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments))
-                {
-                }
 
                 // Get the BepInPlugin attribute and replace the values in it with our own
                 BuildLog.WriteLine("Applying BepInPlugin attribute params");
@@ -88,13 +82,13 @@ namespace MeatKit
                 {
                     BuildLog.WriteLine("  Code to apply harmony patches");
                     var assemblyGetExecutingAssembly = typeof(Assembly).GetMethod("GetExecutingAssembly");
-                    var harmonyCreateAndPatchALl = typeof(Harmony).GetMethod("CreateAndPatchAll", new[] {typeof(Assembly), typeof(string)});
+                    var harmonyCreateAndPatchALl = typeof(Harmony).GetMethod("CreateAndPatchAll", new[] { typeof(Assembly), typeof(string) });
                     il.Emit(OpCodes.Call, plugin.Module.ImportReference(assemblyGetExecutingAssembly));
                     il.Emit(OpCodes.Ldstr, guid);
                     il.Emit(OpCodes.Call, plugin.Module.ImportReference(harmonyCreateAndPatchALl));
                     il.Emit(OpCodes.Pop);
                 }
-                
+
                 // Let any build items insert their own code in here
                 foreach (var item in settings.BuildItems)
                 {
@@ -115,26 +109,23 @@ namespace MeatKit
                 BuildLog.WriteLine("Renaming assembly references");
                 foreach (var ii in asm.MainModule.AssemblyReferences)
                 {
-                    // Rename any references to the game's code
-                    if (ii.Name.Contains("H3VRCode-CSharp"))
-                    {
-                        var newReference = ii.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
-                        BuildLog.WriteLine("  " + ii.Name + " -> " + newReference);
-                        ii.Name = newReference;
-                    }
+                    FixAssemblyNameReference(ii);
+                }
 
-                    // And also if we're referencing a MonoMod DLL, we need to fix reference too
-                    if (ii.Name.EndsWith(".mm"))
+                // For some reason, constructor arguments uses their own instance of AssemblyNameReference
+                // So we need to do the same thing as above again.
+                BuildLog.WriteLine("Fixing custom attribute arguments");
+                foreach (var x in GetAllCustomAttributes(asm).SelectMany(a => a.ConstructorArguments))
+                {
+                    TypeReference typeRef = x.Value as TypeReference;
+
+                    if (typeRef != null)
                     {
-                        // What the name currently is:
-                        //    Assembly-CSharp.PatchName.mm
-                        // What we want:
-                        //    Assembly-CSharp
-                        // So just lop off anything past the second to last dot
-                        int idx = ii.Name.LastIndexOf('.', ii.Name.Length - 4);
-                        var newReference = ii.Name.Substring(0, idx);
-                        BuildLog.WriteLine("  " + ii.Name + " -> " + newReference);
-                        ii.Name = newReference;
+                        AssemblyNameReference asmNameRef = typeRef.Scope as AssemblyNameReference;
+                        if (asmNameRef != null)
+                        {
+                            FixAssemblyNameReference(asmNameRef);
+                        }
                     }
                 }
 
@@ -196,6 +187,31 @@ namespace MeatKit
             File.Delete(tempFile);
         }
 
+        private static void FixAssemblyNameReference(AssemblyNameReference asmNameRef)
+        {
+            // Rename any references to the game's code
+            if (asmNameRef.Name.Contains("H3VRCode-CSharp"))
+            {
+                var newReference = asmNameRef.Name.Replace("H3VRCode-CSharp", "Assembly-CSharp");
+                BuildLog.WriteLine("  " + asmNameRef.Name + " -> " + newReference);
+                asmNameRef.Name = newReference;
+            }
+
+            // And also if we're referencing a MonoMod DLL, we need to fix reference too
+            if (asmNameRef.Name.EndsWith(".mm"))
+            {
+                // What the name currently is:
+                //    Assembly-CSharp.PatchName.mm
+                // What we want:
+                //    Assembly-CSharp
+                // So just lop off anything past the second to last dot
+                int idx = asmNameRef.Name.LastIndexOf('.', asmNameRef.Name.Length - 4);
+                var newReference = asmNameRef.Name.Substring(0, idx);
+                BuildLog.WriteLine("  " + asmNameRef.Name + " -> " + newReference);
+                asmNameRef.Name = newReference;
+            }
+        }
+
         private static TypeDefinition FindPluginClass(ModuleDefinition module, string mainNamespace)
         {
             // Get the default MeatKitPlugin class from the module
@@ -211,7 +227,7 @@ namespace MeatKit
                     break;
                 }
             }
-            
+
             return pluginClass;
         }
 
