@@ -25,6 +25,7 @@ namespace MeatKit
                 string message = e.Message;
                 if (e.InnerException != null) message += "\n\n" + e.InnerException.Message;
                 EditorUtility.DisplayDialog("Build failed", message, "Ok.");
+                Debug.LogError("Build failed: " + message);
                 BuildLog.SetCompletionStatus(true, "MeatKit Build Exception", e);
             }
             catch (Exception e)

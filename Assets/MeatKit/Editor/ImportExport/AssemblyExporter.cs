@@ -170,6 +170,12 @@ namespace MeatKit
                         missingTypes, null);
                 }
 
+                // Also throw an error if anything ends up referencing UnityEditor in the export
+                if (asm.MainModule.AssemblyReferences.Any(a => a.Name.Contains("UnityEditor")))
+                {
+                    throw new MeatKitBuildException("Exported script assembly references UnityEditor, this can cause issues at runtime. Make sure all your editor scripts are inside an Editor folder.");
+                }
+                
                 try
                 {
                     // Save it
