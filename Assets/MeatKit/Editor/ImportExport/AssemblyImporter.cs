@@ -35,7 +35,6 @@ namespace MeatKit
             "Alloy.TextureImportConfig",
             "Alloy.MapTextureChannelMapping",
             "AlloyUtils",
-            "Alloy.EnumExtension",
             "MinValueAttribute",
             "MaxValueAttribute",
             "AlloyEffectsManager",
@@ -159,7 +158,11 @@ namespace MeatKit
                 
                 // Apply help URLs
                 ApplyWikiHelpAttribute(mainAssembly);
-                
+
+                //  Make Alloy.EnumExtension internal and rename it to something else to prevent a conflict.
+                TypeDefinition alloyEnumExtension = mainAssembly.MainModule.GetType("Alloy.EnumExtension");
+                alloyEnumExtension.IsPublic = false;
+
                 // Write the main assembly out into the destination folder and dispose it
                 mainAssembly.Write(Path.Combine(destinationDirectory, AssemblyRename + ".dll"));
             }
