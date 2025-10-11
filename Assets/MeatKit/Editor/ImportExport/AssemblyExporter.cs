@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using BepInEx;
 using HarmonyLib;
 using Mono.Cecil;
@@ -170,15 +171,58 @@ namespace MeatKit
                         missingTypes, null);
                 }
 
-                // Also throw an error if anything ends up referencing UnityEditor in the export
-                if (asm.MainModule.AssemblyReferences.Any(a => a.Name.Contains("UnityEditor")))
+                // Check over all the types and code in the exported assembly to see if they reference other types that
+                // would be problematic, such as stuff from UnityEditor or types that got removed because of namespace
+                // stripping.
+                BuildLog.WriteLine("Building reference map");
+                Dictionary<MemberReference, List<MemberReference>> referenceMap = BuildReferenceMap(asm.MainModule);
+                bool referenceMapHasIssues = false;
+                StringBuilder sb = new StringBuilder();
+                foreach (var kvp in referenceMap)
                 {
-                    throw new MeatKitBuildException("Exported script assembly references UnityEditor, this can cause issues at runtime. Make sure all your editor scripts are inside an Editor folder.");
+                    MemberReference scriptMember = kvp.Key;
+                    foreach (MemberReference referencedMember in kvp.Value)
+                    {
+                        IMetadataScope scope;
+
+                        TypeReference typeRef = referencedMember as TypeReference;
+                        if (typeRef != null)
+                        {
+                            scope = typeRef.Scope;
+                        } else
+                        {
+                            scope = referencedMember.DeclaringType.Scope;
+                        }
+
+                        if (scope == null)
+                        {
+                            referenceMapHasIssues = true;
+                            sb.AppendFormat("{0} references {1} but it was removed due to namespace stripping\n", scriptMember, referencedMember);
+                        }
+                        else if (scope.Name == "UnityEditor")
+                        {
+                            referenceMapHasIssues = true;
+                            sb.AppendFormat("{0} references Editor-only type {1}\n", scriptMember, referencedMember);
+                        }
+                    }
                 }
-                
+
+                // Don't continue if there were any issues
+                if (referenceMapHasIssues)
+                {
+                    throw new MeatKitBuildException("Exported assembly contains issues:\n" + sb);
+                }
+
+                // Make sure the assembly doesn't reference the editor assembly. This should be safe to do now.
+                AssemblyNameReference editorAsmRef = asm.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "UnityEditor");
+                if (editorAsmRef != null)
+                {
+                    asm.MainModule.AssemblyReferences.Remove(editorAsmRef);
+                }
+
+                // All done, save the modified assembly.
                 try
                 {
-                    // Save it
                     asm.Write(exportPath);
                 }
                 catch (ArgumentException e)
@@ -235,6 +279,83 @@ namespace MeatKit
             }
 
             return pluginClass;
+        }
+
+        private static Dictionary<MemberReference, List<MemberReference>> BuildReferenceMap(ModuleDefinition module)
+        {
+            Dictionary<MemberReference, List<MemberReference>> map = new Dictionary<MemberReference, List<MemberReference>>();
+
+            foreach (TypeDefinition type in module.GetTypes())
+            {
+                foreach (CustomAttribute typeAttribute in type.CustomAttributes)
+                {
+                    AddReference(map, type, typeAttribute.AttributeType);
+                }
+
+                foreach (FieldDefinition field in type.Fields)
+                {
+                    AddReference(map, field, field.FieldType);
+
+                    foreach (CustomAttribute fieldAttribute in field.CustomAttributes)
+                    {
+                        AddReference(map, field, fieldAttribute.AttributeType);
+                    }
+                }
+
+                foreach (PropertyDefinition property in type.Properties)
+                {
+                    AddReference(map, property, property.PropertyType);
+
+                    foreach (CustomAttribute propertyAttribute in property.CustomAttributes)
+                    {
+                        AddReference(map, property, propertyAttribute.AttributeType);
+                    }
+                }
+
+                foreach (MethodDefinition method in type.Methods)
+                {
+                    foreach (CustomAttribute methodAttribute in method.CustomAttributes)
+                    {
+                        AddReference(map, method, methodAttribute.AttributeType);
+                    }
+
+                    foreach (ParameterDefinition methodParameter in method.Parameters)
+                    {
+                        AddReference(map, method, methodParameter.ParameterType);
+                    }
+
+                    if (method.ReturnType != null)
+                    {
+                        AddReference(map, method, method.ReturnType);
+                    }
+
+                    if (method.HasBody)
+                    {
+                        foreach (Instruction instruction in method.Body.Instructions)
+                        {
+                            MemberReference memRef = instruction.Operand as MemberReference;
+                            if (memRef != null)
+                            {
+                                AddReference(map, method, memRef);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return map;
+        }
+
+        private static void AddReference(Dictionary<MemberReference, List<MemberReference>> dict, MemberReference key, MemberReference value)
+        {
+            List<MemberReference> list;
+            if (!dict.TryGetValue(key, out list))
+            {
+                list = new List<MemberReference>();
+                dict.Add(key, list);
+            }
+            
+            list.Add(value);
         }
 
         private static IEnumerable<CustomAttribute> GetAllCustomAttributes(AssemblyDefinition asm)
