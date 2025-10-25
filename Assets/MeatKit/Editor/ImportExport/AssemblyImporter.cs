@@ -21,73 +21,6 @@ namespace MeatKit
         public const string AssemblyRename = "H3VRCode-CSharp";
         public const string AssemblyFirstpassName = "Assembly-CSharp-firstpass";
         public const string AssemblyFirstpassRename = "H3VRCode-CSharp-firstpass";
-        
-        // Types we want to strip from the main Unity assembly
-        public static readonly string[] StripAssemblyTypes =
-        {
-            // Alloy classes
-            "MaterialMapChannelPackerDefinition",
-            "Alloy.PackedMapDefinition",
-            "Alloy.BaseTextureChannelMapping",
-            "Alloy.MapChannel",
-            "Alloy.TextureValueChannelMode",
-            "Alloy.NormalMapChannelTextureChannelMapping",
-            "Alloy.TextureImportConfig",
-            "Alloy.MapTextureChannelMapping",
-            "AlloyUtils",
-            "MinValueAttribute",
-            "MaxValueAttribute",
-            "AlloyEffectsManager",
-            "Alloy.EnumFlagsAttribute",
-
-            // Bakery MonoBehaviours
-            "BakeryAlwaysRender",
-            "BakeryDirectLight",
-            "BakeryLightmapGroup",
-            "BakeryLightmapGroupSelector",
-            "BakeryLightmappedPrefab",
-            "BakeryLightMesh",
-            "BakeryPointLight",
-            "BakerySkyLight",
-            "BakeryVolume",
-            "BakeryVolumeReceiver",
-            "BakeryVolumeTrigger",
-            "BakeryProjectSettings",
-            "VolumeTestScene2",
-            "BakeryPackAsSingleSquare",
-            "BakerySector",
-            "BakerySectorCapture",
-            "ftGlobalStorage",
-            "ftLightmaps",
-            "ftLightmapsStorage",
-            "ftLocalStorage",
-
-            // WarFX
-            "CFX_AutoDestructShuriken",
-            "CFX_AutoStopLoopedEffect",
-            "CFX_Demo_GTButton",
-            "CFX_Demo_GTToggle",
-            "CFX_Demo_RandomDir",
-            "CFX_Demo_RotateCamera",
-            "CFX_Demo_Translate",
-            "CFX_LightIntensityFade",
-            "CFX_SpawnSystem",
-            "WFX_BulletHoleDecal",
-            "WFX_Demo",
-            "WFX_Demo_DeleteAfterDelay",
-            "WFX_Demo_New",
-            "WFX_Demo_RandomDir",
-            "WFX_Demo_Wall",
-            "WFX_LightFlicker",
-
-            
-            // Bakery supporting types
-            "ftUniqueIDRegistry",
-            "BakeryLightmapGroupPlain",
-
-            //Editor Tool Scripts
-            "IconCamera"
-        };
 
         // Array of the extra assemblies that need to come with the main Unity assemblies
         private static readonly string[] ExtraAssemblies =
@@ -95,7 +28,6 @@ namespace MeatKit
             "DinoFracture.dll",
             "ES2.dll"
         };
-
 
         private static void ImportAssemblies(string assembliesDirectory, string destinationDirectory)
         {
@@ -125,7 +57,7 @@ namespace MeatKit
 
                 // Publicize Assembly
                 AssemblyStripper.MakePublic(firstpassAssembly, new string[0], false, false);
-                
+
                 firstpassAssembly.Write(Path.Combine(destinationDirectory, AssemblyFirstpassRename + ".dll"));
                 firstpassAssembly.Dispose();
             }
@@ -155,7 +87,7 @@ namespace MeatKit
 
                 // Publicize assembly
                 AssemblyStripper.MakePublic(mainAssembly, new string[0], false, false);
-                
+
                 // Apply help URLs
                 ApplyWikiHelpAttribute(mainAssembly);
 
@@ -203,17 +135,18 @@ namespace MeatKit
                 asm.Name = new AssemblyNameDefinition(name, asm.Name.Version);
                 asm.MainModule.Name = name + ".dll";
             }
-            
+
             // Replace all occurrences to references of Assembly-CSharp with H3VRCode-CSharp
             bool referencesMmhook = false;
             foreach (var reference in asm.MainModule.AssemblyReferences)
             {
                 string refName = reference.Name;
-                
+
                 if (refName == "Assembly-CSharp" || refName == "Assembly-CSharp-firstpass")
                 {
                     reference.Name = refName.Replace("Assembly-CSharp", "H3VRCode-CSharp");
-                } else if (refName.Contains("MMHOOK"))
+                }
+                else if (refName.Contains("MMHOOK"))
                 {
                     referencesMmhook = true;
                 }
@@ -225,7 +158,7 @@ namespace MeatKit
                 bool shouldContinue = EditorUtility.DisplayDialog("Warning", "The selected library appears to reference MMHOOK. If you don't know what this means, do not continue with the import as it will likely result in instability and crashes in your project. Ask the author of the library for a version that does not reference MMHOOK.", "Continue", "Cancel");
                 if (!shouldContinue) return;
             }
-            
+
             asm.Write(Path.Combine(destinationDirectory, asm.MainModule.Name));
             NormalizeMetaFileGUIDs();
         }
@@ -245,16 +178,16 @@ namespace MeatKit
                 // Append 'Global.' to the type name if it's in the global namespace. This is a workaround for docfx.
                 string typeName = string.IsNullOrEmpty(type.Namespace) ? ("Global." + type.FullName) : type.FullName;
                 string helpUrl = "https://h3vr-modding.github.io/docs/api/" + typeName + ".html";
-                
+
                 var str = asm.MainModule.TypeSystem.String;
-                var attributeConstructor = typeof(HelpURLAttribute).GetConstructor(new[] {typeof(string)});
+                var attributeConstructor = typeof(HelpURLAttribute).GetConstructor(new[] { typeof(string) });
                 var attributeRef = asm.MainModule.ImportReference(attributeConstructor);
                 var attribute = new CustomAttribute(attributeRef);
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(str, helpUrl));
                 type.CustomAttributes.Add(attribute);
             }
         }
-        
+
         private static void NormalizeMetaFileGUIDs()
         {
             // This is a really important step. We need to make sure that the meta files for the assemblies are generated
@@ -312,7 +245,7 @@ namespace MeatKit
                             var asmPath = Path.Combine(path, name.Name + ".dll");
                             if (File.Exists(asmPath))
                                 asm = AssemblyDefinition.ReadAssembly(asmPath,
-                                    new ReaderParameters {AssemblyResolver = this});
+                                    new ReaderParameters { AssemblyResolver = this });
                         }
                         catch (AssemblyResolutionException)
                         {
