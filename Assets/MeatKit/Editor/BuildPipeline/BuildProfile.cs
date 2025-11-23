@@ -25,6 +25,7 @@ namespace MeatKit
         public string Version = "";
         public Texture2D Icon;
         public Object ReadMe;
+        public Object Changelog;
         public string WebsiteURL = "";
         public string Description = "";
         public string[] AdditionalDependencies = new string[0];
@@ -73,6 +74,9 @@ namespace MeatKit
                 messages["ReadMe"] = BuildMessage.Error("Missing readme.");
             else if (!AssetDatabase.GetAssetPath(ReadMe).EndsWith(".md", StringComparison.InvariantCultureIgnoreCase))
                 messages["ReadMe"] = BuildMessage.Warning("Are you sure this is a Markdown file? It doesn't have the .md file extension.");
+
+            if (Changelog && !AssetDatabase.GetAssetPath(Changelog).EndsWith(".md", StringComparison.InvariantCultureIgnoreCase))
+                messages["Changelog"] = BuildMessage.Warning("Are you sure this is a markdown file? It doesn't have the .md extension.");
 
             switch (BuildAction)
             {

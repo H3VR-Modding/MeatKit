@@ -147,6 +147,16 @@ namespace MeatKit
             BuildLog.WriteLine("Copying readme");
             File.Copy(AssetDatabase.GetAssetPath(profile.ReadMe), bundleOutputPath + "README.md");
 
+            if (profile.Changelog)
+            {
+                BuildLog.WriteLine("Copying changelog");
+                File.Copy(AssetDatabase.GetAssetPath(profile.Changelog), bundleOutputPath + "CHANGELOG.md");
+            }
+            else
+            {
+                BuildLog.WriteLine("No changelog to copy");
+            }
+
             string packageName = profile.Author + "-" + profile.PackageName;
             if (profile.BuildAction == BuildAction.CopyToProfile)
             {
