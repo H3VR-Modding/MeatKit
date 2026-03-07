@@ -92,13 +92,31 @@ namespace MeatKit
             // Get the list of asset bundle configurations and build them
             BuildLog.WriteLine("Collecting bundles from build items");
             var bundles = profile.BuildItems.SelectMany(x => x.ConfigureBuild()).ToArray();
+
+            BuildLog.WriteLine("Adding Author and PackageName to internal bundle names");
+            var bundleNameMap = new Dictionary<string, string>();
+            for (var i = 0; i < bundles.Length; i++)
+            {
+                var originalName = bundles[i].assetBundleName;
+                
+                // Needed to prevent runtime conflicts. 2 bundles with the same internal (build-time) name
+                // cannot be loaded simultaneously by Unity. Apply lowercase, since names passed to BuildPipeline
+                // are also lowercased.
+                var buildTimeName = (profile.Author + "." + profile.PackageName + "." + originalName).ToLower();
+                if (bundleNameMap.ContainsKey(buildTimeName))
+                    throw new MeatKitBuildException("Two or more AssetBundles share the same name - this is not " +
+                                                    "supported. Make sure all your AssetBundles have unique names.");
+                
+                bundleNameMap[buildTimeName] = originalName;
+                bundles[i].assetBundleName = buildTimeName;
+            }
+
             BuildLog.WriteLine(bundles.Length + " bundles to build. Building bundles.");
             BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles, BuildAssetBundleOptions.ChunkBasedCompression,
                 BuildTarget.StandaloneWindows64);
             
             // Disable bundle processing now that we're done with it.
             AssetBundleIO.DisableProcessing();
-            var requiredScripts = AssetBundleIO.SerializedScriptNames;
             BuildLog.WriteLine("Bundles built");
             
             // Cleanup the unused files created with building the bundles
@@ -106,14 +124,31 @@ namespace MeatKit
             foreach (var file in Directory.GetFiles(bundleOutputPath, "*.manifest"))
                 File.Delete(file);
             File.Delete(Path.Combine(bundleOutputPath, profile.Version));
-            
+
+            // Rename built bundles back to their original names
+            BuildLog.WriteLine("Verifying built bundles, restoring their original names in file system");
+            foreach (var entry in bundleNameMap)
+            {
+                BuildLog.WriteLine("Renaming bundle: " + entry.Key + " -> " + entry.Value);
+                var buildTimeNamePath = Path.Combine(bundleOutputPath, entry.Key);
+                var originalNamePath = Path.Combine(bundleOutputPath, entry.Value);
+                if (!File.Exists(buildTimeNamePath))
+                    throw new MeatKitBuildException("One or more AssetBundles have failed to build! Check the " +
+                                                    "console/build items for errors. Make sure your bundle names " +
+                                                    "don't contain any illegal characters. " +
+                                                    "Name of bundle that failed: " + entry.Value);
+
+                File.Move(buildTimeNamePath, originalNamePath);
+            }
+
             // Reset the virtual reality supported checkbox, so if the user had it disabled it will stay disabled
             PlayerSettings.virtualRealitySupported = wasVirtualRealitySupported;
-            
+
             // And export the assembly to the folder
             BuildLog.WriteLine("Exporting editor assembly");
+            var requiredScripts = AssetBundleIO.SerializedScriptNames;
             ExportEditorAssembly(bundleOutputPath, tempAssemblyFile, requiredScripts);
-            
+
             // Now we can write the Thunderstore stuff to the folder
             BuildLog.WriteLine("Writing Thunderstore manifest");
             profile.WriteThunderstoreManifest(bundleOutputPath + "manifest.json");
@@ -145,7 +180,8 @@ namespace MeatKit
 
             // Copy the readme
             BuildLog.WriteLine("Copying readme");
-            File.Copy(AssetDatabase.GetAssetPath(profile.ReadMe), bundleOutputPath + "README.md");
+            var readmePath = bundleOutputPath + "README.md";
+            File.Copy(AssetDatabase.GetAssetPath(profile.ReadMe), readmePath);
 
             if (profile.Changelog)
             {
@@ -172,8 +208,18 @@ namespace MeatKit
                 using (var zip = new ZipFile())
                 {
                     zip.AddDirectory(bundleOutputPath, "");
-                    zip.Save(Path.Combine(bundleOutputPath, packageName + "-" + profile.Version + ".zip"));
+                    var zipPath = Path.Combine(bundleOutputPath, packageName + "-" + profile.Version + ".zip");
+                    zip.Save(zipPath);
+                    
+                    if (File.Exists(zipPath))
+                        EditorUtility.RevealInFinder(zipPath);
                 }
+            }
+            else
+            {
+                BuildLog.WriteLine("Opening folder with built files");
+                if (File.Exists(readmePath))
+                    EditorUtility.RevealInFinder(readmePath);
             }
 
             // End the stopwatch and save the time
