@@ -287,6 +287,11 @@ namespace MeatKit
 
             foreach (TypeDefinition type in module.GetTypes())
             {
+                if (type.BaseType != null)
+                {
+                    AddReference(map, type, type.BaseType);
+                }
+                
                 foreach (CustomAttribute typeAttribute in type.CustomAttributes)
                 {
                     AddReference(map, type, typeAttribute.AttributeType);
