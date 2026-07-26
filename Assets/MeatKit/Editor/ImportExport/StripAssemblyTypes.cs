@@ -46,6 +46,9 @@
             "ftStorageAsset",
             "ftUniqueIDRegistry",
             "BakeryLightmapGroupPlain",
+            "BakeryLightFilter",
+            "BakeryNamedSection",
+            "BakeryNamedSectionSelector",
 
             // WarFX
             "CFX_AutoDestructShuriken",
