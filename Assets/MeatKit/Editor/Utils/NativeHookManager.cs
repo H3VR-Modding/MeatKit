@@ -340,7 +340,7 @@ namespace MeatKit
             // re-entrant from an [InitializeOnLoad] context and cause crashes in mono.dll.
 
             // NativeDetour objects cause Mono's CRT atexit to deadlock on exit().
-            // Hook editorApplicationQuit (fires before exit()) and call ExitProcess(0) to bypass atexit.
+            // Hook editorApplicationQuit (fires before exit()) so we have a fallback if that happens.
             RegisterQuitCallback();
         }
 
@@ -362,7 +362,52 @@ namespace MeatKit
                             try { existing(); }
                             catch { }
                         }
-                        ExitProcess(0);
+
+                        // Let native shutdown persist scene/layout state instead of killing
+                        // immediately; kill once both files are written, or after 15s as a
+                        // fallback.
+                        string libraryDir = System.IO.Path.GetFullPath(
+                            System.IO.Path.Combine(UnityEngine.Application.dataPath, "../Library"));
+                        string[] stateFiles =
+                        {
+                            System.IO.Path.Combine(libraryDir, "LastSceneManagerSetup.txt"),
+                            System.IO.Path.Combine(libraryDir, "CurrentLayout.dwlt")
+                        };
+                        var baselines = new DateTime[stateFiles.Length];
+                        for (int i = 0; i < stateFiles.Length; i++)
+                            baselines[i] = System.IO.File.Exists(stateFiles[i])
+                                ? System.IO.File.GetLastWriteTimeUtc(stateFiles[i])
+                                : DateTime.MinValue;
+
+                        var watchdog = new System.Threading.Thread(() =>
+                        {
+                            var deadline = DateTime.UtcNow.AddSeconds(15);
+                            bool allWritten = false;
+                            while (DateTime.UtcNow < deadline)
+                            {
+                                allWritten = true;
+                                for (int i = 0; i < stateFiles.Length; i++)
+                                {
+                                    try
+                                    {
+                                        if (!System.IO.File.Exists(stateFiles[i]) ||
+                                            System.IO.File.GetLastWriteTimeUtc(stateFiles[i]) <= baselines[i])
+                                        {
+                                            allWritten = false;
+                                            break;
+                                        }
+                                    }
+                                    catch { allWritten = false; break; }
+                                }
+                                if (allWritten) break;
+                                System.Threading.Thread.Sleep(100);
+                            }
+                            // Short grace period for trailing writes we're not explicitly watching.
+                            if (allWritten) System.Threading.Thread.Sleep(500);
+                            ExitProcess(0);
+                        });
+                        watchdog.IsBackground = true;
+                        watchdog.Start();
                     });
                 }
                 else
