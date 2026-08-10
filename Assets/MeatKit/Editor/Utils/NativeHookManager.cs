@@ -136,10 +136,25 @@ namespace MeatKit
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool CloseHandle(IntPtr hObject);
 
-        // ExitProcess: terminates without running CRT atexit handlers (deadlock site for Mono when
-        // NativeDetour objects have been created). Still fires DLL_PROCESS_DETACH notifications.
+        // ExitProcess + watchdog P/Invokes.  ExitProcess fires DLL_PROCESS_DETACH; the watchdog
+        // is a pure-native Sleep+ExitProcess thread that can't be suspended by STOA.
         [DllImport("kernel32.dll")]
         private static extern void ExitProcess(uint uExitCode);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr CreateThread(
+            IntPtr lpThreadAttributes, UIntPtr dwStackSize,
+            IntPtr lpStartAddress, IntPtr lpParameter,
+            uint dwCreationFlags, out uint lpThreadId);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, uint flAllocationType, uint flProtect);
 
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentThreadId();
@@ -339,8 +354,9 @@ namespace MeatKit
             // NOTE: PIOLA and ReloadAllUsedAssemblies hooks are not installed — both are
             // re-entrant from an [InitializeOnLoad] context and cause crashes in mono.dll.
 
-            // NativeDetour objects cause Mono's CRT atexit to deadlock on exit().
-            // Hook editorApplicationQuit (fires before exit()) so we have a fallback if that happens.
+            // On process exit, editorApplicationQuit fires before exit().  Kill mono I/O
+            // workers and dispose detours here so CRT atexit doesn't deadlock on STOA
+            // or still-active NativeDetour callbacks.  No ExitProcess — normal close.
             RegisterQuitCallback();
         }
 
@@ -356,70 +372,26 @@ namespace MeatKit
                     var existing = (UnityEngine.Events.UnityAction)field.GetValue(null);
                     field.SetValue(null, (UnityEngine.Events.UnityAction)delegate
                     {
-                        // Run any previously-registered quit callbacks first
+                        // Start the native watchdog BEFORE Unity's quit handler.
+                        // If CleanupMono's STOA hangs (after our cleanup below),
+                        // ExitProcess fires after 5s.  Metadata is already written
+                        // at this point (before CoreShutdown runs).
+                        StartNativeWatchdog(5000);
+
                         if (existing != null)
                         {
                             try { existing(); }
                             catch { }
                         }
 
-                        // Let native shutdown persist scene/layout state instead of killing
-                        // immediately; kill once both files are written, or after 15s as a
-                        // fallback.
-                        string libraryDir = System.IO.Path.GetFullPath(
-                            System.IO.Path.Combine(UnityEngine.Application.dataPath, "../Library"));
-                        string[] stateFiles =
-                        {
-                            System.IO.Path.Combine(libraryDir, "LastSceneManagerSetup.txt"),
-                            System.IO.Path.Combine(libraryDir, "CurrentLayout.dwlt")
-                        };
-                        var baselines = new DateTime[stateFiles.Length];
-                        for (int i = 0; i < stateFiles.Length; i++)
-                            baselines[i] = System.IO.File.Exists(stateFiles[i])
-                                ? System.IO.File.GetLastWriteTimeUtc(stateFiles[i])
-                                : DateTime.MinValue;
+                        TerminateMonoIOWorkers();
 
-                        var watchdog = new System.Threading.Thread(() =>
-                        {
-                            var deadline = DateTime.UtcNow.AddSeconds(15);
-                            bool allWritten = false;
-                            while (DateTime.UtcNow < deadline)
-                            {
-                                allWritten = true;
-                                for (int i = 0; i < stateFiles.Length; i++)
-                                {
-                                    try
-                                    {
-                                        if (!System.IO.File.Exists(stateFiles[i]) ||
-                                            System.IO.File.GetLastWriteTimeUtc(stateFiles[i]) <= baselines[i])
-                                        {
-                                            allWritten = false;
-                                            break;
-                                        }
-                                    }
-                                    catch { allWritten = false; break; }
-                                }
-                                if (allWritten) break;
-                                System.Threading.Thread.Sleep(100);
-                            }
-                            // Short grace period for trailing writes we're not explicitly watching.
-                            if (allWritten) System.Threading.Thread.Sleep(500);
-                            ExitProcess(0);
-                        });
-                        watchdog.IsBackground = true;
-                        watchdog.Start();
+                        foreach (var detour in Detours) detour.Dispose();
+                        Detours.Clear();
                     });
                 }
-                else
-                {
-                    Debug.LogWarning("[NativeHookManager] editorApplicationQuit field not found — " +
-                                     "editor close may hang. Force-kill with Task Manager if needed.");
-                }
             }
-            catch (Exception ex)
-            {
-                Debug.LogWarning("[NativeHookManager] Failed to register quit callback: " + ex.Message);
-            }
+            catch { }
         }
 
         public static T ApplyEditorDetour<T>(long from, Delegate to) where T : class
@@ -609,9 +581,9 @@ namespace MeatKit
 
         private static void OnShutdownManaged()
         {
-            // Unity is about to shutdown the mono runtime! Quickly dispose of our detours!
-            // Fire any registered pre-shutdown callbacks before tearing down the domain.
-            // try/finally guarantees OrigShutdownManaged() is called even if a callback throws.
+            // Fire pre-shutdown callbacks, then dispose detours BEFORE native teardown
+            // so CRT atexit handlers (which fire during exit()) don't deadlock on the
+            // still-active NativeDetour callbacks.
             try
             {
                 foreach (var cb in BeforeShutdownCallbacks)
@@ -622,18 +594,13 @@ namespace MeatKit
             }
             finally
             {
-                // Kill Mono IO-worker threads before teardown — they block in uninterruptible I/O
-                // waits, causing STOA to deadlock during domain unload.
+                // Dispose detours first — metadata writes can now complete.
+                foreach (var detour in Detours) detour.Dispose();
+                Detours.Clear();
+
                 TerminateMonoIOWorkers();
 
-                try
-                {
-                    OrigShutdownManaged();
-                }
-                finally
-                {
-                    foreach (var detour in Detours) detour.Dispose();
-                }
+                OrigShutdownManaged();
             }
         }
 
@@ -691,6 +658,39 @@ namespace MeatKit
             {
                 Debug.LogWarning("[NativeHookManager] TerminateMonoIOWorkers failed: " + ex.Message);
             }
+        }
+
+        // Unmanaged watchdog: if OrigShutdownManaged hangs on STOA deadlock, ExitProcess
+        // fires after timeoutMs.  Uses only kernel32 Sleep/ExitProcess — no managed calls
+        // (managed threads are suspended by STOA).  Fires DLL_PROCESS_DETACH.
+        private static void StartNativeWatchdog(uint timeoutMs)
+        {
+            try
+            {
+                IntPtr k32 = GetModuleHandle("kernel32.dll");
+                IntPtr sleep = GetProcAddress(k32, "Sleep");
+                IntPtr exitProc = GetProcAddress(k32, "ExitProcess");
+                if (sleep == IntPtr.Zero || exitProc == IntPtr.Zero) return;
+
+                System.IO.MemoryStream ms = new System.IO.MemoryStream();
+                ms.Write(new byte[] { 0x48, 0xC7, 0xC1 }, 0, 3);
+                ms.Write(BitConverter.GetBytes(timeoutMs), 0, 4);
+                ms.Write(new byte[] { 0x48, 0xB8 }, 0, 2);
+                ms.Write(BitConverter.GetBytes(sleep.ToInt64()), 0, 8);
+                ms.Write(new byte[] { 0x48, 0x83, 0xEC, 0x28, 0xFF, 0xD0, 0x48, 0x83, 0xC4, 0x28 }, 0, 10);
+                ms.Write(new byte[] { 0x48, 0xC7, 0xC1, 0x00, 0x00, 0x00, 0x00 }, 0, 7);
+                ms.Write(new byte[] { 0x48, 0xB8 }, 0, 2);
+                ms.Write(BitConverter.GetBytes(exitProc.ToInt64()), 0, 8);
+                ms.Write(new byte[] { 0x48, 0x83, 0xEC, 0x28, 0xFF, 0xD0 }, 0, 6);
+                byte[] code = ms.ToArray();
+
+                IntPtr exec = VirtualAlloc(IntPtr.Zero, (UIntPtr)code.Length, 0x3000, 0x40);
+                if (exec == IntPtr.Zero) return;
+                Marshal.Copy(code, 0, exec, code.Length);
+                uint tid;
+                CreateThread(IntPtr.Zero, UIntPtr.Zero, exec, IntPtr.Zero, 0, out tid);
+            }
+            catch { }
         }
     }
 }
