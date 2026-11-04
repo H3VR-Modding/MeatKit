@@ -235,6 +235,7 @@ namespace MeatKit
             {
                 NativeHookManager.BeforeEATICallbacks.Remove(_beforeEATI);
                 NativeHookManager.AfterEATICallbacks.Remove(_afterEATI);
+                NativeHookManager.InsideEATI = false;
                 NativeHookManager.InsideBundleEATI = false;
 
                 // Must be here, not after the manifest check: a throw from BuildAssetBundles
