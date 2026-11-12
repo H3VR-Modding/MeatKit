@@ -79,14 +79,7 @@ namespace NStrip
 
 					if (isExplicitlySerialized == null)
 					{
-						var nonSerializedAttributeCtor = typeof(NonSerializedAttribute).GetConstructor(Type.EmptyTypes);
-						var nonSerializedAttributeRef = assembly.MainModule.ImportReference(nonSerializedAttributeCtor);
-						attributes.Add(new CustomAttribute(nonSerializedAttributeRef));
-						
-						var hideInInspectorCtor = typeof(MeatKit.HideInNormalInspectorAttribute).GetConstructor(Type.EmptyTypes);
-						var hideInInspectorRef = assembly.MainModule.ImportReference(hideInInspectorCtor);
-						attributes.Add(new CustomAttribute(hideInInspectorRef));
-						
+						field.IsNotSerialized = true;
 					}
 				}
 			}

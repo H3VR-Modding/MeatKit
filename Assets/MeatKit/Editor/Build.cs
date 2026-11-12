@@ -22,11 +22,11 @@ namespace MeatKit
                 return;
             }
 
-            // Refuse to start a build while scripts are still being compiled
-            if (EditorApplication.isCompiling)
+            // Refuse to start while compiling or refreshing.
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
                 EditorUtility.DisplayDialog("Cannot build",
-                    "Scripts are currently being compiled. Please wait for compilation to finish and then try again.",
+                    "Scripts are currently being compiled or assets are refreshing. Please wait for compilation to finish and then try again.",
                     "Ok");
                 return;
             }
@@ -43,11 +43,13 @@ namespace MeatKit
             {
                 System.Threading.Thread.ResetAbort();
                 NativeHookManager.InsideEATI = false;
+                NativeHookManager.InsideBundleEATI = false;
                 BuildLog.SetCompletionStatus(true, "Build interrupted by domain reload.", null);
             }
             catch (MeatKitBuildException e)
             {
                 NativeHookManager.InsideEATI = false;
+                NativeHookManager.InsideBundleEATI = false;
                 string message = e.Message;
                 if (e.InnerException != null) message += "\n\n" + e.InnerException.Message;
                 EditorUtility.DisplayDialog("Build failed", message, "Ok.");
@@ -57,6 +59,7 @@ namespace MeatKit
             catch (Exception e)
             {
                 NativeHookManager.InsideEATI = false;
+                NativeHookManager.InsideBundleEATI = false;
                 EditorUtility.DisplayDialog("Build failed with unknown error",
                     "Error message: " + e.Message + "\n\nCheck console for full exception text.", "Ok.");
                 Debug.LogException(e);
@@ -65,6 +68,12 @@ namespace MeatKit
             finally
             {
                 _buildRunning = false;
+
+                // Covers the throws between EnableProcessing() and DoBuildInternal's try block,
+                // which that inner finally cannot see.
+                try { AssetBundleIO.DisableProcessing(); }
+                catch (Exception) { }
+
                 try { BuildLog.Finish(); }
                 catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
                 catch (Exception) { }
@@ -77,9 +86,39 @@ namespace MeatKit
             EditorApplication.UnlockReloadAssemblies();
         }
 
+        // Build output is always x86_64. A mismatched editor target makes Unity run
+        // "Determining assets that need to be reimported for target platform" on
+        // every build, so match the target up front.
+        [InitializeOnLoadMethod]
+        private static void EnsureWindows64TargetOnLoad()
+        {
+            try
+            {
+                if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64) return;
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         private static void DoBuildInternal()
         {
             if (ShowErrorIfH3VRNotImported()) return;
+
+            // One-shot: repair H3VRCode MonoScript metadata that was corrupted by
+            // FixRuntimeScriptReference during prior domain-reload cycles. Re-importing
+            // the DLLs forces the MonoImporter to regenerate correct assembly-name refs.
+            // Runs at most once per session, and before any guard, since the forced
+            // reimport queues an AssetDatabase refresh of its own.
+            if (!SessionState.GetBool("MeatKit.RepairedH3VRCodeMS2", false))
+            {
+                string managed = Path.Combine(Application.dataPath, "Managed");
+                foreach (var dll in Directory.GetFiles(managed, "H3VRCode*.dll"))
+                    AssetDatabase.ImportAsset("Assets/Managed/" + Path.GetFileName(dll),
+                        ImportAssetOptions.ForceUpdate | ImportAssetOptions.DontDownloadFromCacheServer);
+                SessionState.SetBool("MeatKit.RepairedH3VRCodeMS2", true);
+            }
 
             BuildProfile profile = BuildWindow.SelectedProfile;
             if (!profile) return;
@@ -180,23 +219,34 @@ namespace MeatKit
             NativeHookManager.BeforeEATICallbacks.Add(_beforeEATI);
             NativeHookManager.AfterEATICallbacks.Add(_afterEATI);
 
-            BuildLog.WriteLine("Calling BuildAssetBundles (isCompiling=" + EditorApplication.isCompiling + " InsideEATI=" + NativeHookManager.InsideEATI + ")");
-            var bundleManifest = BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles,
-                BuildAssetBundleOptions.ChunkBasedCompression,
-                BuildTarget.StandaloneWindows64);
-            BuildLog.WriteLine("BuildAssetBundles returned. manifest=" + (bundleManifest != null ? "OK" : "NULL") + " isCompiling=" + EditorApplication.isCompiling);
+            // NOTE: no StartAssetEditing wrapper here. Proven by gate test:
+            // building bundles while asset editing is active makes Unity refuse
+            // with "Cannot build AssetBundles while imports of assets are in progress".
+            AssetBundleManifest bundleManifest = null;
+            try
+            {
+                BuildLog.WriteLine("Calling BuildAssetBundles (isCompiling=" + EditorApplication.isCompiling + " InsideEATI=" + NativeHookManager.InsideEATI + ")");
+                bundleManifest = BuildPipeline.BuildAssetBundles(bundleOutputPath, bundles,
+                    BuildAssetBundleOptions.ChunkBasedCompression,
+                    BuildTarget.StandaloneWindows64);
+                BuildLog.WriteLine("BuildAssetBundles returned. manifest=" + (bundleManifest != null ? "OK" : "NULL") + " isCompiling=" + EditorApplication.isCompiling);
+            }
+            finally
+            {
+                NativeHookManager.BeforeEATICallbacks.Remove(_beforeEATI);
+                NativeHookManager.AfterEATICallbacks.Remove(_afterEATI);
+                NativeHookManager.InsideEATI = false;
+                NativeHookManager.InsideBundleEATI = false;
 
-            // Unregister EATI callbacks
-            NativeHookManager.BeforeEATICallbacks.Remove(_beforeEATI);
-            NativeHookManager.AfterEATICallbacks.Remove(_afterEATI);
-            // Keep InsideEATI=true so post-build EATI can't overwrite H3VRCode TypeTree
-            // Clear InsideBundleEATI so post-build EATI doesn't block BepInEx/OtherLoader
-            NativeHookManager.InsideBundleEATI = false;
+                // Must be here, not after the manifest check: a throw from BuildAssetBundles
+                // never reaches the old call site, leaving the write hook armed. See DoBuild's
+                // finally, which is what actually covers every other failure path.
+                AssetBundleIO.DisableProcessing();
+            }
 
             if (bundleManifest == null)
                 throw new MeatKitBuildException("AssetBundle build failed to produce a manifest. Check the console for errors.");
 
-            AssetBundleIO.DisableProcessing();
             BuildLog.WriteLine("Bundles built");
 
             // If no firstpass existed before build, capture the one generated by standalone compile

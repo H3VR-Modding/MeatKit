@@ -21,6 +21,7 @@ namespace MeatKit
         public long RenewMonoScriptsFromAssemblies { get; set; }
         public long ReleaseMonoScriptCaches { get; set; }
         public long IsCompatibleWithEditorCPUAndOS { get; set; }
+        public long GetMonoManagerPtr { get; set; }
     }
 
     public class EditorVersion
@@ -89,7 +90,8 @@ namespace MeatKit
                         TransferScriptingObjectGTT = 0xE4CA80,
                         RenewMonoScriptsFromAssemblies = 0x14C6910,
                         ReleaseMonoScriptCaches = 0x14C66F0,
-                        IsCompatibleWithEditorCPUAndOS = 0x1601D10
+                        IsCompatibleWithEditorCPUAndOS = 0x1601D10,
+                        GetMonoManagerPtr = 0x14C2510
                     }
                 }
             },

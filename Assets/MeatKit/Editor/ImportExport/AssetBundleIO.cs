@@ -104,7 +104,9 @@ namespace MeatKit
             // or H3VRCode-CSharp → Assembly-CSharp).  All entries are in the replaceMap; see
             // Build.cs for the full map.  The name is restored after OrigTransferWrite below.
             string newAssemblyName;
-            if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
+            // Null check: an NRE out of a native detour callback crashes the editor rather
+            // than surfacing as a catchable error.
+            if (_replaceMap != null && _replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // If we're processing a type that should exist in the main game assembly, skip translation
                 if (assemblyName != MeatKit.AssemblyName + ".dll" || !MeatKit.StripAssemblyTypes.Contains(fullName))
@@ -168,7 +170,9 @@ namespace MeatKit
 
             // Check if we want to remap this assembly name
             string newAssemblyName;
-            if (_replaceMap.TryGetValue(assemblyName, out newAssemblyName))
+            // Null check: an NRE out of a native detour callback crashes the editor rather
+            // than surfacing as a catchable error.
+            if (_replaceMap != null && _replaceMap.TryGetValue(assemblyName, out newAssemblyName))
             {
                 // If we're processing a type that should exist in the main game assembly, skip translation
                 if (assemblyName != MeatKit.AssemblyName || !MeatKit.StripAssemblyTypes.Contains(fullName))

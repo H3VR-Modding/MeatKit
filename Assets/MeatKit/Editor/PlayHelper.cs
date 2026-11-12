@@ -275,6 +275,27 @@ public static class PlayHelper
             Log("Disabled existing camera: " + existing[i].gameObject.name);
         }
 
+        // Scene cameras can carry their own AudioListener; only [EditorVRCamera] should have one.
+        // FindObjectsOfTypeAll (not FindObjectsOfType) -- a leftover [EditorVRCamera] from an
+        // earlier session is HideFlags.DontSave, which FindObjectsOfType silently can't see,
+        // letting its enabled listener go undetected and accumulate session after session.
+        AudioListener[] existingListeners = Resources.FindObjectsOfTypeAll<AudioListener>();
+        for (int i = 0; i < existingListeners.Length; i++)
+        {
+            // FindObjectsOfTypeAll can also return a component sitting on a loaded prefab
+            // asset (e.g. a weapon scope prefab with its own AudioListener) rather than a
+            // scene instance; IsPersistent tells them apart. Never touch a project asset.
+            if (UnityEditor.EditorUtility.IsPersistent(existingListeners[i].gameObject)) continue;
+
+            existingListeners[i].enabled = false;
+            Log("Disabled existing AudioListener: " + existingListeners[i].gameObject.name);
+        }
+
+        // FVRSceneSettings' real Start() (vault scenario load, etc.) can spawn more objects
+        // with their own AudioListener after this one-time pass already ran; keep enforcing
+        // exactly one for the rest of the session, see EnforceSingleAudioListener.
+        UnityEditor.EditorApplication.update += EnforceSingleAudioListener;
+
         // Capture scene-view position, then detach the scene-view camera from VR tracking.
         Vector3 spawnPos;
         Quaternion spawnRot;
@@ -301,14 +322,42 @@ public static class PlayHelper
         vrCam.farClipPlane    = 1000f;
         vrCam.clearFlags      = CameraClearFlags.Skybox;
         vrCam.depth           = 10;
-        vrCam.stereoTargetEye = StereoTargetEyeMask.Both;  // explicit: this camera renders to the HMD
+        vrCam.stereoTargetEye = StereoTargetEyeMask.None;  // enabled after a warm-up delay, see EnableVrStereoWhenReady
+        _vrCamListener = camGO.AddComponent<AudioListener>();
         camGO.transform.position = spawnPos;
         camGO.transform.rotation = spawnRot;
+
+        // Enabling stereo immediately can race Unity's own native OpenVR handshake and crash
+        // inside vrclient_x64.dll on a NULL this-pointer; wait a moment before enabling it.
+        _pendingVrCam = vrCam;
+        _vrCamStereoEnableAt = UnityEditor.EditorApplication.timeSinceStartup + VrStereoWarmupDelaySeconds;
+        UnityEditor.EditorApplication.update += EnableVrStereoWhenReady;
 
         // Unity's VR system can re-enable stereo on the scene-view camera each frame.
         // Register an editor-update callback to keep it detached for the entire play session.
         UnityEditor.EditorApplication.update += KeepSceneViewDetachedFromVR;
         UnityEditor.EditorApplication.playmodeStateChanged += OnPlaymodeChanged;
+    }
+
+    private static Camera _pendingVrCam;
+    private static double _vrCamStereoEnableAt;
+    private const double VrStereoWarmupDelaySeconds = 1.0;
+
+    // Delays the [EditorVRCamera]'s stereo output by VrStereoWarmupDelaySeconds so Unity's
+    // native OpenVR init has time to finish before the first stereo render is attempted.
+    private static void EnableVrStereoWhenReady()
+    {
+        if (_pendingVrCam == null)
+        {
+            UnityEditor.EditorApplication.update -= EnableVrStereoWhenReady;
+            return;
+        }
+        if (UnityEditor.EditorApplication.timeSinceStartup < _vrCamStereoEnableAt) return;
+
+        _pendingVrCam.stereoTargetEye = StereoTargetEyeMask.Both;
+        Log("[EditorVRCamera] stereo enabled after warm-up delay.");
+        _pendingVrCam = null;
+        UnityEditor.EditorApplication.update -= EnableVrStereoWhenReady;
     }
 
     // Unsubscribes the per-frame scene-view guard when play mode ends.
@@ -318,7 +367,37 @@ public static class PlayHelper
             !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
         {
             UnityEditor.EditorApplication.update -= KeepSceneViewDetachedFromVR;
+            UnityEditor.EditorApplication.update -= EnableVrStereoWhenReady;
+            UnityEditor.EditorApplication.update -= EnforceSingleAudioListener;
             UnityEditor.EditorApplication.playmodeStateChanged -= OnPlaymodeChanged;
+
+            // [EditorVRCamera] uses HideFlags.DontSave, so it survives Stop instead of being
+            // cleaned up -- disable its listener here or it's left enabled indefinitely (and
+            // the next Play session's [EditorVRCamera] would just add another one on top).
+            if (_vrCamListener != null) _vrCamListener.enabled = false;
+
+            _pendingVrCam = null;
+            _vrCamListener = null;
+        }
+    }
+
+    private static AudioListener _vrCamListener;
+
+    // Disables every AudioListener except [EditorVRCamera]'s own. Checked every frame rather
+    // than throttled -- a scenario/vault load can spawn a burst of new listeners at once, and
+    // a throttled check left a window where Unity would log its warning before the next pass.
+    // Uses FindObjectsOfTypeAll -- see the matching note in OnAfterSceneLoad.
+    private static void EnforceSingleAudioListener()
+    {
+        AudioListener[] listeners = Resources.FindObjectsOfTypeAll<AudioListener>();
+        for (int i = 0; i < listeners.Length; i++)
+        {
+            if (listeners[i] != _vrCamListener && listeners[i].enabled &&
+                !UnityEditor.EditorUtility.IsPersistent(listeners[i].gameObject))
+            {
+                listeners[i].enabled = false;
+                Log("Disabled newly-spawned AudioListener: " + listeners[i].gameObject.name);
+            }
         }
     }
 
@@ -394,28 +473,24 @@ public static class PlayHelper
             if (fxmType != null)
                 PatchAwakeWithSwallow(fxmType);
 
+            // SetReverbEnvironment needs a real AudioMixer this bootstrap doesn't provide.
+            // SM.Update no longer needs a skip patch -- confirmed against the full log file
+            // (not just a tail window, which is too small to catch a fast-repeating exception)
+            // that the current game version's own null-guards let it run for real, with zero
+            // exceptions.
             if (smType != null)
-            {
                 PatchSafely(AccessTools.Method(smType, "SetReverbEnvironment"), skip);
-                // SM.Update NPEs on null TinnitusSound; no-op it.
-                PatchSafely(AccessTools.Method(smType, "Update"), skip);
-            }
 
+            // AchCheck() reads GM.CurrentMovementManager.transform with no null-guard; this
+            // bootstrap has no real MovementManager, so it NREs every single Update() tick
+            // (10,100 times in one 60s session) unless skip-patched.
             if (ssType != null)
-            {
-                PatchSafely(AccessTools.Method(ssType, "Start"), skip);
                 PatchSafely(AccessTools.Method(ssType, "Update"), skip);
-            }
 
             // CurrentPlayerBody is null in editor.
             Type aicType = ResolveFromH3VR("FistVR.AudioImpactController");
             if (aicType != null)
                 PatchSafely(AccessTools.Method(aicType, "OnCollisionEnter"), skip);
-
-            // Reads GM.CurrentMovementManager which is null in editor.
-            Type w1873Type = ResolveFromH3VR("FistVR.Winchester1873LoadingGate");
-            if (w1873Type != null)
-                PatchSafely(AccessTools.Method(w1873Type, "Update"), skip);
 
             // DllNotFoundException from haptic feedback DLL; no-op if not installed.
             Type forceTubeType = ResolveFromH3VR("ForceTubeVRInterface");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -516,18 +516,26 @@ namespace MeatKit
                 InsideEATI = true;
             }
 
-            foreach (var cb in BeforeEATICallbacks)
-                try { cb(); }
-                catch (Exception ex) { Debug.LogException(ex); }
+            // Restore in a finally: a throw out of _origEATI would otherwise leave
+            // InsideEATI stuck true for the session, blocking H3VRCode extraction.
+            try
+            {
+                foreach (var cb in BeforeEATICallbacks)
+                    try { cb(); }
+                    catch (Exception ex) { Debug.LogException(ex); }
 
-            byte result = _origEATI(policyIndex, assemblyId, buildTarget, typeInfoCollector);
+                byte result = _origEATI(policyIndex, assemblyId, buildTarget, typeInfoCollector);
 
-            foreach (var cb in AfterEATICallbacks)
-                try { cb(); }
-                catch (Exception ex) { Debug.LogException(ex); }
+                foreach (var cb in AfterEATICallbacks)
+                    try { cb(); }
+                    catch (Exception ex) { Debug.LogException(ex); }
 
-            if (isStandaloneEATI) InsideEATI = wasInsideEATI;
-            return result;
+                return result;
+            }
+            finally
+            {
+                if (isStandaloneEATI) InsideEATI = wasInsideEATI;
+            }
         }
 
         // During bundle builds: return false for ALL Assets/Managed/ DLLs to prevent EATI from
@@ -581,9 +589,9 @@ namespace MeatKit
 
         private static void OnShutdownManaged()
         {
-            // Fire pre-shutdown callbacks, then dispose detours BEFORE native teardown
-            // so CRT atexit handlers (which fire during exit()) don't deadlock on the
-            // still-active NativeDetour callbacks.
+            // Unity is about to shutdown the mono runtime! Quickly dispose of our detours!
+            // Fire any registered pre-shutdown callbacks before tearing down the domain.
+            // try/finally guarantees OrigShutdownManaged() is called even if a callback throws.
             try
             {
                 foreach (var cb in BeforeShutdownCallbacks)
@@ -594,13 +602,21 @@ namespace MeatKit
             }
             finally
             {
-                // Dispose detours first — metadata writes can now complete.
-                foreach (var detour in Detours) detour.Dispose();
-                Detours.Clear();
-
+                // Kill Mono IO-worker threads before teardown - they block in uninterruptible I/O
+                // waits, causing STOA to deadlock during domain unload.
                 TerminateMonoIOWorkers();
 
-                OrigShutdownManaged();
+                try
+                {
+                    OrigShutdownManaged();
+                }
+                finally
+                {
+                    foreach (var detour in Detours) detour.Dispose();
+                    // Clear too: the other shutdown path disposes and clears, so a session
+                    // hitting both would dispose every detour twice.
+                    Detours.Clear();
+                }
             }
         }
 

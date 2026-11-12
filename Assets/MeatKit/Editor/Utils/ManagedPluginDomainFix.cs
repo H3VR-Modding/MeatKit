@@ -65,6 +65,15 @@ namespace MeatKit
             AppDomain.CurrentDomain.AssemblyResolve += ResolveUnityExtensionAssembly;
             CopyH3VRCodeDlls(true);
             NativeHookManager.BeforeShutdownCallbacks.Add(delegate { CopyH3VRCodeDlls(false); });
+            // Fixes edited scripts never reflecting changes without a full Editor restart.
+            if (EditorVersion.Current.FunctionOffsets.GetMonoManagerPtr != 0)
+            {
+                NativeHookManager.BeforeShutdownCallbacks.Add(delegate
+                {
+                    try { CaptureAndEvictStaleScriptAssemblyImages(); }
+                    catch (Exception ex) { Debug.LogWarning("[ManagedPluginDomainFix] CaptureAndEvictStaleScriptAssemblyImages failed: " + ex.Message); }
+                });
+            }
 
             // Note: PIOLA and RUA hooks cannot be installed safely from an [InitializeOnLoad]
             // static ctor. ShutdownManaged + BeforeEATI callbacks cover all required work.
@@ -224,6 +233,18 @@ namespace MeatKit
         private static Assembly ResolveUnityExtensionAssembly(object sender, ResolveEventArgs args)
         {
             var simpleName = new AssemblyName(args.Name).Name;
+            // Prefer an already-loaded copy. LoadAssemblyWrapper does not dedupe against
+            // plugin-loaded assemblies, so a raced bind double-loads the DLL and splits
+            // type identity.
+            foreach (var loaded in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    if (string.Equals(loaded.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase))
+                        return loaded;
+                }
+                catch { }
+            }
             // Search UnityExtensions first (recursive), then Assets/Managed/ (flat).
             string[][] searchPaths = new string[][] {
                 Directory.Exists(_unityExtensionsDir) ? Directory.GetFiles(_unityExtensionsDir, simpleName + ".dll", SearchOption.AllDirectories) : new string[0],
@@ -1059,6 +1080,187 @@ namespace MeatKit
             {
                 BuildLog.WriteLine("ReprimeSingleNativeScript: " + ex.Message);
             }
+        }
+
+        // GetMonoManagerPtr() -- trivial no-arg accessor, called directly (never detoured).
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr d_GetMonoManagerPtr();
+
+        private static d_GetMonoManagerPtr _getMonoManagerPtr;
+        private static bool _getMonoManagerPtrResolveFailed;
+
+        private static IntPtr ResolveMonoManagerPtr()
+        {
+            if (_getMonoManagerPtr == null)
+            {
+                if (_getMonoManagerPtrResolveFailed) return IntPtr.Zero;
+                long rva = EditorVersion.Current.FunctionOffsets.GetMonoManagerPtr;
+                if (rva == 0) { _getMonoManagerPtrResolveFailed = true; return IntPtr.Zero; }
+                IntPtr unityBase = GetUnityModule();
+                if (unityBase == IntPtr.Zero) return IntPtr.Zero;
+                IntPtr fnPtr = (IntPtr)(unityBase.ToInt64() + rva);
+                _getMonoManagerPtr = (d_GetMonoManagerPtr)Marshal.GetDelegateForFunctionPointer(fnPtr, typeof(d_GetMonoManagerPtr));
+            }
+            return _getMonoManagerPtr();
+        }
+
+        // MonoImage* vector on MonoManager: begin ptr at +520, end ptr at +528, 8 bytes/element.
+        // Indices 0-2 are core assemblies; ordinary script assemblies start at index 3.
+        private const int MonoImagesVectorBeginOffset = 520;
+        private const int MonoImagesVectorEndOffset = 528;
+        private const int FirstOrdinaryScriptAssemblyIndex = 3;
+
+        // mono.dll's internal (non-exported) name-cache hash table lookup/remove, resolved by RVA.
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr d_g_hash_table_lookup(IntPtr hashTable, IntPtr key);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate int d_g_hash_table_remove(IntPtr hashTable, IntPtr key);
+
+        private static d_g_hash_table_lookup _monoImagesHashLookup;
+        private static d_g_hash_table_remove _monoImagesHashRemove;
+
+        // MonoImage struct field offsets used as register_image's cache keys, plus the two
+        // name-cache hash tables and the mutex mono.dll itself locks around them.
+        private const int MonoImageFlagsOffset = 28;
+        private const int MonoImageNameOffset = 32;
+        private const int MonoImageAssemblyNameOffset = 40;
+        private const long LoadedImagesHashGlobalRva = 0x265750;
+        private const long LoadedImagesRefonlyHashGlobalRva = 0x265780;
+        private const long HashLookupFunctionRva = 0x2278;
+        private const long HashRemoveFunctionRva = 0x24DC;
+        private const long ImagesLockInitedFlagRva = 0x265788;
+        private const long ImagesMutexRva = 0x265758;
+
+        [DllImport("kernel32.dll")]
+        private static extern void EnterCriticalSection(IntPtr lpCriticalSection);
+
+        [DllImport("kernel32.dll")]
+        private static extern void LeaveCriticalSection(IntPtr lpCriticalSection);
+
+        // Used to confirm a native pointer is actually mapped before dereferencing it.
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MEMORY_BASIC_INFORMATION
+        {
+            public IntPtr BaseAddress;
+            public IntPtr AllocationBase;
+            public uint AllocationProtect;
+            public IntPtr RegionSize;
+            public uint State;
+            public uint Protect;
+            public uint Type;
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr VirtualQuery(IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, UIntPtr dwLength);
+
+        private const uint MEM_COMMIT = 0x1000;
+        private const uint PAGE_NOACCESS = 0x01;
+        private const uint PAGE_GUARD = 0x100;
+
+        private static bool IsReadablePointer(IntPtr addr)
+        {
+            if (addr == IntPtr.Zero) return false;
+            MEMORY_BASIC_INFORMATION mbi;
+            IntPtr queryResult = VirtualQuery(addr, out mbi, (UIntPtr)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+            if (queryResult == IntPtr.Zero) return false;
+            if (mbi.State != MEM_COMMIT) return false;
+            if ((mbi.Protect & PAGE_NOACCESS) != 0) return false;
+            if ((mbi.Protect & PAGE_GUARD) != 0) return false;
+            return true;
+        }
+
+        private static bool EnsureMonoInternalHashDelegatesLoaded(out IntPtr monoModule)
+        {
+            monoModule = GetMonoModule();
+            if (monoModule == IntPtr.Zero) return false;
+            if (_monoImagesHashLookup != null && _monoImagesHashRemove != null) return true;
+
+            IntPtr lookupPtr = (IntPtr)(monoModule.ToInt64() + HashLookupFunctionRva);
+            IntPtr removePtr = (IntPtr)(monoModule.ToInt64() + HashRemoveFunctionRva);
+            _monoImagesHashLookup = (d_g_hash_table_lookup)Marshal.GetDelegateForFunctionPointer(lookupPtr, typeof(d_g_hash_table_lookup));
+            _monoImagesHashRemove = (d_g_hash_table_remove)Marshal.GetDelegateForFunctionPointer(removePtr, typeof(d_g_hash_table_remove));
+            return true;
+        }
+
+        // Removes a stale MonoImage's entries from register_image's name-cache so the next load
+        // creates a fresh image instead of reusing this one. Never closes/frees the image itself --
+        // just unlinks the cache entry, which is enough to fix the staleness and avoids the crashes
+        // that came from actually closing a still-referenced image.
+        private static void EvictStaleImageFromNameCache(IntPtr staleImage)
+        {
+            IntPtr monoModule;
+            if (!EnsureMonoInternalHashDelegatesLoaded(out monoModule)) return;
+
+            if (!IsReadablePointer(staleImage))
+            {
+                Debug.LogWarning("[ManagedPluginDomainFix] EvictStaleImageFromNameCache: rejected unreadable staleImage=0x" + staleImage.ToInt64().ToString("X"));
+                return;
+            }
+
+            byte flags = Marshal.ReadByte(staleImage, MonoImageFlagsOffset);
+            IntPtr nameKey = Marshal.ReadIntPtr(staleImage, MonoImageNameOffset);
+            IntPtr assemblyNameKey = Marshal.ReadIntPtr(staleImage, MonoImageAssemblyNameOffset);
+
+            if (!IsReadablePointer(nameKey)) nameKey = IntPtr.Zero;
+            if (!IsReadablePointer(assemblyNameKey)) assemblyNameKey = IntPtr.Zero;
+
+            long hashGlobalRva = (flags & 0x8) != 0 ? LoadedImagesRefonlyHashGlobalRva : LoadedImagesHashGlobalRva;
+            IntPtr hashTable = Marshal.ReadIntPtr((IntPtr)(monoModule.ToInt64() + hashGlobalRva));
+            if (hashTable == IntPtr.Zero) return;
+
+            IntPtr mutexAddr = (IntPtr)(monoModule.ToInt64() + ImagesMutexRva);
+            bool lockInited = Marshal.ReadInt32((IntPtr)(monoModule.ToInt64() + ImagesLockInitedFlagRva)) != 0;
+            if (lockInited) EnterCriticalSection(mutexAddr);
+            try
+            {
+                if (nameKey != IntPtr.Zero && _monoImagesHashLookup(hashTable, nameKey) == staleImage)
+                    _monoImagesHashRemove(hashTable, nameKey);
+                if (assemblyNameKey != IntPtr.Zero && _monoImagesHashLookup(hashTable, assemblyNameKey) == staleImage)
+                    _monoImagesHashRemove(hashTable, assemblyNameKey);
+            }
+            finally
+            {
+                if (lockInited) LeaveCriticalSection(mutexAddr);
+            }
+        }
+
+        // Called each reload via BeforeShutdownCallbacks, before this reload's own LoadAssemblies
+        // runs. Reads every ordinary script-assembly slot off MonoManager and evicts it from the
+        // name-cache immediately, so edited scripts actually get reloaded instead of Mono silently
+        // reusing the previous compile forever (the root cause of scripts never reflecting changes
+        // without a full Editor restart).
+        private static void CaptureAndEvictStaleScriptAssemblyImages()
+        {
+            IntPtr pMonoManager = ResolveMonoManagerPtr();
+            if (pMonoManager == IntPtr.Zero) return;
+
+            IntPtr begin = Marshal.ReadIntPtr(pMonoManager, MonoImagesVectorBeginOffset);
+            IntPtr end = Marshal.ReadIntPtr(pMonoManager, MonoImagesVectorEndOffset);
+            if (begin == IntPtr.Zero || end == IntPtr.Zero || end.ToInt64() <= begin.ToInt64()) return;
+
+            long elementCount = (end.ToInt64() - begin.ToInt64()) / 8;
+            int evicted = 0;
+            for (long i = FirstOrdinaryScriptAssemblyIndex; i < elementCount; i++)
+            {
+                IntPtr slotAddr = new IntPtr(begin.ToInt64() + i * 8);
+                IntPtr image = Marshal.ReadIntPtr(slotAddr);
+                if (image == IntPtr.Zero) continue;
+                // The last one or two entries are sometimes an unmapped pointer at this exact
+                // moment -- skip rather than risk dereferencing it.
+                if (!IsReadablePointer(image)) continue;
+                try
+                {
+                    EvictStaleImageFromNameCache(image);
+                    evicted++;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning("[ManagedPluginDomainFix] EvictStaleImageFromNameCache failed for 0x" + image.ToInt64().ToString("X") + ": " + ex.Message);
+                }
+            }
+            if (evicted > 0)
+                Log("CaptureAndEvictStaleScriptAssemblyImages: evicted " + evicted + " image(s) from the name-cache");
         }
 
         private static void Log(string msg)

@@ -140,6 +140,8 @@ namespace MeatKit
                     ImportSingleAssembly(path, destinationDirectory);
             }
 
+            ValidateNoProjectAssemblyReferences(destinationDirectory);
+
             // Check if anything didn't apply
             foreach (var editor in editors)
                 if (!editor.Applied)
@@ -149,6 +151,40 @@ namespace MeatKit
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, "H3VR_IMPORTED");
             NormalizeMetaFileGUIDs();
             EnsureMcsRsp();
+        }
+
+        internal static int ValidateNoProjectAssemblyReferences(string managedDirectory)
+        {
+            int problems = 0;
+            foreach (var path in Directory.GetFiles(managedDirectory, "*.dll"))
+            {
+                ModuleDefinition module = null;
+                try
+                {
+                    module = ModuleDefinition.ReadModule(path);
+                    foreach (var reference in module.AssemblyReferences)
+                    {
+                        string n = reference.Name;
+                        if (n == "Assembly-CSharp" || n == "Assembly-CSharp-firstpass" ||
+                            n == "Assembly-CSharp-Editor" || n == "Assembly-CSharp-Editor-firstpass")
+                        {
+                            problems++;
+                            Debug.LogError("[MeatKit] " + Path.GetFileName(path) + " references the project assembly '" + n +
+                                           "'. This creates an assembly reference cycle that Mono cannot unload, which " +
+                                           "duplicates assemblies after script reloads. Remove the reference from the imported DLL.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning("[MeatKit] Could not inspect " + Path.GetFileName(path) + " for project-assembly references: " + ex.Message);
+                }
+                finally
+                {
+                    if (module != null) module.Dispose();
+                }
+            }
+            return problems;
         }
 
         // Attempts to write the Cecil assembly directly to destPath.  If the destination is
@@ -252,49 +288,58 @@ namespace MeatKit
                 AssemblyResolver = resolver
             };
 
-            // If this assembly uses the Assembly-CSharp name at all for any reason, replace it with H3VRCode-CSharp
-            // This would probably only be done on MonoMod patches but is required to make Unity shut up
-            var asm = AssemblyDefinition.ReadAssembly(assemblyPath, rParams);
-            string name = asm.Name.Name;
-            if (name.Contains("Assembly-CSharp"))
+            try
             {
-                name = name.Replace("Assembly-CSharp", "H3VRCode-CSharp");
-                asm.Name = new AssemblyNameDefinition(name, asm.Name.Version);
-                asm.MainModule.Name = name + ".dll";
-            }
+                // If this assembly uses the Assembly-CSharp name at all for any reason, replace it with H3VRCode-CSharp
+                // This would probably only be done on MonoMod patches but is required to make Unity shut up
+                var asm = AssemblyDefinition.ReadAssembly(assemblyPath, rParams);
+                try
+                {
+                    string name = asm.Name.Name;
+                    if (name.Contains("Assembly-CSharp"))
+                    {
+                        name = name.Replace("Assembly-CSharp", "H3VRCode-CSharp");
+                        asm.Name = new AssemblyNameDefinition(name, asm.Name.Version);
+                        asm.MainModule.Name = name + ".dll";
+                    }
 
-            // Replace all occurrences to references of Assembly-CSharp with H3VRCode-CSharp
-            bool referencesMmhook = false;
-            foreach (var reference in asm.MainModule.AssemblyReferences)
+                    // Replace all occurrences to references of Assembly-CSharp with H3VRCode-CSharp
+                    bool referencesMmhook = false;
+                    foreach (var reference in asm.MainModule.AssemblyReferences)
+                    {
+                        string refName = reference.Name;
+
+                        if (refName == "Assembly-CSharp" || refName == "Assembly-CSharp-firstpass")
+                        {
+                            reference.Name = refName.Replace("Assembly-CSharp", "H3VRCode-CSharp");
+                        }
+                        else if (refName.Contains("MMHOOK"))
+                        {
+                            referencesMmhook = true;
+                        }
+                    }
+
+                    // If we detected this library references MMHOOK, confirm with the user if we should ocontinue.
+                    if (referencesMmhook)
+                    {
+                        bool shouldContinue = EditorUtility.DisplayDialog("Warning", "The selected library appears to reference MMHOOK. If you don't know what this means, do not continue with the import as it will likely result in instability and crashes in your project. Ask the author of the library for a version that does not reference MMHOOK.", "Continue", "Cancel");
+                        if (!shouldContinue) return;
+                    }
+
+                    asm.Write(Path.Combine(destinationDirectory, asm.MainModule.Name));
+                }
+                finally
+                {
+                    IDisposable d = asm as IDisposable;
+                    if (d != null) d.Dispose();
+                }
+            }
+            finally
             {
-                string refName = reference.Name;
-
-                if (refName == "Assembly-CSharp" || refName == "Assembly-CSharp-firstpass")
-                {
-                    reference.Name = refName.Replace("Assembly-CSharp", "H3VRCode-CSharp");
-                }
-                else if (refName.Contains("MMHOOK"))
-                {
-                    referencesMmhook = true;
-                }
+                // Must not be skipped: a leaked resolver holds FileStreams and makes
+                // Unity's AssemblyUpdater hit a sharing violation.
+                resolver.Dispose();
             }
-
-            // If we detected this library references MMHOOK, confirm with the user if we should ocontinue.
-            if (referencesMmhook)
-            {
-                bool shouldContinue = EditorUtility.DisplayDialog("Warning", "The selected library appears to reference MMHOOK. If you don't know what this means, do not continue with the import as it will likely result in instability and crashes in your project. Ask the author of the library for a version that does not reference MMHOOK.", "Continue", "Cancel");
-                if (!shouldContinue)
-                {
-                    IDisposable asmD = asm as IDisposable;
-                    if (asmD != null) asmD.Dispose();
-                    return;
-                }
-            }
-
-            asm.Write(Path.Combine(destinationDirectory, asm.MainModule.Name));
-            IDisposable asmD2 = asm as IDisposable;
-            if (asmD2 != null) asmD2.Dispose();
-            resolver.Dispose();
         }
 
         private static void ApplyWikiHelpAttribute(AssemblyDefinition asm)
